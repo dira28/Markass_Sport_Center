@@ -3,10 +3,13 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('auth.login');
-})->name('login');
+    return view('dashboard');
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->name('dashboard');
+});
 
+Route::get('/booking', function () {
+    return view('booking');
+});
