@@ -1,13 +1,10 @@
-/* Tailwind directives */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import './pages/dashboard.css';
 
 @import "flowbite";
 
 @layer base {
     body {
         font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-                     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+            'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     }
 }

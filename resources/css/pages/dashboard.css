@@ -1,0 +1,321 @@
+/* ===================== */
+/* GLOBAL */
+/* ===================== */
+body {
+    background: #f4f6f9;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===================== */
+/* NAVBAR */
+/* ===================== */
+
+
+.navbar {
+    background: white;
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 22px;
+    color: #b71c1c !important;
+}
+
+.nav-link {
+    font-weight: 600;
+    color: #333 !important;
+    margin-left: 15px;
+    transition: 0.3s;
+}
+
+.nav-link:hover {
+    color: #b71c1c !important;
+}
+
+.nav-link.active {
+    color: #b71c1c !important;
+    border-bottom: 2px solid #b71c1c;
+}
+
+/* ===================== */
+/* HERO */
+/* ===================== */
+.hero {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)),
+        url('https://images.unsplash.com/photo-1574629810360-7efbbe195018');
+    background-size: cover;
+    background-position: center;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* ===================== */
+/* BUTTON */
+/* ===================== */
+.btn-red {
+    background: #c62828 !important;
+    color: white !important;
+    padding: 10px 25px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-red:hover {
+    background: #8e0000 !important;
+    transform: translateY(-2px);
+}
+
+/* ===================== */
+/* CARD */
+/* ===================== */
+.card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: 0.3s;
+    background: white;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.price {
+    color: #c62828;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* ===================== */
+/* SECTION */
+/* ===================== */
+.section-title {
+    font-weight: 700;
+    margin-bottom: 40px;
+    font-size: 28px;
+}
+
+/* ===================== */
+/* WHY US */
+/* ===================== */
+.why-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+}
+
+.why-card:hover {
+    transform: translateY(-5px);
+}
+
+.why-card img {
+    width: 60px;
+    margin-bottom: 15px;
+}
+
+/* ===================== */
+/* BOOKING STEP */
+/* ===================== */
+.step {
+    position: relative;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+}
+
+.step:hover {
+    transform: translateY(-5px);
+}
+
+/* BULATAN ANGKA */
+.step::before {
+    content: attr(data-step);
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #c62828;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* ===================== */
+/* TESTIMONIAL */
+/* ===================== */
+.testi-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+}
+
+.testi-card:hover {
+    transform: translateY(-5px);
+}
+
+.testi-card img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+/* ===================== */
+/* FOOTER */
+/* ===================== */
+.footer-main {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)),
+        url('https://images.unsplash.com/photo-1517649763962-0c623066013b');
+    background-size: cover;
+    background-position: center;
+    padding: 60px 0 20px;
+    color: white;
+}
+
+.footer-link {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-link li {
+    margin-bottom: 8px;
+    opacity: 0.8;
+}
+
+.footer-line {
+    border-color: rgba(255, 255, 255, 0.2);
+    margin-top: 20px;
+}
+
+/* ===================== */
+/* BOOKING PAGE */
+/* ===================== */
+.booking-hero {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url('https://images.unsplash.com/photo-1574629810360-7efbbe195018');
+    background-size: cover;
+    background-position: center;
+    padding: 120px 0;
+    color: white;
+}
+
+.booking-hero h1 {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+.booking-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: 0.3s;
+    background: white;
+}
+
+.booking-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.booking-card img {
+    height: 230px;
+    object-fit: cover;
+}
+
+/* ===================== */
+/* FORM BOOKING */
+/* ===================== */
+.booking-form-section {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url('https://images.unsplash.com/photo-1517649763962-0c623066013b');
+    background-size: cover;
+    background-position: center;
+    padding: 80px 0;
+}
+
+.booking-form-card {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    max-width: 900px;
+    margin: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.booking-form-card label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.booking-form-card input,
+.booking-form-card select {
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* ===================== */
+/* RESPONSIVE */
+/* ===================== */
+@media(max-width:768px) {
+
+    .hero {
+        height: auto;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: 28px;
+    }
+
+    .section-title {
+        font-size: 22px;
+    }
+}

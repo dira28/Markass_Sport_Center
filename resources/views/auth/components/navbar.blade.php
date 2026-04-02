@@ -1,1 +1,0 @@
-<a class="nav-link active" href="/booking">Booking</a>
