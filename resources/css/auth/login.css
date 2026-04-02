@@ -1,0 +1,127 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #111827, #1f2937, #111827);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.logo img {
+    width: 270px;
+    max-width: none;
+}
+
+.login-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 120px 40px 40px;
+    border-radius: 12px;
+    width: 350px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+
+.login-title {
+    color: white;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.login-subtitle {
+    text-align: center;
+    color: #9ca3af;
+    margin-bottom: 10px;
+    margin-top: 0px;
+}
+
+.form-label {
+    color: #e5e7eb;
+    font-size: 14px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 15px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.form-input:focus {
+    outline: 2px solid #ef4444;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 10px;
+    background: #ef4444;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-login:hover {
+    background: #dc2626;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.divider-line {
+    flex: 1;
+    height: 1px;
+    background: #374151;
+}
+
+.divider-text {
+    margin: 0 10px;
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.btn-google {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.btn-google img {
+    width: 18px;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 15px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.login-footer a {
+    color: #f87171;
+    font-weight: bold;
+    text-decoration: none;
+}

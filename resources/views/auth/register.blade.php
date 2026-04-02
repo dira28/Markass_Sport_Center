@@ -3,24 +3,27 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Register</title>
 
-    <!-- CSS -->
     @vite('resources/css/auth/login.css')
 </head>
 
 <body>
 
     <div class="login-container">
-
         <div class="logo">
             <img src="/images/logo-markass.png" alt="Markass Logo">
         </div>
 
-        <h2 class="login-title">Welcome Back</h2>
-        <p class="login-subtitle">Sign in to continue</p>
+        <h2 class="login-title">Create Account</h2>
+        <p class="login-subtitle">Sign up to get started</p>
 
-        <form id="loginForm">
+        <form id="registerForm">
+
+            <div class="form-group">
+                <label class="form-label">Userame</label>
+                <input type="text" id="name" class="form-input" placeholder="Enter your name" required>
+            </div>
 
             <div class="form-group">
                 <label class="form-label">Email</label>
@@ -29,76 +32,54 @@
 
             <div class="form-group">
                 <label class="form-label">Password</label>
-                <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                <input type="password" id="password" class="form-input" placeholder="Create a password" required>
             </div>
 
-            <button type="submit" class="btn-login">LOGIN</button>
+            <button type="submit" class="btn-login">REGISTER</button>
 
         </form>
 
-        <!-- OR -->
-        <div class="divider">
-            <div class="divider-line"></div>
-            <span class="divider-text">OR</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <!-- GOOGLE -->
-        <button class="btn-google">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg">
-            Continue with Google
-        </button>
-
         <div class="login-footer">
-            Don't have an account? <a href="/register">Sign up</a>
+            Already have an account? <a href="/login">Sign in</a>
         </div>
 
     </div>
 
-    <!-- API LOGIN -->
+    <!-- API REGISTER -->
     <script>
-        document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        document.getElementById("registerForm").addEventListener("submit", async function (e) {
             e.preventDefault();
 
+            const nama = document.getElementById("name").value.trim(); // 👈 ini dia
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
 
-            if (!email || !password) {
+            if (!nama || !email || !password) {
                 alert("Please fill in all fields!");
                 return;
             }
 
             try {
-                const response = await fetch("http://localhost:5000/api/auth/login", {
+                const response = await fetch("http://localhost:5000/api/auth/register", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
+                        nama: nama,
                         email: email,
                         password: password
                     })
                 });
 
                 const result = await response.json();
-                console.log(result); // debug
+                console.log(result);
 
                 if (result.success) {
-                    const user = result.data;
-
-                    localStorage.setItem("token", user.token);
-                    localStorage.setItem("role", user.role);
-
-                    alert("Login successful!");
-
-                    if (user.role === "admin") {
-                        window.location.href = "/admin-dashboard";
-                    } else {
-                        window.location.href = "/dashboard";
-                    }
-
+                    alert("Registration successful! Please sign in.");
+                    window.location.href = "/login";
                 } else {
-                    alert(result.message || "Login failed!");
+                    alert(result.message || "Registration failed!");
                 }
 
             } catch (error) {
@@ -107,7 +88,6 @@
             }
         });
     </script>
-
 </body>
 
 </html>
