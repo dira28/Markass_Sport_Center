@@ -6,7 +6,7 @@
 
     <!-- HERO -->
     <section class="hero">
-        <div class="container">
+        <div class="container text-start">
 
             <h1>Booking Lapangan Olahraga<br>Jadi Lebih Mudah</h1>
 
@@ -30,7 +30,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="{{ asset('images/badminton.jpg') }}" class="img-fluid">
-                        <div class="card-body">
+                        <div class="card-body text-center">
                             <h5>Badminton Lapangan 1</h5>
                             <p class="price">Mulai Rp35.000 / Jam</p>
                             <a href="#" class="btn btn-red w-100">Booking</a>
@@ -42,7 +42,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="{{ asset('images/badminton.jpg') }}" class="img-fluid">
-                        <div class="card-body">
+                        <div class="card-body text-center">
                             <h5>Badminton Lapangan 2</h5>
                             <p class="price">Mulai Rp35.000 / Jam</p>
                             <a href="#" class="btn btn-red w-100">Booking</a>
@@ -54,7 +54,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="{{ asset('images/futsal.jpg') }}" class="img-fluid">
-                        <div class="card-body">
+                        <div class="card-body text-center">
                             <h5>Futsal Lapangan 1</h5>
                             <p class="price">Mulai Rp120.000 / Jam</p>
                             <a href="#" class="btn btn-red w-100">Booking</a>
@@ -66,7 +66,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="card">
                         <img src="{{ asset('images/futsal.jpg') }}" class="img-fluid">
-                        <div class="card-body">
+                        <div class="card-body text-center">
                             <h5>Futsal Lapangan 2</h5>
                             <p class="price">Mulai Rp120.000 / Jam</p>
                             <a href="#" class="btn btn-red w-100">Booking</a>
@@ -84,22 +84,31 @@
 
             <h3 class="section-title">Kenapa Pilih Kami</h3>
 
-            <div class="row">
+            <div class="row text-center">
 
                 <div class="col-md-4 mb-4">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1048/1048953.png" width="60">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1048/1048953.png"
+                         width="60"
+                         class="d-block mx-auto">
+
                     <h5 class="mt-3">Lapangan Bersih</h5>
                     <p>Lapangan selalu dirawat dan standar nasional.</p>
                 </div>
 
                 <div class="col-md-4 mb-4">
-                    <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png" width="60">
+                    <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png"
+                         width="60"
+                         class="d-block mx-auto">
+
                     <h5 class="mt-3">Booking Real-Time</h5>
                     <p>Booking online tanpa harus datang ke lokasi.</p>
                 </div>
 
                 <div class="col-md-4 mb-4">
-                    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" width="60">
+                    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
+                         width="60"
+                         class="d-block mx-auto">
+
                     <h5 class="mt-3">Lokasi Strategis</h5>
                     <p>Berlokasi di Kudus dan mudah dijangkau.</p>
                 </div>
@@ -152,22 +161,31 @@
 
             <h3 class="section-title">Testimoni</h3>
 
-            <div class="row">
+            <div class="row text-center">
 
                 <div class="col-md-4 mb-4">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" width="70" class="rounded-circle mb-2">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg"
+                         width="70"
+                         class="rounded-circle mb-2 d-block mx-auto">
+
                     <h6>Andi Pratama</h6>
                     <p>Lapangan sangat bagus dan bersih.</p>
                 </div>
 
                 <div class="col-md-4 mb-4">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" width="70" class="rounded-circle mb-2">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg"
+                         width="70"
+                         class="rounded-circle mb-2 d-block mx-auto">
+
                     <h6>Siti Rahmawati</h6>
                     <p>Booking gampang dan cepat.</p>
                 </div>
 
                 <div class="col-md-4 mb-4">
-                    <img src="https://randomuser.me/api/portraits/men/65.jpg" width="70" class="rounded-circle mb-2">
+                    <img src="https://randomuser.me/api/portraits/men/65.jpg"
+                         width="70"
+                         class="rounded-circle mb-2 d-block mx-auto">
+
                     <h6>Budi Santoso</h6>
                     <p>Tempat olahraga terbaik di Kudus.</p>
                 </div>

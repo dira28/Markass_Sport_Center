@@ -8,3 +8,65 @@
             'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     }
 }
+
+/* ===================== */
+/* TAMBAHAN HARGA CARD   */
+/* ===================== */
+
+.harga-card {
+    background: #1e293b;
+    border-radius: 20px;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    transition: 0.3s;
+    border: none;
+}
+
+.harga-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+
+/* ===================== */
+/* LIST HARGA (CLEAN)    */
+/* ===================== */
+
+.harga-box {
+    border-radius: 15px;
+    border: none;
+    background: #111827;
+    color: #e5e7eb;
+    transition: 0.3s;
+}
+
+.harga-box:hover {
+    transform: scale(1.02);
+    background: #1f2937;
+}
+
+/* ===================== */
+/* SUMMARY (CLEAN)       */
+/* ===================== */
+
+.summary-card {
+    border-radius: 15px;
+    border: none;
+    background: #020617;
+    color: #e5e7eb;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+}
+
+/* ===================== */
+/* BUTTON (LEBIH HALUS)  */
+/* ===================== */
+
+.btn-danger {
+    border-radius: 10px;
+    font-weight: 500;
+    background-color: #dc2626;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}

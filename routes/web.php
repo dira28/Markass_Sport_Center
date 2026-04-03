@@ -13,3 +13,6 @@ Route::get('/dashboard', function () {
 Route::get('/booking', function () {
     return view('pages.booking');
 });
+Route::get('/harga', function () {
+    return view('pages.harga');
+});
