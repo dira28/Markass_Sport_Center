@@ -20,20 +20,39 @@
         <h2 class="login-title">Welcome Back</h2>
         <p class="login-subtitle">Sign in to continue</p>
 
-        <form id="loginForm">
+        <!-- ERROR MESSAGE -->
+        @if(session('error'))
+            <p style="color:red; text-align:center;">
+                {{ session('error') }}
+            </p>
+        @endif
+
+        <form method="POST" action="/login">
+            @csrf
 
             <div class="form-group">
                 <label class="form-label">Email</label>
-                <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                <input 
+                    type="email" 
+                    name="email"
+                    class="form-input" 
+                    placeholder="Enter your email" 
+                    required
+                >
             </div>
 
             <div class="form-group">
                 <label class="form-label">Password</label>
-                <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                <input 
+                    type="password" 
+                    name="password"
+                    class="form-input" 
+                    placeholder="Enter your password" 
+                    required
+                >
             </div>
 
             <button type="submit" class="btn-login">LOGIN</button>
-
         </form>
 
         <!-- OR -->
@@ -54,59 +73,6 @@
         </div>
 
     </div>
-
-    <!-- API LOGIN -->
-    <script>
-        document.getElementById("loginForm").addEventListener("submit", async function (e) {
-            e.preventDefault();
-
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value.trim();
-
-            if (!email || !password) {
-                alert("Please fill in all fields!");
-                return;
-            }
-
-            try {
-                const response = await fetch("http://localhost:5000/api/auth/login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                });
-
-                const result = await response.json();
-                console.log(result); // debug
-
-                if (result.success) {
-                    const user = result.data;
-
-                    localStorage.setItem("token", user.token);
-                    localStorage.setItem("role", user.role);
-
-                    alert("Login successful!");
-
-                    if (user.role === "admin") {
-                        window.location.href = "/admin-dashboard";
-                    } else {
-                        window.location.href = "/dashboard";
-                    }
-
-                } else {
-                    alert(result.message || "Login failed!");
-                }
-
-            } catch (error) {
-                alert("Server error! Please try again.");
-                console.log(error);
-            }
-        });
-    </script>
 
 </body>
 
