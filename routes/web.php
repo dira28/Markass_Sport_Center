@@ -3,15 +3,18 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('dashboard');
+    return view('pages.dashboard');
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('pages.dashboard');
 });
 
 Route::get('/booking', function () {
-    return view('booking');
+    return view('pages.booking');
+});
+Route::get('/harga', function () {
+    return view('pages.harga');
 });
 
 Route::get('/login', function () {
