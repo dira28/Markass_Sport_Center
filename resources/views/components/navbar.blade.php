@@ -39,15 +39,11 @@
                 <!-- INI YANG DIUBAH -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('harga') ? 'active' : '' }}" href="/harga">
-                        Harga
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
                         Tentang
                     </a>
                 </li>
+
+               
 
             </ul>
 
