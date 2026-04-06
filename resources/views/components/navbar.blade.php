@@ -36,14 +36,12 @@
                     </a>
                 </li>
 
-                <!-- INI YANG DIUBAH -->
+                <!-- ✅ SUDAH DIPERBAIKI -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('harga') ? 'active' : '' }}" href="/harga">
                         Tentang
                     </a>
                 </li>
-
-               
 
             </ul>
 

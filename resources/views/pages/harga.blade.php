@@ -25,48 +25,58 @@
 
     <!-- TAB MENU -->
     <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-        <li class="nav-item">
+
+        <li class="nav-item" role="presentation">
             <button class="nav-link active text-danger fw-bold"
-                    data-bs-toggle="tab"
-                    data-bs-target="#informasi"
-                    type="button">
+                id="informasi-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#informasi"
+                type="button"
+                role="tab">
                 Informasi
             </button>
         </li>
 
-        <li class="nav-item">
+        <li class="nav-item" role="presentation">
             <button class="nav-link"
-                    data-bs-toggle="tab"
-                    data-bs-target="#jadwal"
-                    type="button">
+                id="jadwal-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#jadwal"
+                type="button"
+                role="tab">
                 Jadwal Operasional
             </button>
         </li>
 
-        <li class="nav-item">
+        <li class="nav-item" role="presentation">
             <button class="nav-link"
-                    data-bs-toggle="tab"
-                    data-bs-target="#fasilitas"
-                    type="button">
+                id="fasilitas-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#fasilitas"
+                type="button"
+                role="tab">
                 Fasilitas
             </button>
         </li>
 
-        <li class="nav-item">
+        <li class="nav-item" role="presentation">
             <button class="nav-link"
-                    data-bs-toggle="tab"
-                    data-bs-target="#ulasan"
-                    type="button">
+                id="ulasan-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#ulasan"
+                type="button"
+                role="tab">
                 Ulasan
             </button>
         </li>
+
     </ul>
 
     <!-- TAB CONTENT -->
     <div class="tab-content">
 
         <!-- INFORMASI -->
-        <div class="tab-pane fade show active" id="informasi">
+        <div class="tab-pane fade show active" id="informasi" role="tabpanel">
             <h5 class="fw-bold">Tentang Venue</h5>
             <p class="text-muted">
                 Markass Sports Center adalah fasilitas olahraga modern yang menyediakan lapangan futsal dan badminton berkualitas tinggi.
@@ -75,13 +85,13 @@
         </div>
 
         <!-- JADWAL -->
-        <div class="tab-pane fade" id="jadwal">
+        <div class="tab-pane fade" id="jadwal" role="tabpanel">
             <h5 class="fw-bold">Jadwal Operasional</h5>
             <p class="text-muted">Senin - Minggu : 08.00 - 22.00</p>
         </div>
 
         <!-- FASILITAS -->
-        <div class="tab-pane fade" id="fasilitas">
+        <div class="tab-pane fade" id="fasilitas" role="tabpanel">
             <h5 class="fw-bold">Fasilitas</h5>
             <ul>
                 <li>Lapangan Indoor</li>
@@ -92,7 +102,7 @@
         </div>
 
         <!-- ULASAN -->
-        <div class="tab-pane fade" id="ulasan">
+        <div class="tab-pane fade" id="ulasan" role="tabpanel">
             <h5 class="fw-bold">Ulasan</h5>
             <p class="text-muted">⭐ 4.8 dari 324 ulasan pengguna</p>
         </div>

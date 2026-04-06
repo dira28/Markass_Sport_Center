@@ -27,8 +27,7 @@
                 <ul class="footer-link">
                     <li><a href="/dashboard" class="text-decoration-none text-light">Home</a></li>
                     <li><a href="/booking" class="text-decoration-none text-light">Booking</a></li>
-                    <li><a href="/harga" class="text-decoration-none text-light">Harga</a></li>
-                    <li><a href="#" class="text-decoration-none text-light">Tentang</a></li>
+                    <li><a href="/harga" class="text-decoration-none text-light">Tentang</a></li>
                 </ul>
             </div>
 
