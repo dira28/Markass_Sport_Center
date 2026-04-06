@@ -1,5 +1,7 @@
-@import './pages/dashboard.css';
-
+@import './user/pages/dashboard.css';
+@import './admin/components/navbar.css';
+@import './admin/components/sidebar.css';
+@import './admin/pages/dashboard.css';
 @import "flowbite";
 
 @layer base {
@@ -9,9 +11,6 @@
     }
 }
 
-/* ===================== */
-/* TAMBAHAN HARGA CARD   */
-/* ===================== */
 
 .harga-card {
     background: #1e293b;
@@ -27,9 +26,6 @@
     box-shadow: 0 10px 25px rgba(0,0,0,0.6);
 }
 
-/* ===================== */
-/* LIST HARGA (CLEAN)    */
-/* ===================== */
 
 .harga-box {
     border-radius: 15px;
@@ -44,10 +40,6 @@
     background: #1f2937;
 }
 
-/* ===================== */
-/* SUMMARY (CLEAN)       */
-/* ===================== */
-
 .summary-card {
     border-radius: 15px;
     border: none;
@@ -56,9 +48,6 @@
     box-shadow: 0 5px 20px rgba(0,0,0,0.6);
 }
 
-/* ===================== */
-/* BUTTON (LEBIH HALUS)  */
-/* ===================== */
 
 .btn-danger {
     border-radius: 10px;

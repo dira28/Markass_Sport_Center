@@ -1,6 +1,3 @@
-/* ===================== */
-/* GLOBAL */
-/* ===================== */
 body {
     background: #f4f6f9;
     font-family: 'Segoe UI', sans-serif;
@@ -8,9 +5,6 @@ body {
     padding: 0;
 }
 
-/* ===================== */
-/* NAVBAR */
-/* ===================== */
 .navbar {
     background: white;
     padding: 15px 0;
@@ -39,9 +33,6 @@ body {
     border-bottom: 2px solid #b71c1c;
 }
 
-/* ===================== */
-/* HERO (PAKAI GAMBAR) */
-/* ===================== */
 .hero {
     background:
         linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
@@ -65,9 +56,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* ===================== */
-/* BUTTON */
-/* ===================== */
 .btn-red {
     background: #c62828 !important;
     color: white !important;
@@ -83,9 +71,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* ===================== */
-/* CARD */
-/* ===================== */
 .card {
     border: none;
     border-radius: 15px;
@@ -114,20 +99,14 @@ body {
     margin-bottom: 10px;
 }
 
-/* ===================== */
-/* SECTION */
-/* ===================== */
 .section-title {
     font-weight: 700;
     margin-bottom: 40px;
     font-size: 28px;
 }
 
-/* ===================== */
-/* FOOTER (TANPA GAMBAR) */
-/* ===================== */
 .footer-main {
-    background: #121212; /* polos */
+    background: #121212;
     padding: 60px 0 20px;
     color: white;
     border-top: 3px solid #c62828;
