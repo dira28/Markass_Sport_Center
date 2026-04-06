@@ -5,19 +5,19 @@
         <div class="row">
 
             <!-- KOLOM 1 -->
-            <div class="col-md-3 mb-3 d-flex align-items-center">
+            <div class="col-md-3 mb-3">
 
                 <!-- TEXT -->
                 <div>
                     <h5>MARKASS SPORT CENTER</h5>
-                    <p class="mb-0">Tempat booking lapangan terbaik di Kudus.</p>
+                    <p class="mb-2">Tempat booking lapangan terbaik di Kudus.</p>
                 </div>
 
-                <!-- LOGO -->
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUS3cLEY3Wpkum4hAwNZAj_mFyL6q7HQbm6Q&s"
+                <!-- LOGO BARU (DIBAWAH TEXT) -->
+                <img src="/images/logo.png"
                      alt="Logo Markass"
-                     class="img-fluid ms-3"
-                     style="max-width:80px;">
+                     class="img-fluid mt-2"
+                     style="max-width:180px;">
 
             </div>
 
