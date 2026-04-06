@@ -2,6 +2,7 @@
 @import './admin/components/navbar.css';
 @import './admin/components/sidebar.css';
 @import './admin/pages/dashboard.css';
+@import './admin/pages/booking.css';
 @import "flowbite";
 
 @layer base {
@@ -9,6 +10,12 @@
         font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
             'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     }
+}
+
+.admin-main {
+    margin-left: 250px;
+    min-height: 100vh;
+    background: #f5f6fa;
 }
 
 

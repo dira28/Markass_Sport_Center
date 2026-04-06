@@ -1,146 +1,151 @@
-/* DASHBOARD ADMIN */
-
-/* HEADER */
-.dashboard-header {
-    background: #f5f6fa;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
+/* ===================== */
+/* GLOBAL WRAPPER */
+/* ===================== */
 .content-wrapper {
-    background: #ffffff;
+    background: #f5f6fa;
     padding: 25px;
     border-radius: 16px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* FILTER */
-/* WRAPPER */
-.filter-wrapper {
-    width: 100%;
-    background: #f9fafb;
-    padding: 15px;
-    border-radius: 14px;
-    margin-top: 15px;
-}
-
-/* ROW ATAS */
-.filter-top {
-    width: 100%;
-    margin-bottom: 12px;
-}
-
-.date-box {
+/* ===================== */
+/* HEADER */
+/* ===================== */
+.dashboard-header-v2 {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 10px 15px;
-    width: 100%;
-    max-width: 350px;
-    cursor: pointer;
-}
-/* ROW BAWAH */
-.filter-bottom {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
 }
 
-/* INPUT & SELECT */
-.select-box {
-    position: relative;
-    min-width: 200px;
+.dashboard-header-v2 h3 {
+    margin: 0;
+    font-weight: 600;
 }
 
-.select-box select {
-    width: 100%;
-    padding: 10px 35px 10px 15px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    appearance: none;
-    background: #fff;
+.dashboard-header-v2 p {
+    margin: 0;
+    color: #777;
 }
 
-.select-box i {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-/* SEARCH */
-.search-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 10px 15px;
-}
-
-.search-box input {
+/* BUTTON DOWNLOAD */
+.btn-download {
+    background: #f1f3f5;
     border: none;
-    outline: none;
-    background: transparent;
-}
-
-/* BUTTON */
-.btn-filter {
-    background: #800020;
-    color: white;
-    border: none;
-    padding: 10px 22px;
+    padding: 10px 15px;
     border-radius: 10px;
     font-weight: 500;
     transition: 0.3s;
 }
 
-.btn-filter:hover {
-    background: #66001a;
+.btn-download:hover {
+    background: #e2e6ea;
 }
 
-/* CARD */
-.card-box {
+/* ===================== */
+/* DATE RANGE */
+/* ===================== */
+.date-range-box {
     background: #ffffff;
-    padding: 20px;
+    padding: 12px 18px;
     border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.card-box p {
-    margin: 0;
-    color: #888;
+/* ===================== */
+/* REVENUE CARD */
+/* ===================== */
+.revenue-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
 }
 
-.card-box h3 {
+.revenue-card p {
+    margin: 0;
+    color: #777;
+}
+
+.revenue-card h3 {
     margin-top: 10px;
     font-weight: bold;
 }
 
-/* CARD VARIANT */
-.total {
-    border-left: 5px solid #ffc107;
+.revenue-card.big {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.success {
-    border-left: 5px solid #28a745;
+.revenue-card.small {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.warning {
-    border-left: 5px solid #007bff;
+/* ===================== */
+/* BADGE */
+/* ===================== */
+.badge {
+    padding: 6px 10px;
+    border-radius: 8px;
 }
 
-.danger {
-    border-left: 5px solid #dc3545;
+/* ===================== */
+/* CARD BOX */
+/* ===================== */
+.card-box {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* ===================== */
+/* CHART */
+/* ===================== */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.chart-filter button {
+    border: none;
+    background: #f1f3f5;
+    padding: 6px 12px;
+    margin-left: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.chart-filter button:hover {
+    background: #dee2e6;
+}
+
+/* ===================== */
+/* SUMMARY BOX */
+/* ===================== */
+.summary-box {
+    text-align: center;
+}
+
+.summary-box h4 {
+    font-weight: bold;
+}
+
+.summary-box p {
+    margin: 5px 0;
+}
+
+/* ===================== */
 /* TABLE */
+/* ===================== */
 .table {
     background: #ffffff;
     border-radius: 12px;
@@ -151,7 +156,96 @@
     background: #f8f9fa;
 }
 
-.badge {
-    padding: 6px 10px;
-    border-radius: 8px;
+.table td {
+    vertical-align: middle;
+}
+
+/* ===================== */
+/* BUTTON SHOW */
+/* ===================== */
+.btn-show {
+    background: #f1f3f5;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 10px;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.btn-show:hover {
+    background: #dee2e6;
+}
+
+/* ===================== */
+/* FACILITY */
+/* ===================== */
+.facility-item {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    align-items: center;
+}
+
+.facility-item img {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.facility-item p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.facility-item small {
+    color: #777;
+}
+
+/* ===================== */
+/* BUTTON MERAH */
+/* ===================== */
+.btn-filter {
+    background: #800020;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-filter:hover {
+    background: #66001a;
+}
+
+/* ===================== */
+/* GRID SPACING */
+/* ===================== */
+.row.g-3>div {
+    margin-bottom: 10px;
+}
+
+/* ACTIVE FILTER */
+.chart-filter button.active {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* CHART CANVAS */
+#chart {
+    max-height: 250px;
+}
+
+/* HOVER CARD */
+.card-box:hover,
+.revenue-card:hover {
+    transform: translateY(-3px);
+    transition: 0.3s;
+}
+
+/* SHADOW LEBIH HALUS */
+.card-box,
+.revenue-card {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
