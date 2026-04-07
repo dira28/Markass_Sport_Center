@@ -1,57 +1,15 @@
 /* ===================== */
-/* TAILWIND */
-/* ===================== */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* ===================== */
-/* 🎨 COLOR SYSTEM */
-/* ===================== */
-:root {
-    --primary: #e53935;
-    --primary-dark: #c62828;
-    --bg-light: #ffffff;
-    --bg-soft: #ffeaea;
-    --bg-page: #f4f6f9;
-    --text-dark: #222222;
-    --text-muted: #777777;
-}
-
-/* ===================== */
-/* GLOBAL */
+/* BACKGROUND */
 /* ===================== */
 body {
-    font-family: 'Instrument Sans', sans-serif;
-    background: var(--bg-page);   /* abu-abu terang */
-    color: var(--text-dark);
-}
-
-/* ===================== */
-/* MAIN CONTENT */
-/* ===================== */
-.main-content {
-    background: var(--bg-light);
-    padding: 30px;
-    border-radius: 15px;
-    margin: 20px auto;
-    max-width: 1200px;
-}
-
-/* ===================== */
-/* HARGA WRAPPER */
-/* ===================== */
-.harga-wrapper {
-    background: var(--bg-light);
-    padding: 20px;
-    border-radius: 15px;
+    background: #f4f6f9;
 }
 
 /* ===================== */
 /* HERO */
 /* ===================== */
 .hero-booking {
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+    background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)),
     url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d');
     background-size: cover;
     background-position: center;
@@ -66,7 +24,37 @@ body {
 }
 
 .hero-booking p {
-    opacity: 0.9;
+    opacity: 0.85;
+}
+
+/* ===================== */
+/* ROW */
+/* ===================== */
+.row-equal {
+    align-items: stretch;
+}
+
+/* ===================== */
+/* COLUMN */
+/* ===================== */
+.col-left,
+.col-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.col-left > div,
+.col-right > div {
+    width: 100%;
+}
+
+/* ===================== */
+/* HARGA WRAPPER */
+/* ===================== */
+.harga-wrapper {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
 }
 
 /* ===================== */
@@ -78,12 +66,12 @@ body {
     gap: 15px;
     padding: 18px;
     border-radius: 14px;
-    background: var(--bg-light);
+    background: white;
     margin-bottom: 16px;
     cursor: pointer;
     border: 2px solid transparent;
     min-height: 110px;
-    transition: 0.25s;
+    transition: all 0.25s ease;
 }
 
 .card-lapangan:hover {
@@ -92,15 +80,19 @@ body {
 }
 
 .card-lapangan.active {
-    border: 2px solid var(--primary);
-    background: var(--bg-soft);
+    border: 2px solid #e53935;
+    background: #fff5f5;
 }
 
+/* ===================== */
+/* IMAGE (FIX UTAMA) */
+/* ===================== */
 .card-lapangan img {
     width: 110px;
     height: 80px;
     object-fit: cover;
     border-radius: 10px;
+    flex-shrink: 0;
 }
 
 /* ===================== */
@@ -114,44 +106,43 @@ body {
 
 .card-lapangan small {
     font-size: 13px;
-    color: var(--text-muted);
+    color: #6b7280;
 }
 
 /* ===================== */
 /* HARGA */
 /* ===================== */
 .harga {
-    color: var(--primary);
+    color: #e53935;
     font-weight: bold;
     font-size: 16px;
 }
 
 /* ===================== */
-/* BOOKING SUMMARY (PUTIH) */
+/* BOOKING SUMMARY */
 /* ===================== */
 .booking-summary {
-    background: var(--bg-light);   /* PUTIH */
-    color: var(--text-dark);
+    background: white;
     padding: 22px;
     border-radius: 14px;
+    position: sticky;
+    top: 100px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
 
 /* ===================== */
 /* BUTTON */
 /* ===================== */
-.btn-red-custom,
 .btn-red {
-    background: var(--primary);
+    background: #e53935;
     color: white;
     border-radius: 10px;
     font-weight: 500;
     transition: 0.25s;
 }
 
-.btn-red:hover,
-.btn-red-custom:hover {
-    background: var(--primary-dark);
+.btn-red:hover {
+    background: #c62828;
     transform: translateY(-1px);
 }
 
@@ -159,9 +150,9 @@ body {
 /* SPORT BUTTON */
 /* ===================== */
 .sport.active {
-    background: var(--primary) !important;
+    background: #e53935 !important;
     color: white !important;
-    border-color: var(--primary) !important;
+    border-color: #e53935 !important;
 }
 
 /* ===================== */
@@ -172,7 +163,7 @@ body {
 }
 
 .jadwal button.active {
-    background: var(--primary);
+    background: #e53935;
     color: white;
 }
 
