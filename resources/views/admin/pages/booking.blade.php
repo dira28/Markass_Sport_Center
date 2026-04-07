@@ -2,119 +2,99 @@
 
 @section('content')
 
-    <!-- HEADER -->
-    <div class="booking-header">
-        <div>
-            <h4>Manajemen Booking</h4>
-            <small>Admin / Booking</small>
-        </div>
-
-        <div class="filter-wrapper">
-
-            <!-- ROW 1 -->
-            <div class="filter-top">
-                <div class="date-box" id="dateRangeBox">
-                    <i class="bi bi-calendar"></i>
-                    <span id="dateText">Pilih tanggal</span>
-                    <i class="bi bi-chevron-down"></i>
-                </div>
-
-                <input type="text" id="dateRange" class="d-none">
-            </div>
-
-            <!-- ROW 2 -->
-            <div class="filter-bottom">
-                <div class="select-box">
-                    <select>
-                        <option>Semua Olahraga</option>
-                        <option>Badminton</option>
-                        <option>Futsal</option>
-                    </select>
-                    <i class="bi bi-chevron-down"></i>
-                </div>
-
-                <div class="select-box">
-                    <select>
-                        <option>Semua Status</option>
-                        <option>Berlangsung</option>
-                        <option>Menunggu</option>
-                        <option>Selesai</option>
-                        <option>Dibatalkan</option>
-                    </select>
-                    <i class="bi bi-chevron-down"></i>
-                </div>
-
-                <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Cari booking...">
-                </div>
-
-                <button class="btn-filter">Filter</button>
-            </div>
-
-        </div>
+<div class="booking-header">
+    <div>
+        <h4>Manajemen Booking</h4>
+        <small>Admin / Booking</small>
     </div>
+</div>
 
-    <!-- CARD STATISTIK -->
-    <div class="row g-3 mt-2">
+<div class="card-box mt-4">
 
-        <div class="col-md-3">
-            <div class="card-box total">
-                <p>Total Booking</p>
-                <h3>215</h3>
-            </div>
+    <h5 class="mb-3">Data Booking</h5>
+
+    {{-- 🔥 ERROR ALERT --}}
+    @if(isset($error))
+        <div class="alert alert-danger">
+            {{ $error }}
         </div>
+    @endif
 
-        <div class="col-md-3">
-            <div class="card-box success">
-                <p>Berlangsung</p>
-                <h3>38</h3>
-            </div>
-        </div>
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>ID</th>
+                <th>Pengguna</th>
+                <th>Lapangan</th>
+                <th>Status</th>
+                <th>Harga</th>
+            </tr>
+        </thead>
 
-        <div class="col-md-3">
-            <div class="card-box warning">
-                <p>Menunggu</p>
-                <h3>12</h3>
-            </div>
-        </div>
+<tbody>
+@forelse ($bookings as $item)
 
-        <div class="col-md-3">
-            <div class="card-box danger">
-                <p>Dibatalkan</p>
-                <h3>6</h3>
-            </div>
-        </div>
+    @php
+        $tanggal = \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
 
-    </div>
+        $status = $item['status'] ?? '-';
+        $pembayaran = $item['status_pembayaran'] ?? '-';
 
-    <!-- TABLE -->
-    <div class="card-box mt-4">
+        if ($status == 'booked') {
+            $statusText = 'Berlangsung';
+            $badge = 'success';
+        } elseif ($status == 'available') {
+            $statusText = 'Tersedia';
+            $badge = 'secondary';
+        } else {
+            $statusText = ucfirst($status);
+            $badge = 'dark';
+        }
 
-        <h5 class="mb-3">Data Booking</h5>
+        if ($pembayaran == 'pending') {
+            $statusText .= ' (Menunggu Bayar)';
+            $badge = 'warning';
+        } elseif ($pembayaran == 'expired') {
+            $statusText = 'Expired';
+            $badge = 'danger';
+        } elseif ($pembayaran == 'paid') {
+            $statusText .= ' (Lunas)';
+        }
+    @endphp
 
-        <table class="table align-middle">
-            <thead>
-                <tr>
-                    <th>Tanggal</th>
-                    <th>ID</th>
-                    <th>Pengguna</th>
-                    <th>Lapangan</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
+    <tr>
+        <td>
+            {{ $tanggal->translatedFormat('d M Y') }} <br>
+        </td>
 
-            <tbody>
-                <tr>
-                    <td>22 Apr 2024</td>
-                    <td>BK-001</td>
-                    <td>Andi</td>
-                    <td>Lapangan 1</td>
-                    <td><span class="badge bg-success">Berlangsung</span></td>
-                </tr>
-            </tbody>
-        </table>
+        <td>{{ $item['id_booking'] }}</td>
 
-    </div>
+        <td>{{ $item['user']['nama'] ?? '-' }}</td>
+
+        <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
+
+        <td>
+            <span class="badge bg-{{ $badge }}">
+                {{ $statusText }}
+            </span>
+        </td>
+
+        <td>
+            Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
+        </td>
+    </tr>
+
+@empty
+    <tr>
+        <td colspan="6" class="text-center">
+            Tidak ada data booking
+        </td>
+    </tr>
+@endforelse
+</tbody>
+    </table>
+
+</div>
 
 @endsection

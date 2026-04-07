@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
@@ -53,8 +54,6 @@ Route::prefix('admin')->group(function () {
 
     })->name('admin.dashboard');
 
-    Route::get('/booking', function () {
-        return view('admin.pages.booking');
-    })->name('admin.booking');
-
+Route::get('/booking', [BookingController::class, 'index'])
+    ->name('admin.booking');
 });
