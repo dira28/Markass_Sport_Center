@@ -4,196 +4,122 @@
 
 @section('content')
 
-    <!-- HERO -->
-    <section class="hero">
-        <div class="container text-start">
-
-            <h1>Booking Lapangan Olahraga<br>Jadi Lebih Mudah</h1>
-
-            <p>Pesan badminton & futsal secara online di Markass Sport Center Kudus.</p>
-
-            <a href="#" class="btn btn-red me-2">Booking Sekarang</a>
-            <a href="#" class="btn btn-light">Lihat Jadwal</a>
-
+    <section class="hero-dashboard">
+        <div class="container text-center text-md-start">
+            <div class="col-lg-6">
+                <h1>Booking Lapangan Olahraga<br>Jadi Lebih Mudah</h1>
+                <p>Pesan badminton & futsal secara online di Markass Sport Center Kudus dengan sistem real-time.</p>
+                <div class="hero-btns">
+                    <a href="/booking" class="btn-red-dashboard me-md-2">Booking Sekarang</a>
+                    <a href="/booking" class="btn-outline-white">Lihat Jadwal</a>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- OLAHRAGA -->
     <section class="py-5">
-        <div class="container text-center">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h3 class="section-title-dashboard">Olahraga Favoritmu</h3>
+                <div class="title-line"></div>
+            </div>
 
-            <h3 class="section-title">Olahraga Favoritmu</h3>
+            <div class="row g-4 justify-content-center">
+                @php
+                    $lapangans = [
+                        ['name' => 'Badminton Lapangan 1', 'price' => '35.000', 'img' => 'badminton.jpg'],
+                        ['name' => 'Badminton Lapangan 2', 'price' => '35.000', 'img' => 'badminton.jpg'],
+                        ['name' => 'Futsal Lapangan 1', 'price' => '120.000', 'img' => 'futsal.jpg'],
+                        ['name' => 'Futsal Lapangan 2', 'price' => '120.000', 'img' => 'futsal.jpg'],
+                    ];
+                @endphp
 
-            <div class="row justify-content-center">
-
-                <!-- BADMINTON 1 -->
-                <div class="col-md-3 mb-4">
-                    <div class="card">
-                        <img src="{{ asset('images/badminton.jpg') }}" class="img-fluid">
-                        <div class="card-body text-center">
-                            <h5>Badminton Lapangan 1</h5>
-                            <p class="price">Mulai Rp35.000 / Jam</p>
-                            <a href="#" class="btn btn-red w-100">Booking</a>
+                @foreach($lapangans as $lap)
+                <div class="col-md-6 col-lg-3">
+                    <div class="card-dashboard">
+                        <div class="card-img-wrapper">
+                            <img src="{{ asset('images/' . $lap['img']) }}" alt="{{ $lap['name'] }}">
+                        </div>
+                        <div class="card-body">
+                            <h5>{{ $lap['name'] }}</h5>
+                            <p class="price">Mulai Rp{{ $lap['price'] }} <span>/ Jam</span></p>
+                            <a href="/booking" class="btn-red-dashboard w-100">Booking Sekarang</a>
                         </div>
                     </div>
                 </div>
-
-                <!-- BADMINTON 2 -->
-                <div class="col-md-3 mb-4">
-                    <div class="card">
-                        <img src="{{ asset('images/badminton.jpg') }}" class="img-fluid">
-                        <div class="card-body text-center">
-                            <h5>Badminton Lapangan 2</h5>
-                            <p class="price">Mulai Rp35.000 / Jam</p>
-                            <a href="#" class="btn btn-red w-100">Booking</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FUTSAL 1 -->
-                <div class="col-md-3 mb-4">
-                    <div class="card">
-                        <img src="{{ asset('images/futsal.jpg') }}" class="img-fluid">
-                        <div class="card-body text-center">
-                            <h5>Futsal Lapangan 1</h5>
-                            <p class="price">Mulai Rp120.000 / Jam</p>
-                            <a href="#" class="btn btn-red w-100">Booking</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FUTSAL 2 -->
-                <div class="col-md-3 mb-4">
-                    <div class="card">
-                        <img src="{{ asset('images/futsal.jpg') }}" class="img-fluid">
-                        <div class="card-body text-center">
-                            <h5>Futsal Lapangan 2</h5>
-                            <p class="price">Mulai Rp120.000 / Jam</p>
-                            <a href="#" class="btn btn-red w-100">Booking</a>
-                        </div>
-                    </div>
-                </div>
-
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- KENAPA PILIH KAMI -->
-    <section class="py-5 bg-light">
-        <div class="container text-center">
-
-            <h3 class="section-title">Kenapa Pilih Kami</h3>
-
+    <section class="py-5 bg-white shadow-sm">
+        <div class="container">
             <div class="row text-center">
-
                 <div class="col-md-4 mb-4">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1048/1048953.png"
-                         width="60"
-                         class="d-block mx-auto">
-
-                    <h5 class="mt-3">Lapangan Bersih</h5>
-                    <p>Lapangan selalu dirawat dan standar nasional.</p>
+                    <div class="feature-box">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1048/1048953.png" width="60" class="mb-3">
+                        <h5>Lapangan Bersih</h5>
+                        <p class="text-muted">Lapangan selalu dirawat dan memenuhi standar nasional.</p>
+                    </div>
                 </div>
-
                 <div class="col-md-4 mb-4">
-                    <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png"
-                         width="60"
-                         class="d-block mx-auto">
-
-                    <h5 class="mt-3">Booking Real-Time</h5>
-                    <p>Booking online tanpa harus datang ke lokasi.</p>
+                    <div class="feature-box">
+                        <img src="https://cdn-icons-png.flaticon.com/512/747/747310.png" width="60" class="mb-3">
+                        <h5>Booking Real-Time</h5>
+                        <p class="text-muted">Cek ketersediaan jadwal secara instan dari mana saja.</p>
+                    </div>
                 </div>
-
                 <div class="col-md-4 mb-4">
-                    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
-                         width="60"
-                         class="d-block mx-auto">
-
-                    <h5 class="mt-3">Lokasi Strategis</h5>
-                    <p>Berlokasi di Kudus dan mudah dijangkau.</p>
+                    <div class="feature-box">
+                        <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" width="60" class="mb-3">
+                        <h5>Lokasi Strategis</h5>
+                        <p class="text-muted">Berlokasi di pusat kota Kudus yang mudah diakses.</p>
+                    </div>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <!-- CARA BOOKING -->
     <section class="timeline-section py-5">
-        <div class="container text-center">
-
-            <h3 class="section-title text-white mb-5">Cara Booking</h3>
-
-            <div class="timeline">
-
-                <div class="step" data-step="1">
-                    <h5>1. Pilih Lapangan</h5>
-                    <p>Pilih jenis olahraga & lapangan yang tersedia.</p>
+        <div class="container">
+            <h3 class="section-title-dashboard text-white text-center mb-5">Bagaimana Cara Pesan?</h3>
+            <div class="timeline-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h5>Pilih Lapangan</h5>
+                    <p>Cari jenis olahraga yang kamu inginkan.</p>
                 </div>
-
-                <div class="step" data-step="2">
-                    <h5>2. Tentukan Jadwal</h5>
-                    <p>Pilih tanggal dan jam bermain.</p>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h5>Atur Jadwal</h5>
+                    <p>Tentukan tanggal dan jam yang kosong.</p>
                 </div>
-
-                <div class="step" data-step="3">
-                    <h5>3. Isi Data</h5>
-                    <p>Masukkan nama dan kontak.</p>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h5>Isi Data</h5>
+                    <p>Lengkapi informasi pemesanan kamu.</p>
                 </div>
-
-                <div class="step" data-step="4">
-                    <h5>4. Pembayaran</h5>
-                    <p>Lakukan pembayaran booking.</p>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h5>Pembayaran</h5>
+                    <p>Selesaikan transaksi via transfer/E-wallet.</p>
                 </div>
-
-                <div class="step" data-step="5">
-                    <h5>5. Selesai</h5>
-                    <p>Booking berhasil 🎉</p>
-                </div>
-
             </div>
-
         </div>
     </section>
 
-    <!-- TESTIMONI -->
     <section class="py-5 bg-light">
         <div class="container text-center">
-
-            <h3 class="section-title">Testimoni</h3>
-
-            <div class="row text-center">
-
+            <h3 class="section-title-dashboard">Apa Kata Mereka?</h3>
+            <div class="row mt-4">
                 <div class="col-md-4 mb-4">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg"
-                         width="70"
-                         class="rounded-circle mb-2 d-block mx-auto">
-
-                    <h6>Andi Pratama</h6>
-                    <p>Lapangan sangat bagus dan bersih.</p>
+                    <div class="testimonial-card">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle mb-3">
+                        <p class="fst-italic text-muted">"Proses bookingnya cepet banget, gak perlu nunggu admin bales WA!"</p>
+                        <h6>Andi Pratama</h6>
+                    </div>
                 </div>
-
-                <div class="col-md-4 mb-4">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg"
-                         width="70"
-                         class="rounded-circle mb-2 d-block mx-auto">
-
-                    <h6>Siti Rahmawati</h6>
-                    <p>Booking gampang dan cepat.</p>
                 </div>
-
-                <div class="col-md-4 mb-4">
-                    <img src="https://randomuser.me/api/portraits/men/65.jpg"
-                         width="70"
-                         class="rounded-circle mb-2 d-block mx-auto">
-
-                    <h6>Budi Santoso</h6>
-                    <p>Tempat olahraga terbaik di Kudus.</p>
-                </div>
-
-            </div>
-
-            <a href="#" class="btn btn-red mt-3">Booking Sekarang</a>
-
         </div>
     </section>
 

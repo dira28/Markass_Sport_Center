@@ -36,18 +36,28 @@
                     </a>
                 </li>
 
-                <!-- INI YANG DIUBAH -->
+                <!-- ✅ SUDAH DIPERBAIKI -->
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('harga') ? 'active' : '' }}" href="/harga">
+                    <a class="nav-link {{ request()->is('tentang') ? 'active' : '' }}" href="/tentang">
                         Tentang
                     </a>
                 </li>
-
-               
+                
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('my-bookings') ? 'active' : '' }}" href="/my-bookings">
+                        Riwayat Booking
+                    </a>
+                </li>
 
             </ul>
 
-            <button class="btn btn-danger btn-sm">Login</button>
+            @if(session('token'))
+                <a href="{{ route('profile') }}" class="ms-3">
+                    <img src="https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3485.jpg" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%;">
+                </a>
+            @else
+                <a class="btn btn-danger btn-sm ms-3" href="{{ route('login') }}">Login</a>
+            @endif
 
         </div>
     </div>

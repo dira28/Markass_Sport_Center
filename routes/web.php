@@ -1,9 +1,15 @@
 <?php
 
-use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\HistoryBookingController;
+use App\Http\Controllers\LapanganController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\UserBookingController;
+use App\Http\Controllers\AdminDashboardController;
 
 // =====================
 // HALAMAN USER
@@ -16,13 +22,15 @@ Route::get('/dashboard', function () {
     return view('user.pages.dashboard');
 })->name('user.dashboard');
 
-Route::get('/booking', function () {
-    return view('user.pages.booking');
-})->name('user.booking');
+Route::get('/booking', [BookingController::class, 'index']);
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 
-Route::get('/harga', function () {
-    return view('user.pages.harga');
-})->name('user.harga');
+Route::get('/tentang', function () {
+    return view('user.pages.tentang');
+})->name('user.tentang');
+
+Route::get('/my-bookings', [UserBookingController::class, 'index'])
+    ->name('user.bookings');
 
 // =====================
 // AUTH
@@ -39,21 +47,26 @@ Route::get('/register', function () {
 
 Route::post('/register', [RegisterController::class, 'register']);
 
+Route::get('/profile', [ProfileController::class, 'profile'])->name('profile');
+Route::get('/logout', [ProfileController::class, 'logout'])->name('logout');
+
 // =====================
 // ADMIN
 // =====================
 Route::prefix('admin')->group(function () {
 
-    Route::get('/dashboard', function () {
+    // 🔥 DASHBOARD (PAKE CONTROLLER)
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('admin.dashboard');
 
-        if (!session('token') || session('role') !== 'admin') {
-            return redirect()->route('login');
-        }
+    // 🔥 BOOKING
+    Route::get('/booking', [HistoryBookingController::class, 'index'])
+        ->name('admin.booking');
 
-        return view('admin.pages.dashboard');
+    // 🔥 LAPANGAN CRUD
+    Route::get('/lapangan', [LapanganController::class, 'index'])->name('lapangan.index');
+    Route::post('/lapangan', [LapanganController::class, 'store'])->name('lapangan.store');
+    Route::post('/lapangan/update/{id}', [LapanganController::class, 'update'])->name('lapangan.update');
+    Route::get('/lapangan/delete/{id}', [LapanganController::class, 'destroy'])->name('lapangan.delete');
 
-    })->name('admin.dashboard');
-
-Route::get('/booking', [BookingController::class, 'index'])
-    ->name('admin.booking');
 });

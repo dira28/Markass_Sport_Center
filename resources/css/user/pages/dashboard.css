@@ -1,160 +1,213 @@
+/* GLOBAL & TYPOGRAPHY */
 body {
-    background: #f4f6f9;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: #fffcfc; /* Sedikit lebih bersih */
+    color: #333;
 }
 
-.navbar {
-    background: white;
-    padding: 15px 0;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.navbar-brand {
-    font-weight: 700;
-    font-size: 22px;
-    color: #b71c1c !important;
-}
-
-.nav-link {
-    font-weight: 600;
-    color: #333 !important;
-    margin-left: 15px;
-    transition: 0.3s;
-}
-
-.nav-link:hover {
-    color: #b71c1c !important;
-}
-
-.nav-link.active {
-    color: #b71c1c !important;
-    border-bottom: 2px solid #b71c1c;
-}
-
-.hero {
-    background:
-        linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
-        url('https://images.unsplash.com/photo-1574629810360-7efbbe195018');
+/* HERO SECTION */
+.hero-dashboard {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(183, 28, 28, 0.4)),
+                url('https://images.unsplash.com/photo-1574629810360-7efbbe195018');
     background-size: cover;
     background-position: center;
-    height: 500px;
+    min-height: 80vh;
     display: flex;
     align-items: center;
     color: white;
 }
 
-.hero h1 {
-    font-size: 42px;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-
-.hero p {
-    font-size: 18px;
+.hero-dashboard h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.2;
     margin-bottom: 20px;
 }
 
-.btn-red {
-    background: #c62828 !important;
-    color: white !important;
-    padding: 10px 25px;
-    border-radius: 8px;
+.hero-dashboard p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 30px;
+}
+
+/* BUTTONS */
+.btn-red-dashboard {
+    background: #ff5252;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px; /* Lebih modern bulat */
     border: none;
     font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+}
+
+.btn-red-dashboard:hover {
+    background: #c62828;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(183, 28, 28, 0.4);
+}
+
+.btn-outline-white {
+    background: transparent;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    border: 2px solid white;
+    font-weight: 600;
+    text-decoration: none;
     transition: 0.3s;
 }
 
-.btn-red:hover {
-    background: #8e0000 !important;
-    transform: translateY(-2px);
-}
-
-.card {
-    border: none;
-    border-radius: 15px;
-    overflow: hidden;
-    transition: 0.3s;
+.btn-outline-white:hover {
     background: white;
+    color: #b71c1c;
 }
 
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+/* SECTION TITLES */
+.section-title-dashboard {
+    font-weight: 800;
+    color: #b71c1c;
+    position: relative;
+    display: inline-block;
 }
 
-.card img {
+.title-line {
+    width: 60px;
+    height: 4px;
+    background: #ff5252;
+    margin: 10px auto 40px;
+    border-radius: 2px;
+}
+
+/* CARDS */
+.card-dashboard {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: all 0.4s ease;
+    height: 100%;
+}
+
+.card-dashboard:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(183, 28, 28, 0.15);
+}
+
+.card-img-wrapper {
+    overflow: hidden;
     height: 200px;
+}
+
+.card-dashboard img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    transition: 0.5s;
 }
 
-.card-body {
-    padding: 20px;
+.card-dashboard:hover img {
+    transform: scale(1.1);
 }
 
-.price {
-    color: #c62828;
-    font-weight: 600;
+.card-dashboard .card-body {
+    padding: 25px;
+}
+
+.card-dashboard h5 {
+    font-weight: 700;
     margin-bottom: 10px;
 }
 
-.section-title {
-    font-weight: 700;
-    margin-bottom: 40px;
-    font-size: 28px;
+.card-dashboard .price {
+    color: #b71c1c;
+    font-weight: 800;
+    font-size: 1.1rem;
 }
 
-.footer-main {
-    background: #121212;
-    padding: 60px 0 20px;
-    color: white;
-    border-top: 3px solid #c62828;
+.card-dashboard .price span {
+    font-size: 0.8rem;
+    color: #888;
 }
 
-.footer-main h5 {
-    font-weight: 700;
-    margin-bottom: 15px;
+/* TIMELINE CUSTOM */
+.timeline-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
 }
 
-.footer-main p {
-    color: #ccc;
-    font-size: 14px;
+.step {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: center;
 }
 
-.footer-link {
-    list-style: none;
-    padding: 0;
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: white;
+    color: #b71c1c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    margin: 0 auto 15px;
 }
 
-.footer-link li {
-    margin-bottom: 8px;
-    color: #bbb;
-    cursor: pointer;
-    transition: 0.3s;
+/* TESTIMONIALS */
+.testimonial-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.03);
 }
 
-.footer-link li:hover {
-    color: #c62828;
+.testimonial-card img {
+    width: 60px;
+    height: 60px;
+    border: 3px solid #ff5252;
 }
 
-.footer-line {
-    border-color: rgba(255,255,255,0.2);
-    margin-top: 20px;
-}
-
-/* ===================== */
 /* RESPONSIVE */
-/* ===================== */
-@media(max-width:768px) {
-
-    .hero {
-        height: auto;
-        padding: 80px 20px;
+@media (max-width: 768px) {
+    .hero-dashboard {
         text-align: center;
+        padding-top: 100px;
     }
+    .hero-btns .btn-red-dashboard {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    .btn-outline-white {
+        width: 100%;
+    }
+}
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--text-dark);
+    transition: 0.25s;
+}
+.nav-tabs .nav-link:hover {
+    color: var(--primary);
+}
+.nav-tabs .nav-link.active {
+    border-bottom: 3px solid var(--primary);
+}
 
-    .hero h1 {
-        font-size: 28px;
-    }
+.tab-content p, .tab-content li {
+    line-height: 1.7;
+}
+
+.list-group-item {
+    background: transparent;
 }

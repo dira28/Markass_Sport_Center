@@ -1,0 +1,156 @@
+/* ========================================= */
+/* DETAIL VENUE / TENTANG CSS */
+/* ========================================= */
+
+/* GALLERY SECTION */
+.header-img-main {
+    overflow: hidden;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.header-img-main img {
+    height: 420px;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.header-img-side {
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.header-img-side img {
+    height: 202px; /* Menyesuaikan gap agar presisi dengan main image */
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.header-img-main:hover img, 
+.header-img-side:hover img {
+    transform: scale(1.05);
+}
+
+/* VENUE IDENTITY */
+.badge.bg-danger {
+    background-color: #b71c1c !important;
+    padding: 6px 15px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.text-warning {
+    color: #fbc02d !important;
+}
+
+/* CUSTOM MODERN TABS */
+.venue-tabs-container {
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: -1px; /* Overlap dengan border content */
+}
+
+.nav-link-modern {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 1rem;
+    position: relative;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+}
+
+.nav-link-modern:hover {
+    color: #b71c1c;
+}
+
+.nav-link-modern.active {
+    color: #b71c1c;
+    border-bottom: 3px solid #b71c1c;
+}
+
+/* TAB CONTENT CARD */
+.detail-card-content {
+    background: #ffffff;
+    border-top: 4px solid #b71c1c;
+    transition: box-shadow 0.3s ease;
+}
+
+.detail-card-content p {
+    line-height: 1.8;
+}
+
+/* FACILITY ITEMS */
+.transition-hover {
+    transition: all 0.3s ease;
+    background: #fff;
+    border: 1px solid #eee !important;
+}
+
+.transition-hover:hover {
+    border-color: #ffcdd2 !important;
+    background-color: #fff8f8;
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(183, 28, 28, 0.08);
+}
+
+.icon-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: #b71c1c;
+    color: white;
+}
+
+/* TESTIMONIAL MINI */
+.x-small {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.btn-outline-danger {
+    color: #b71c1c;
+    border-color: #b71c1c;
+}
+
+.btn-outline-danger:hover {
+    background-color: #b71c1c;
+    color: white;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 991px) {
+    .header-img-main img {
+        height: 350px;
+    }
+}
+
+@media (max-width: 767px) {
+    .header-img-main img {
+        height: 250px;
+    }
+    
+    .nav-link-modern {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .venue-tabs-container {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+    
+    .venue-tabs-container::-webkit-scrollbar {
+        display: none; /* Hide scrollbar for Chrome/Safari */
+    }
+}

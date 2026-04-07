@@ -2,174 +2,345 @@
 
 @section('title', 'Booking')
 
+@push('styles')
+@vite('resources/css/user/pages/booking.css')
+@endpush
+
 @section('content')
 
-    <style>
-        .booking-hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d');
-            background-size: cover;
-            background-position: center;
-            height: 300px;
-            display: flex;
-            align-items: center;
-            color: white;
-        }
+<section class="hero-booking">
+    <div class="container">
+        <h2 class="fw-bold">Harga Sewa Lapangan<br>Olahraga Kudus!</h2>
+        <p>Lihat harga sewa lapangan favoritmu di Markass Sport Center Kudus</p>
+    </div>
+</section>
 
-        .booking-card img {
-            height: 200px;
-            object-fit: cover;
-        }
+<section class="py-5">
+    <div class="container">
+        <div class="row row-equal">
 
-        .booking-card {
-            border-radius: 15px;
-            overflow: hidden;
-            transition: 0.3s;
-        }
+            <!-- KIRI -->
+            <div class="col-md-8 col-left">
+                <div class="harga-wrapper">
+                    <h5 class="fw-bold mb-3">Pilih Lapangan</h5>
 
-        .booking-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
+                    @foreach($lapangan ?? [] as $i => $item)
+                    <div class="card-lapangan {{ $i==0 ? 'active' : '' }}"
+                        data-id="{{ $item['id_lapangan'] }}"
+                        data-nama="{{ $item['nama_lapangan'] }}"
+                        data-harga="{{ $item['harga_per_jam'] }}">
 
-        .booking-form-section {
-            background: #c62828;
-            padding: 60px 0;
-        }
 
-        .booking-form-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 800px;
-            margin: auto;
-        }
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ $item['nama_lapangan'] }}</h6>
+                            <small class="text-muted">{{ $item['deskripsi'] }}</small>
+                        </div>
 
-        input,
-        select {
-            border-radius: 8px !important;
-        }
-    </style>
-
-    <!-- HERO -->
-    <section class="booking-hero">
-        <div class="container text-center">
-            <h1 class="fw-bold">Booking Lapangan</h1>
-            <p>Pilih lapangan, tanggal, dan jam bermain dengan mudah.</p>
-        </div>
-    </section>
-
-    <!-- PILIH LAPANGAN -->
-    <section class="py-5 bg-light">
-        <div class="container text-center">
-
-            <h3 class="section-title">Pilih Lapangan</h3>
-
-            <div class="row justify-content-center">
-
-                <!-- FUTSAL -->
-                <div class="col-md-5 mb-4">
-                    <div class="card booking-card shadow-sm">
-                        <img src="https://www.rukita.co/stories/wp-content/uploads/2020/02/futsal.jpg">
-                        <div class="card-body">
-                            <h5>Lapangan Futsal</h5>
-                            <p class="text-muted">Mulai Rp120.000 / Jam</p>
-                            <a href="#" class="btn btn-red px-4">Pilih</a>
+                        <div class="harga">
+                            Rp{{ number_format($item['harga_per_jam'],0,',','.') }}
                         </div>
                     </div>
-                </div>
+                    @endforeach
 
-                <!-- BADMINTON -->
-                <div class="col-md-5 mb-4">
-                    <div class="card booking-card shadow-sm">
-                        <img
-                            src="https://kelanakids.com/wp-content/uploads/2023/03/badminton-concept-with-racket-shuttlecock.jpg">
-                        <div class="card-body">
-                            <h5>Lapangan Badminton</h5>
-                            <p class="text-muted">Mulai Rp35.000 / Jam</p>
-                            <a href="#" class="btn btn-red px-4">Pilih</a>
-                        </div>
-                    </div>
                 </div>
-
             </div>
-        </div>
-    </section>
 
-    <!-- FORM BOOKING -->
-    <section class="booking-form-section">
-        <div class="container">
+            <!-- KANAN -->
+            <div class="col-md-4 col-right">
+                <div class="booking-summary shadow-sm">
 
-            <h3 class="text-center text-white mb-4 fw-bold">Form Booking</h3>
+                    <h6 class="fw-bold mb-3">Ringkasan Booking</h6>
 
-            <div class="booking-form-card shadow">
-
-                <form>
-
-                    <div class="row">
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-semibold">Nama</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-semibold">Tanggal</label>
-                            <input type="date" class="form-control">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-semibold">Jam</label>
-                            <select class="form-control">
-                                <option>08.00 - 09.00</option>
-                                <option>09.00 - 10.00</option>
-                                <option>10.00 - 11.00</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-semibold">Pilih Lapangan</label>
-                            <select class="form-control">
-                                <option>Futsal</option>
-                                <option>Badminton</option>
-                            </select>
-                        </div>
-
+                    <div class="d-flex mb-3">
+                        @foreach($lapangan ?? [] as $i => $item)
+                        <button class="sport btn {{ $i==0 ? 'btn-outline-danger active' : 'btn-outline-secondary' }} w-50 me-2"
+                            data-id="{{ $item['id_lapangan'] }}"
+                            data-nama="{{ $item['nama_lapangan'] }}"
+                            data-harga="{{ $item['harga_per_jam'] }}">
+                            {{ $item['nama_lapangan'] }}
+                        </button>
+                        @endforeach
                     </div>
 
-                    <button class="btn btn-red w-100 mt-3">Booking Sekarang</button>
+                    <input type="date" class="form-control mb-3" id="tanggal">
 
-                </form>
+                    <!-- JAM -->
+                    <div class="jadwal mb-3">
+                        @for ($i = 9; $i <= 23; $i++)
+                            <button class="btn btn-light btn-sm jam-btn" data-jam="{{ sprintf('%02d:00',$i) }}">
+                                {{ sprintf('%02d:00',$i) }}
+                            </button>
+                        @endfor
+                    </div>
 
+                    <!-- DURASI -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button class="btn btn-light" id="minus">-</button>
+                        <b><span id="durasi">1</span> Jam</b>
+                        <button class="btn btn-light" id="plus">+</button>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <small>Olahraga</small>
+                        <small id="summary-nama">{{ $lapangan[0]['nama_lapangan'] ?? '-' }}</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <small>Tanggal</small>
+                        <small id="summary-tanggal">-</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <small>Jam</small>
+                        <small id="summary-jam">-</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <small>Durasi</small>
+                        <small><span id="summary-durasi">1</span> jam</small>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total Harga</span>
+                        <span id="total">Rp0</span>
+                    </div>
+
+                    <button id="btnBooking" class="btn btn-red w-100 mt-3">
+                        Booking Sekarang →
+                    </button>
+
+                </div>
             </div>
+
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- TAMBAHAN DESIGN -->
-    <section class="py-5 bg-light">
-        <div class="container text-center">
+<style>
+.btn-danger {
+    background-color: #ff4d4d !important;
+    color: white;
+}
+</style>
 
-            <h3 class="section-title">Kenapa Booking di Sini?</h3>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-            <div class="row">
+    let activeCard = document.querySelector(".card-lapangan.active");
 
-                <div class="col-md-4 mb-4">
-                    <h5>⚡ Cepat & Mudah</h5>
-                    <p>Booking hanya dalam hitungan detik tanpa ribet.</p>
-                </div>
+    let lapanganAktif = activeCard?.dataset.id;
+    let hargaPerJam = parseInt(activeCard?.dataset.harga || 0);
 
-                <div class="col-md-4 mb-4">
-                    <h5>📍 Lokasi Strategis</h5>
-                    <p>Mudah dijangkau dan dekat pusat kota.</p>
-                </div>
+    let jamAktif = null;
+    let durasi = 1;
 
-                <div class="col-md-4 mb-4">
-                    <h5>💯 Lapangan Berkualitas</h5>
-                    <p>Standar terbaik untuk kenyamanan bermain.</p>
-                </div>
+    let summaryNama = document.getElementById("summary-nama");
+    let summaryTanggal = document.getElementById("summary-tanggal");
+    let summaryJam = document.getElementById("summary-jam");
+    let totalHarga = document.getElementById("total");
 
-            </div>
-        </div>
-    </section>
+    let durasiEl = document.getElementById("durasi");
+    let summaryDurasi = document.getElementById("summary-durasi");
 
+    function updateUI() {
+        if (!jamAktif || !hargaPerJam) {
+            totalHarga.textContent = "Rp0";
+            return;
+        }
+
+        totalHarga.textContent =
+            "Rp" + (hargaPerJam * durasi).toLocaleString("id-ID");
+    }
+
+    // 🔥 RESET JAM
+    function resetJam() {
+        jamAktif = null;
+        summaryJam.textContent = "-";
+
+        document.querySelectorAll(".jam-btn").forEach(btn => {
+            btn.classList.remove("active");
+        });
+    }
+
+    // 🔥 LOAD AVAILABILITY
+    async function loadAvailability(tanggal) {
+        try {
+            let res = await fetch(`/api/lapangan/availability/check?tanggal=${tanggal}`);
+            let result = await res.json();
+
+            if (result.status !== "success") return;
+
+            // 🔥 RESET SEMUA JAM
+            document.querySelectorAll(".jam-btn").forEach(btn => {
+                btn.classList.remove("jam-booked", "active");
+                btn.classList.add("btn-light");
+
+                // balikin biar bisa diklik lagi
+                btn.style.pointerEvents = "auto";
+            });
+
+            resetJam();
+
+            let lapangan = result.data.find(l => l.id_lapangan === lapanganAktif);
+            if (!lapangan) return;
+
+            let booked = [];
+
+            // 🔥 CONVERT SLOT
+            lapangan.booked_slots.forEach(slot => {
+                let [start, end] = slot.split("-");
+
+                let s = parseInt(start.split(":")[0]);
+                let e = parseInt(end.split(":")[0]);
+
+                for (let i = s; i < e; i++) {
+                    let jam = (i < 10 ? "0" : "") + i + ":00";
+                    booked.push(jam);
+                }
+            });
+
+            // 🔥 APPLY BOOKED STYLE (PINK + DEAD CLICK)
+            document.querySelectorAll(".jam-btn").forEach(btn => {
+                if (booked.includes(btn.dataset.jam)) {
+
+                    btn.classList.add("jam-booked");
+
+                    // ❌ MATI TOTAL CLICK
+                    btn.style.pointerEvents = "none";
+
+                    // kalau sebelumnya kepilih → reset
+                    if (jamAktif === btn.dataset.jam) {
+                        jamAktif = null;
+                        summaryJam.textContent = "-";
+                    }
+                }
+            });
+
+        } catch (err) {
+            console.error("ERROR AVAILABILITY:", err);
+        }
+    }
+
+    // 🔥 PILIH LAPANGAN
+    document.querySelectorAll(".sport, .card-lapangan").forEach(el => {
+        el.addEventListener("click", function () {
+
+            lapanganAktif = this.dataset.id;
+            hargaPerJam = parseInt(this.dataset.harga);
+            let nama = this.dataset.nama;
+
+            document.querySelectorAll(".sport").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".card-lapangan").forEach(c => c.classList.remove("active"));
+
+            document.querySelectorAll(`[data-id="${lapanganAktif}"]`)
+                .forEach(x => x.classList.add("active"));
+
+            summaryNama.textContent = nama;
+
+            let tgl = document.getElementById("tanggal").value;
+            if (tgl) loadAvailability(tgl);
+
+            updateUI();
+        });
+    });
+
+    // 🔥 PILIH JAM
+    document.querySelectorAll(".jam-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+
+            // kalau udah ke-lock → stop
+            if (this.classList.contains("jam-booked")) return;
+
+            document.querySelectorAll(".jam-btn").forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+
+            jamAktif = this.dataset.jam;
+            summaryJam.textContent = jamAktif;
+
+            updateUI();
+        });
+    });
+
+    // 🔥 PILIH TANGGAL
+    document.getElementById("tanggal").addEventListener("change", function(){
+        let tanggal = this.value;
+
+        summaryTanggal.textContent = tanggal;
+
+        if (tanggal) {
+            loadAvailability(tanggal);
+        }
+
+        updateUI();
+    });
+
+    // 🔥 DURASI
+    document.getElementById("plus").onclick = () => {
+        durasi++;
+        updateDurasi();
+    };
+
+    document.getElementById("minus").onclick = () => {
+        if (durasi > 1) durasi--;
+        updateDurasi();
+    };
+
+    function updateDurasi() {
+        durasiEl.textContent = durasi;
+        summaryDurasi.textContent = durasi;
+        updateUI();
+    }
+
+    // 🔥 BOOKING
+    document.getElementById("btnBooking").addEventListener("click", async function () {
+
+        let tanggal = document.getElementById("tanggal").value;
+
+        if (!tanggal) return alert("Pilih tanggal dulu");
+        if (!jamAktif) return alert("Pilih jam dulu");
+
+        let startHour = parseInt(jamAktif);
+        let endHour = startHour + durasi;
+
+        let jamSelesai = (endHour < 10 ? "0" : "") + endHour + ":00";
+
+        try {
+            let res = await fetch("{{ route('booking.store') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    id_lapangan: lapanganAktif,
+                    tanggal: tanggal,
+                    jam_mulai: jamAktif,
+                    jam_selesai: jamSelesai
+                })
+            });
+
+            let result = await res.json();
+
+            if (result.status === "success") {
+                alert("✅ Booking berhasil!");
+
+                // 🔥 reload availability biar langsung ke-lock
+                loadAvailability(tanggal);
+
+            } else {
+                alert("❌ " + result.message);
+            }
+
+        } catch (err) {
+            alert("Server error");
+        }
+
+    });
+
+});
+</script>
 @endsection

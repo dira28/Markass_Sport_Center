@@ -19,9 +19,9 @@
             </a>
         </li>
 
-        <li class="{{ request()->is('admin/jadwal') ? 'active' : '' }}">
-            <a href="/admin/jadwal">
-                <i class="bi bi-clock"></i> Jadwal
+        <li class="{{ request()->is('admin/lapangan') ? 'active' : '' }}">
+            <a href="/admin/lapangan">
+                <i class="bi bi-dribbble"></i> Lapangan
             </a>
         </li>
 

@@ -7,44 +7,38 @@ use Illuminate\Support\Facades\Http;
 
 class BookingController extends Controller
 {
-    public function index(Request $request)
+    public function index()
+    {
+        $lapangan = [];
+
+        try {
+            $res = Http::get(env('API_URL') . '/api/lapangan');
+
+            if ($res->successful()) {
+                $lapangan = $res->json()['data'];
+            }
+        } catch (\Exception $e) {}
+
+        return view('user.pages.booking', compact('lapangan'));
+    }
+
+    public function store(Request $request)
     {
         $token = session('token');
 
-        // 🔐 Cek token login
-        if (!$token) {
-            return redirect()->route('login')->with('error', 'Silakan login dulu!');
-        }
+        $res = Http::withToken($token)
+            ->post(env('API_URL') . '/api/booking', $request->all());
 
-        try {
-            $response = Http::withToken($token)
-                ->acceptJson()
-                ->get(env('API_URL') . '/api/booking', [
-                    'status_pembayaran' => $request->status,
-                    'tanggal' => $request->tanggal,
-                    'id_lapangan' => $request->lapangan,
-                ]);
-
-            // ❌ Kalau API gagal
-            if ($response->failed()) {
-                return view('admin.pages.booking', [
-                    'bookings' => [],
-                    'error' => 'Gagal ambil data dari API'
-                ]);
-            }
-
-            $result = $response->json();
-
-            // 🧠 Ambil data aman
-            $bookings = $result['data'] ?? [];
-
-        } catch (\Exception $e) {
-            return view('admin.pages.booking', [
-                'bookings' => [],
-                'error' => $e->getMessage()
+        if ($res->successful()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $res->json()
             ]);
         }
 
-        return view('admin.pages.booking', compact('bookings'));
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Booking gagal'
+        ], 400);
     }
 }
