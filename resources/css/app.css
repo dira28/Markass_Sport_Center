@@ -3,6 +3,8 @@
 @import './admin/components/sidebar.css';
 @import './admin/pages/dashboard.css';
 @import './admin/pages/booking.css';
+@import "./admin/components/profit-overview.css";
+@import './admin/pages/profile.css';
 @import "flowbite";
 /* ===================== */
 /* TAILWIND */
@@ -35,7 +37,8 @@
 /* ===================== */
 body {
     font-family: 'Instrument Sans', sans-serif;
-    background: var(--bg-page);   /* abu-abu terang */
+    background: var(--bg-page);
+    /* abu-abu terang */
     color: var(--text-dark);
 }
 
@@ -63,8 +66,8 @@ body {
 /* HERO */
 /* ===================== */
 .hero-booking {
-    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-    url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d');
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d');
     background-size: cover;
     background-position: center;
     height: 300px;
@@ -100,7 +103,7 @@ body {
 
 .card-lapangan:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
 .card-lapangan.active {
@@ -142,11 +145,12 @@ body {
 /* BOOKING SUMMARY (PUTIH) */
 /* ===================== */
 .booking-summary {
-    background: var(--bg-light);   /* PUTIH */
+    background: var(--bg-light);
+    /* PUTIH */
     color: var(--text-dark);
     padding: 22px;
     border-radius: 14px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 /* ===================== */
@@ -167,7 +171,8 @@ body {
     transform: translateY(-1px);
 }
 
-.feature-box img, .step img {
+.feature-box img,
+.step img {
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -211,5 +216,13 @@ body {
     .card-lapangan img {
         width: 100%;
         height: 150px;
+    }
+
+    /* profile */
+    .profile-img-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
     }
 }

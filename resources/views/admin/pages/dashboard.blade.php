@@ -2,119 +2,95 @@
 
 @section('content')
 
-<div class="dashboard-header-v2">
-    <div>
-        <h3>Halo Admin!</h3>
-        <p>Selamat datang di Dashboard Markass Sport Center</p>
+<div class="content-wrapper">
+
+    {{-- HEADER --}}
+    <div class="dashboard-header-v2 mb-3">
+        <div>
+            <h3>Halo Admin!</h3>
+            <p>Selamat datang di Dashboard Markass Sport Center</p>
+        </div>
     </div>
+
+
+    {{-- KPI CARDS --}}
+    <div class="mb-3">
+        @include('admin.components.kpi-cards', [
+            'totalRevenue' => $totalRevenue ?? 0,
+            'totalBooking' => $totalBooking ?? 0,
+            'totalUser' => $totalUser ?? 0,
+            'averagePerDay' => $averagePerDay ?? 0
+        ])
+    </div>
+
+
+    {{-- DATA CHART --}}
+    @php
+        $chartData = [
+            'day' => [
+                'labels' => $chartLabels ?? [],
+                'data' => $chartValues ?? []
+            ],
+            'month' => [
+                'labels' => $chartLabels ?? [],
+                'data' => $chartValues ?? []
+            ],
+            'year' => [
+                'labels' => $chartLabels ?? [],
+                'data' => $chartValues ?? []
+            ],
+        ];
+    @endphp
+
+
+    {{-- CHART + SUMMARY --}}
+    <div class="row g-3">
+
+        <div class="col-md-8">
+            @include('admin.components.profit-overview', [
+                'data' => $chartData,
+                'id' => 'dashboard',
+                'title' => 'Grafik Pendapatan'
+            ])
+        </div>
+
+        <div class="col-md-4">
+            @include('admin.components.revenue-summary', [
+                'revenueToday' => $revenueToday ?? 0,
+                'totalBooking' => $totalBooking ?? 0
+            ])
+        </div>
+
+    </div>
+
+
+    {{-- EXTRA INSIGHT --}}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card-box">
+                <h6 class="mb-2">Insight Hari Ini</h6>
+                <p class="text-muted mb-0">
+                    Belum ada data insight hari ini
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    {{-- LATEST BOOKING --}}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            @include('admin.components.latest-booking', [
+                'data' => $latestBookings ?? [],
+                'title' => 'Latest Bookings',
+                'showButton' => true,
+                'url' => route('admin.laporan')
+            ])
+        </div>
+    </div>
+
 </div>
 
-<!-- REVENUE -->
-<div class="row g-3 mt-2">
-
-    <div class="col-md-6">
-        <div class="revenue-card big">
-            <p>Pendapatan Hari Ini</p>
-            <h3 class="text-danger">
-                Rp {{ number_format($revenueToday, 0, ',', '.') }}
-            </h3>
-            <span class="badge bg-success">
-                {{ $totalBooking }} Booking
-            </span>
-        </div>
-    </div>
-
-    <div class="col-md-6">
-        <div class="revenue-card big">
-            <p>Total Booking Hari Ini</p>
-            <h3>{{ $totalBooking }}</h3>
-        </div>
-    </div>
-
-</div>
-
-<!-- CHART -->
-<div class="row mt-4">
-
-    <div class="col-md-8">
-        <div class="card-box">
-            <h5>Profit Overview</h5>
-            <canvas id="chart"></canvas>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card-box summary-box">
-            <h4>Rp {{ number_format($revenueToday, 0, ',', '.') }}</h4>
-            <p class="text-success">{{ $totalBooking }} Booking Hari Ini</p>
-            <small>Realtime Data</small>
-        </div>
-    </div>
-
-</div>
-
-<!-- LATEST BOOKING -->
-<div class="row mt-4">
-
-    <div class="col-md-12">
-        <div class="card-box">
-            <h5>Latest Bookings</h5>
-
-            <table class="table">
-                @forelse($latestBookings as $item)
-                    <tr>
-                        <td>{{ $item['id_booking'] }}</td>
-                        <td>{{ $item['user']['nama'] ?? '-' }}</td>
-                        <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
-                        <td>
-                            {{ \Carbon\Carbon::parse($item['tanggal'])->format('d M') }}
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4">Tidak ada data</td>
-                    </tr>
-                @endforelse
-            </table>
-
-        </div>
-    </div>
-
-</div>
-
-<!-- CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    const labels = @json($chartLabels);
-    const dataValues = @json($chartValues);
-
-    const ctx = document.getElementById('chart').getContext('2d');
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, "rgba(220,53,69,0.4)");
-    gradient.addColorStop(1, "rgba(220,53,69,0)");
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: dataValues,
-                borderColor: '#dc3545',
-                backgroundColor: gradient,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { display: false },
-                x: { display: true }
-            }
-        }
-    });
-</script>
 
 @endsection

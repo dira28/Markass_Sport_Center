@@ -22,6 +22,11 @@ class AdminDashboardController extends Controller
         $chartLabels = [];
         $chartValues = [];
 
+        // 🔥 TAMBAHAN (BIAR GA ERROR)
+        $totalRevenue = 0;
+        $totalUser = 0;
+        $averagePerDay = 0;
+
         try {
             // 🔥 REVENUE HARI INI
             $resRevenue = Http::withToken($token)
@@ -43,17 +48,26 @@ class AdminDashboardController extends Controller
             if ($resBooking->successful()) {
                 $bookings = $resBooking->json()['data'] ?? [];
 
-                // 🔥 latest booking (ambil 5)
+                // 🔥 latest booking
                 $latestBookings = array_slice($bookings, 0, 5);
 
-                // 🔥 chart monthly revenue
                 $monthly = [];
+                $totalRevenueTemp = 0;
+                $days = [];
 
                 foreach ($bookings as $b) {
                     if (($b['status_pembayaran'] ?? '') !== 'paid') continue;
 
-                    $month = Carbon::parse($b['tanggal'])->format('M');
+                    $tanggal = Carbon::parse($b['tanggal']);
+                    $month = $tanggal->format('M');
 
+                    // total revenue
+                    $totalRevenueTemp += $b['total_harga'];
+
+                    // simpan unique day
+                    $days[$tanggal->format('Y-m-d')] = true;
+
+                    // chart
                     if (!isset($monthly[$month])) {
                         $monthly[$month] = 0;
                     }
@@ -61,9 +75,27 @@ class AdminDashboardController extends Controller
                     $monthly[$month] += $b['total_harga'];
                 }
 
+                $totalRevenue = $totalRevenueTemp;
+
+                // average per day
+                $totalDays = count($days);
+                $averagePerDay = $totalDays > 0 ? $totalRevenue / $totalDays : 0;
+
                 $chartLabels = array_keys($monthly);
                 $chartValues = array_values($monthly);
             }
+
+            // 🔥 GET TOTAL USER (optional, kalau ada API)
+            try {
+                $resUser = Http::withToken($token)
+                    ->acceptJson()
+                    ->get(env('API_URL') . '/api/user');
+
+                if ($resUser->successful()) {
+                    $users = $resUser->json()['data'] ?? [];
+                    $totalUser = count($users);
+                }
+            } catch (\Exception $e) {}
 
         } catch (\Exception $e) {
             // fallback aman
@@ -74,7 +106,10 @@ class AdminDashboardController extends Controller
             'totalBooking',
             'latestBookings',
             'chartLabels',
-            'chartValues'
+            'chartValues',
+            'totalRevenue',
+            'totalUser',
+            'averagePerDay'
         ));
     }
 }

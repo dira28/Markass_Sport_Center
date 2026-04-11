@@ -1,15 +1,11 @@
-/* ===================== */
-/* GLOBAL WRAPPER */
-/* ===================== */
+/* wrapper */
 .content-wrapper {
     background: #f5f6fa;
     padding: 25px;
     border-radius: 16px;
 }
 
-/* ===================== */
-/* HEADER */
-/* ===================== */
+/* header */
 .dashboard-header-v2 {
     display: flex;
     justify-content: space-between;
@@ -26,111 +22,77 @@
     color: #777;
 }
 
-/* BUTTON DOWNLOAD */
-.btn-download {
-    background: #f1f3f5;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 10px;
-    font-weight: 500;
-    transition: 0.3s;
+/* KPI */
+.kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    padding: 18px;
+    border-radius: 16px;
+    background: #fff;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    transition: 0.25s ease;
 }
 
-.btn-download:hover {
-    background: #e2e6ea;
+.kpi-card:hover {
+    transform: translateY(-4px);
 }
 
-/* ===================== */
-/* DATE RANGE */
-/* ===================== */
-.date-range-box {
-    background: #ffffff;
-    padding: 12px 18px;
+.kpi-icon {
+    width: 50px;
+    height: 50px;
     border-radius: 12px;
-    display: inline-flex;
+
+    display: flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    justify-content: center;
+
+    font-size: 20px;
 }
 
-/* ===================== */
-/* REVENUE CARD */
-/* ===================== */
-.revenue-card {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
-}
-
-.revenue-card p {
+.kpi-card p {
     margin: 0;
-    color: #777;
+    font-size: 13px;
+    color: #888;
 }
 
-.revenue-card h3 {
-    margin-top: 10px;
-    font-weight: bold;
+.kpi-card h4 {
+    margin: 4px 0 0;
+    font-weight: 700;
 }
 
-.revenue-card.big {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* warna KPI */
+.kpi-green .kpi-icon {
+    background: rgba(40,167,69,0.1);
+    color: #28a745;
 }
 
-.revenue-card.small {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.kpi-blue .kpi-icon {
+    background: rgba(0,123,255,0.1);
+    color: #007bff;
 }
 
-/* ===================== */
-/* BADGE */
-/* ===================== */
-.badge {
-    padding: 6px 10px;
-    border-radius: 8px;
+.kpi-yellow .kpi-icon {
+    background: rgba(255,193,7,0.15);
+    color: #ffc107;
 }
 
-/* ===================== */
-/* CARD BOX */
-/* ===================== */
+.kpi-red .kpi-icon {
+    background: rgba(220,53,69,0.1);
+    color: #dc3545;
+}
+
+/* card umum */
 .card-box {
-    background: #ffffff;
+    background: #fff;
     padding: 20px;
     border-radius: 14px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
 
-/* ===================== */
-/* CHART */
-/* ===================== */
-.chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.chart-filter button {
-    border: none;
-    background: #f1f3f5;
-    padding: 6px 12px;
-    margin-left: 5px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.chart-filter button:hover {
-    background: #dee2e6;
-}
-
-/* ===================== */
-/* SUMMARY BOX */
-/* ===================== */
+/* summary */
 .summary-box {
     text-align: center;
 }
@@ -139,15 +101,37 @@
     font-weight: bold;
 }
 
-.summary-box p {
-    margin: 5px 0;
+/* chart */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
 }
 
-/* ===================== */
-/* TABLE */
-/* ===================== */
+.chart-filter {
+    display: flex;
+    gap: 6px;
+    background: #f1f3f5;
+    padding: 5px;
+    border-radius: 12px;
+}
+
+.chart-filter button {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.chart-filter button.active {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* table */
 .table {
-    background: #ffffff;
+    background: #fff;
     border-radius: 12px;
     overflow: hidden;
 }
@@ -156,96 +140,11 @@
     background: #f8f9fa;
 }
 
-.table td {
-    vertical-align: middle;
-}
-
-/* ===================== */
-/* BUTTON SHOW */
-/* ===================== */
-.btn-show {
-    background: #f1f3f5;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 10px;
-    margin-top: 10px;
-    transition: 0.3s;
-}
-
-.btn-show:hover {
-    background: #dee2e6;
-}
-
-/* ===================== */
-/* FACILITY */
-/* ===================== */
-.facility-item {
-    display: flex;
-    gap: 12px;
-    margin-top: 12px;
-    align-items: center;
-}
-
-.facility-item img {
-    width: 80px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-.facility-item p {
-    margin: 0;
-    font-weight: 500;
-}
-
-.facility-item small {
-    color: #777;
-}
-
-/* ===================== */
-/* BUTTON MERAH */
-/* ===================== */
+/* button */
 .btn-filter {
     background: #800020;
     color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 10px;
-    font-weight: 500;
-    transition: 0.3s;
-}
-
-.btn-filter:hover {
-    background: #66001a;
-}
-
-/* ===================== */
-/* GRID SPACING */
-/* ===================== */
-.row.g-3>div {
-    margin-bottom: 10px;
-}
-
-/* ACTIVE FILTER */
-.chart-filter button.active {
-    background: #dc3545;
-    color: #fff;
-}
-
-/* CHART CANVAS */
-#chart {
-    max-height: 250px;
-}
-
-/* HOVER CARD */
-.card-box:hover,
-.revenue-card:hover {
-    transform: translateY(-3px);
-    transition: 0.3s;
-}
-
-/* SHADOW LEBIH HALUS */
-.card-box,
-.revenue-card {
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }

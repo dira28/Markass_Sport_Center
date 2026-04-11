@@ -6,11 +6,17 @@
     </div>
 
     <div class="nav-right">
-        <div class="profile-box">
-            <img src="https://i.pravatar.cc/40" class="profile-img">
-            <span>Admin</span>
-            <i class="bi bi-chevron-down"></i>
-        </div>
+        <a href="{{ route('admin.profile') }}" class="profile-box text-decoration-none">
+
+            <div class="avatar-circle-sm">
+                {{ strtoupper(substr(session('user')['nama'] ?? 'A', 0, 1)) }}
+            </div>
+
+            <span class="text-dark">
+                {{ session('user')['nama'] ?? 'Admin' }}
+            </span>
+
+        </a>
     </div>
 
 </nav>

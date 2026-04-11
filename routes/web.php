@@ -63,6 +63,19 @@ Route::prefix('admin')->group(function () {
     Route::get('/booking', [HistoryBookingController::class, 'index'])
         ->name('admin.booking');
 
+    Route::get('/laporan', function () {
+        return view('admin.pages.laporan');
+    })->name('admin.laporan');
+
+    Route::get('/admin/profile', function () {
+        return view('admin.pages.profile');
+    })->name('admin.profile');
+
+    Route::post('/logout', function () {
+        session()->flush();
+        return redirect('/login');
+    })->name('logout');
+
     // 🔥 LAPANGAN CRUD
     Route::get('/lapangan', [LapanganController::class, 'index'])->name('lapangan.index');
     Route::post('/lapangan', [LapanganController::class, 'store'])->name('lapangan.store');
