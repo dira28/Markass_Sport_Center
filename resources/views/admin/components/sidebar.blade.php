@@ -25,21 +25,15 @@
             </a>
         </li>
 
-        <li class="{{ request()->is('admin/users') ? 'active' : '' }}">
-            <a href="/admin/users">
-                <i class="bi bi-people"></i> Pengguna
-            </a>
-        </li>
-
         <li class="{{ request()->is('admin/laporan') ? 'active' : '' }}">
             <a href="/admin/laporan">
                 <i class="bi bi-bar-chart"></i> Laporan
             </a>
         </li>
 
-        <li class="{{ request()->is('admin/pengaturan') ? 'active' : '' }}">
-            <a href="/admin/pengaturan">
-                <i class="bi bi-gear"></i> Pengaturan
+        <li class="{{ request()->is('admin/profile') ? 'active' : '' }}">
+            <a href="/admin/profile">
+                <i class="bi bi-person-circle"></i> Profil
             </a>
         </li>
 
