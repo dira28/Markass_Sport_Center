@@ -1,3 +1,33 @@
+<style>
+    .navbar {
+        padding-top: 18px;
+        padding-bottom: 18px;
+        transition: top 0.3s;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 999;
+    }
+
+    .navbar-hide {
+        top: -100px;
+    }
+
+    body {
+        padding-top: 90px;
+    }
+
+    /* TAMBAHAN FONT */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap');
+
+    .brand-text {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        letter-spacing: 1px;
+        font-size: 18px;
+    }
+</style>
+
 <nav class="navbar navbar-expand-lg bg-white shadow-sm">
     <div class="container">
 
@@ -8,7 +38,8 @@
                  alt="Logo Markass"
                  style="max-width:45px;">
 
-            <span class="ms-2">
+            <!-- HANYA TAMBAH CLASS -->
+            <span class="ms-2 brand-text">
                 MARKASS SPORT CENTER
             </span>
 
@@ -36,7 +67,6 @@
                     </a>
                 </li>
 
-                <!-- ✅ SUDAH DIPERBAIKI -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('tentang') ? 'active' : '' }}" href="/tentang">
                         Tentang
@@ -62,3 +92,20 @@
         </div>
     </div>
 </nav>
+
+<script>
+    let lastScrollTop = 0;
+    const navbar = document.querySelector(".navbar");
+
+    window.addEventListener("scroll", function () {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (scrollTop > lastScrollTop) {
+            navbar.classList.add("navbar-hide");
+        } else {
+            navbar.classList.remove("navbar-hide");
+        }
+
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    });
+</script>
