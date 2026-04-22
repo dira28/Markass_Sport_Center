@@ -4,14 +4,19 @@
 
 @section('content')
 
-    <section class="hero-dashboard">
-        <div class="container text-center text-md-start">
+    <section class="hero-dashboard" style="position: relative;">
+        
+        <!-- TAMBAHAN: area klik seluruh hero -->
+        <a href="{{ url('/booking') }}" 
+           style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;"></a>
+
+        <div class="container text-center text-md-start" style="position: relative; z-index:2;">
             <div class="col-lg-6">
                 <h1>Booking Lapangan Olahraga<br>Jadi Lebih Mudah</h1>
                 <p>Pesan badminton & futsal secara online di Markass Sport Center Kudus dengan sistem real-time.</p>
                 <div class="hero-btns">
-                    <a href="/booking" class="btn-red-dashboard me-md-2">Booking Sekarang</a>
-                    <a href="/booking" class="btn-outline-white">Lihat Jadwal</a>
+                    <a href="{{ url('/booking') }}" class="btn-red-dashboard me-md-2">Booking Sekarang</a>
+                    <a href="{{ url('/booking') }}" class="btn-outline-white">Lihat Jadwal</a>
                 </div>
             </div>
         </div>
@@ -43,7 +48,7 @@
                         <div class="card-body">
                             <h5>{{ $lap['name'] }}</h5>
                             <p class="price">Mulai Rp{{ $lap['price'] }} <span>/ Jam</span></p>
-                            <a href="/booking" class="btn-red-dashboard w-100">Booking Sekarang</a>
+                            <a href="{{ url('/booking') }}" class="btn-red-dashboard w-100">Booking Sekarang</a>
                         </div>
                     </div>
                 </div>
@@ -52,7 +57,8 @@
         </div>
     </section>
 
-    <section class="py-5 bg-white shadow-sm">
+    <!-- DIUBAH DI SINI (bg-white ➝ bg-light) -->
+    <section class="py-5 bg-light shadow-sm">
         <div class="container">
             <div class="row text-center">
                 <div class="col-md-4 mb-4">
@@ -82,7 +88,7 @@
 
     <section class="timeline-section py-5">
         <div class="container">
-            <h3 class="section-title-dashboard text-white text-center mb-5">Bagaimana Cara Pesan?</h3>
+            <h3 class="section-title-dashboard text-black text-center mb-5">Bagaimana Cara Pesan?</h3>
             <div class="timeline-container">
                 <div class="step">
                     <div class="step-number">1</div>
@@ -111,7 +117,17 @@
     <section class="py-5 bg-light">
         <div class="container text-center">
             <h3 class="section-title-dashboard">Apa Kata Mereka?</h3>
-            <div class="row mt-4">
+
+            <div class="row mt-4 testimonial-row">
+
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" class="rounded-circle mb-3">
+                        <p class="fst-italic text-muted">"Tempatnya nyaman banget, lapangannya juga bersih dan terawat."</p>
+                        <h6>Siti Rahma</h6>
+                    </div>
+                </div>
+
                 <div class="col-md-4 mb-4">
                     <div class="testimonial-card">
                         <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle mb-3">
@@ -119,7 +135,16 @@
                         <h6>Andi Pratama</h6>
                     </div>
                 </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card">
+                        <img src="https://randomuser.me/api/portraits/men/65.jpg" class="rounded-circle mb-3">
+                        <p class="fst-italic text-muted">"Sistemnya mudah dipakai, sangat membantu untuk booking cepat."</p>
+                        <h6>Budi Santoso</h6>
+                    </div>
                 </div>
+
+            </div
         </div>
     </section>
 
