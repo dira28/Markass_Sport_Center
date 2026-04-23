@@ -1,0 +1,48 @@
+.booking-summary {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.booking-summary h6 {
+    font-size: 16px;
+}
+
+.booking-summary .sport {
+    font-size: 13px;
+    border-radius: 10px;
+}
+
+.booking-summary .sport.active {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.jadwal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.jam-btn {
+    width: 60px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.jam-btn.active {
+    background-color: #dc3545;
+    color: white;
+}
+
+.jam-booked {
+    background-color: #ffc0cb !important;
+    color: #999;
+    cursor: not-allowed;
+}
+
+#btnBooking {
+    border-radius: 10px;
+    font-weight: 500;
+}
