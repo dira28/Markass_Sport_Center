@@ -32,7 +32,7 @@
     border-radius: 16px;
     background: #fff;
 
-    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
     transition: 0.25s ease;
 }
 
@@ -65,22 +65,22 @@
 
 /* warna KPI */
 .kpi-green .kpi-icon {
-    background: rgba(40,167,69,0.1);
+    background: rgba(40, 167, 69, 0.1);
     color: #28a745;
 }
 
 .kpi-blue .kpi-icon {
-    background: rgba(0,123,255,0.1);
+    background: rgba(0, 123, 255, 0.1);
     color: #007bff;
 }
 
 .kpi-yellow .kpi-icon {
-    background: rgba(255,193,7,0.15);
+    background: rgba(255, 193, 7, 0.15);
     color: #ffc107;
 }
 
 .kpi-red .kpi-icon {
-    background: rgba(220,53,69,0.1);
+    background: rgba(220, 53, 69, 0.1);
     color: #dc3545;
 }
 
@@ -89,7 +89,7 @@
     background: #fff;
     padding: 20px;
     border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 /* summary */

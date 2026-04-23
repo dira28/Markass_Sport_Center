@@ -17,7 +17,8 @@ class BookingController extends Controller
             if ($res->successful()) {
                 $lapangan = $res->json()['data'];
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         return view('user.pages.booking', compact('lapangan'));
     }
@@ -41,4 +42,5 @@ class BookingController extends Controller
             'message' => 'Booking gagal'
         ], 400);
     }
+
 }

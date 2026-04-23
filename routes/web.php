@@ -24,6 +24,8 @@ Route::get('/dashboard', function () {
 
 Route::get('/booking', [BookingController::class, 'index']);
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+Route::get('/booking/slots', [BookingController::class, 'getBookedSlots'])
+    ->name('booking.slots');
 
 Route::get('/tentang', function () {
     return view('user.pages.tentang');
@@ -55,11 +57,11 @@ Route::get('/logout', [ProfileController::class, 'logout'])->name('logout');
 // =====================
 Route::prefix('admin')->group(function () {
 
-    // 🔥 DASHBOARD (PAKE CONTROLLER)
+    // DASHBOARD
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
 
-    // 🔥 BOOKING
+    // BOOKING
     Route::get('/booking', [HistoryBookingController::class, 'index'])
         ->name('admin.booking');
 
@@ -76,7 +78,7 @@ Route::prefix('admin')->group(function () {
         return redirect('/login');
     })->name('logout');
 
-    // 🔥 LAPANGAN CRUD
+    //LAPANGAN CRUD
     Route::get('/lapangan', [LapanganController::class, 'index'])->name('lapangan.index');
     Route::post('/lapangan', [LapanganController::class, 'store'])->name('lapangan.store');
     Route::post('/lapangan/update/{id}', [LapanganController::class, 'update'])->name('lapangan.update');

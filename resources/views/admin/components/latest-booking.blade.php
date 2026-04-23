@@ -9,23 +9,50 @@
     </div>
 
     <table class="table">
-        @forelse($data as $item)
+
+        <!-- header -->
+        <thead>
             <tr>
-                <td>{{ $item['id_booking'] }}</td>
-                <td>{{ $item['user']['nama'] ?? '-' }}</td>
-                <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
-                <td>
-                    {{ \Carbon\Carbon::parse($item['tanggal'])->format('d M') }}
-                </td>
+                <th>ID</th>
+                <th>User</th>
+                <th>Lapangan</th>
+                <th>Tanggal</th>
+                <th>Status</th>
             </tr>
-        @empty
-            <tr>
-                <td colspan="4" class="text-center text-muted py-4">
-                    <i class="fas fa-box-open mb-2"></i><br>
-                    Belum ada booking hari ini
-                </td>
-            </tr>
-        @endforelse
+        </thead>
+
+        <!-- body -->
+        <tbody>
+            @forelse($data as $item)
+                <tr>
+                    <td>{{ $item['id_booking'] }}</td>
+                    <td>{{ $item['user']['nama'] ?? '-' }}</td>
+                    <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
+                    <td>
+                        {{ \Carbon\Carbon::parse($item['tanggal'])->format('d M') }}
+                    </td>
+
+                    <!-- status -->
+                    <td>
+                        @if($item['status_pembayaran'] == 'confirmed')
+                            <span class="badge bg-success px-3 py-2">Lunas</span>
+                        @elseif($item['status_pembayaran'] == 'pending')
+                            <span class="badge bg-warning px-3 py-2">Pending</span>
+                        @else
+                            <span class="badge bg-danger px-3 py-2">Batal</span>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        <i class="fas fa-box-open mb-2"></i><br>
+                        Belum ada booking hari ini
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+
     </table>
 
 </div>

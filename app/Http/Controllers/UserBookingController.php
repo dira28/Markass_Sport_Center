@@ -39,4 +39,7 @@ class UserBookingController extends Controller
 
         return view('user.pages.booking-history', compact('bookings'));
     }
+
+    
+    
 }

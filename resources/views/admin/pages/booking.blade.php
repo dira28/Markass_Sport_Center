@@ -13,7 +13,7 @@
 
     <h5 class="mb-3">Data Booking</h5>
 
-    {{-- 🔥 ERROR ALERT --}}
+    {{-- ERROR ALERT --}}
     @if(isset($error))
         <div class="alert alert-danger">
             {{ $error }}

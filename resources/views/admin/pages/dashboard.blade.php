@@ -12,8 +12,7 @@
         </div>
     </div>
 
-
-    {{-- KPI CARDS --}}
+    {{-- KPI --}}
     <div class="mb-3">
         @include('admin.components.kpi-cards', [
             'totalRevenue' => $totalRevenue ?? 0,
@@ -22,26 +21,6 @@
             'averagePerDay' => $averagePerDay ?? 0
         ])
     </div>
-
-
-    {{-- DATA CHART --}}
-    @php
-        $chartData = [
-            'day' => [
-                'labels' => $chartLabels ?? [],
-                'data' => $chartValues ?? []
-            ],
-            'month' => [
-                'labels' => $chartLabels ?? [],
-                'data' => $chartValues ?? []
-            ],
-            'year' => [
-                'labels' => $chartLabels ?? [],
-                'data' => $chartValues ?? []
-            ],
-        ];
-    @endphp
-
 
     {{-- CHART + SUMMARY --}}
     <div class="row g-3">
@@ -63,19 +42,15 @@
 
     </div>
 
-
-    {{-- EXTRA INSIGHT --}}
+    {{-- INSIGHT --}}
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card-box">
                 <h6 class="mb-2">Insight Hari Ini</h6>
-                <p class="text-muted mb-0">
-                    Belum ada data insight hari ini
-                </p>
+                <p class="text-muted mb-0">Belum ada data insight hari ini</p>
             </div>
         </div>
     </div>
-
 
     {{-- LATEST BOOKING --}}
     <div class="row mt-4">

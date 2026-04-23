@@ -9,7 +9,6 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // 🔐 cek admin
         if (!session('token') || session('role') !== 'admin') {
             return redirect()->route('login');
         }
@@ -19,19 +18,21 @@ class AdminDashboardController extends Controller
         $revenueToday = 0;
         $totalBooking = 0;
         $latestBookings = [];
-        $chartLabels = [];
-        $chartValues = [];
 
-        // 🔥 TAMBAHAN (BIAR GA ERROR)
         $totalRevenue = 0;
         $totalUser = 0;
         $averagePerDay = 0;
 
+        $daily = [];
+        $monthly = [];
+        $yearly = [];
+
         try {
-            // 🔥 REVENUE HARI INI
+
+            //REVENUE HARI INI
             $resRevenue = Http::withToken($token)
                 ->acceptJson()
-                ->get(env('API_URL') . '/api/booking/revenue/daily');
+                ->get(env('API_URL') . '/booking/revenue/daily');
 
             if ($resRevenue->successful()) {
                 $data = $resRevenue->json()['data'];
@@ -40,73 +41,95 @@ class AdminDashboardController extends Controller
                 $totalBooking = $data['total_bookings'] ?? 0;
             }
 
-            // 🔥 GET ALL BOOKINGS
+            //BOOKING
             $resBooking = Http::withToken($token)
                 ->acceptJson()
-                ->get(env('API_URL') . '/api/booking');
+                ->get(env('API_URL') . '/booking');
 
             if ($resBooking->successful()) {
                 $bookings = $resBooking->json()['data'] ?? [];
 
-                // 🔥 latest booking
                 $latestBookings = array_slice($bookings, 0, 5);
 
-                $monthly = [];
                 $totalRevenueTemp = 0;
                 $days = [];
 
                 foreach ($bookings as $b) {
-                    if (($b['status_pembayaran'] ?? '') !== 'paid') continue;
+
+                    //STATUS
+                    if (($b['status_pembayaran'] ?? '') !== 'confirmed')
+                        continue;
 
                     $tanggal = Carbon::parse($b['tanggal']);
-                    $month = $tanggal->format('M');
 
-                    // total revenue
+                    $day = $tanggal->format('d M');
+                    $month = $tanggal->format('M Y');
+                    $year = $tanggal->format('Y');
+
                     $totalRevenueTemp += $b['total_harga'];
-
-                    // simpan unique day
                     $days[$tanggal->format('Y-m-d')] = true;
 
-                    // chart
-                    if (!isset($monthly[$month])) {
-                        $monthly[$month] = 0;
-                    }
+                    // DAILY
+                    $daily[$day] = ($daily[$day] ?? 0) + $b['total_harga'];
 
-                    $monthly[$month] += $b['total_harga'];
+                    // MONTHLY
+                    $monthly[$month] = ($monthly[$month] ?? 0) + $b['total_harga'];
+
+                    // YEARLY
+                    $yearly[$year] = ($yearly[$year] ?? 0) + $b['total_harga'];
                 }
 
                 $totalRevenue = $totalRevenueTemp;
 
-                // average per day
                 $totalDays = count($days);
                 $averagePerDay = $totalDays > 0 ? $totalRevenue / $totalDays : 0;
-
-                $chartLabels = array_keys($monthly);
-                $chartValues = array_values($monthly);
             }
 
-            // 🔥 GET TOTAL USER (optional, kalau ada API)
-            try {
-                $resUser = Http::withToken($token)
-                    ->acceptJson()
-                    ->get(env('API_URL') . '/api/user');
-
-                if ($resUser->successful()) {
-                    $users = $resUser->json()['data'] ?? [];
-                    $totalUser = count($users);
-                }
-            } catch (\Exception $e) {}
+            // FINAL CHART DATA
+            $chartData = [
+                'day' => [
+                    'labels' => array_values(array_keys($daily)),
+                    'data' => array_values($daily)
+                ],
+                'month' => [
+                    'labels' => array_values(array_keys($monthly)),
+                    'data' => array_values($monthly)
+                ],
+                'year' => [
+                    'labels' => array_values(array_keys($yearly)),
+                    'data' => array_values($yearly)
+                ]
+            ];
 
         } catch (\Exception $e) {
-            // fallback aman
+
+            $chartData = [
+                'day' => ['labels' => [], 'data' => []],
+                'month' => ['labels' => [], 'data' => []],
+                'year' => ['labels' => [], 'data' => []]
+            ];
         }
+
+        $chartData = [
+            'day' => [
+                'labels' => ['01 Jul', '02 Jul', '03 Jul'],
+                'data' => [100000, 200000, 150000]
+            ],
+            'month' => [
+                'labels' => ['Jan', 'Feb', 'Mar'],
+                'data' => [1000000, 1500000, 1200000]
+            ],
+            'year' => [
+                'labels' => ['2023', '2024', '2025'],
+                'data' => [10000000, 15000000, 20000000]
+            ]
+        ];
 
         return view('admin.pages.dashboard', compact(
             'revenueToday',
             'totalBooking',
             'latestBookings',
-            'chartLabels',
-            'chartValues',
+            'chartData',
             'totalRevenue',
             'totalUser',
             'averagePerDay'

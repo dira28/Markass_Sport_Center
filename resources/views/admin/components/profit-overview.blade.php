@@ -17,63 +17,92 @@
 </div>
 
 <script>
-    const chartData_{{ $id }} = @json($data);
+    document.addEventListener("DOMContentLoaded", function () {
 
-    let currentType_{{ $id }} = 'day';
+        const chartData = @json($data);
+        let currentType = 'day';
 
-    const ctx_{{ $id }} = document.getElementById('chart-{{ $id }}').getContext('2d');
+        const ctx = document.getElementById('chart-{{ $id }}').getContext('2d');
 
-    const gradient_{{ $id }} = ctx_{{ $id }}.createLinearGradient(0, 0, 0, 300);
-    gradient_{{ $id }}.addColorStop(0, "rgba(220,53,69,0.4)");
-    gradient_{{ $id }}.addColorStop(1, "rgba(220,53,69,0)");
+        function getChartStyle(type) {
+            let color;
 
-    let chart_{{ $id }} = new Chart(ctx_{{ $id }}, {
-        type: 'line',
-        data: {
-            labels: chartData_{{ $id }}[currentType_{{ $id }}].labels,
-            datasets: [{
+            if (type === 'day') color = '#dc3545';      
+            else if (type === 'month') color = '#0d6efd'; 
+            else color = '#198754'; 
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, color + '66');
+            gradient.addColorStop(1, color + '00');
+
+            return { color, gradient };
+        }
+
+        let style = getChartStyle(currentType);
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData[currentType]?.labels || [],
                 datasets: [{
                     label: 'Pendapatan',
-                    data: chartData_{{ $id }}[currentType_{{ $id }}].data,
-                    borderColor: '#dc3545',
-                    backgroundColor: gradient_{{ $id }},
+                    data: chartData[currentType]?.data || [],
+                    borderColor: style.color,
+                    backgroundColor: style.gradient,
                     fill: true,
                     tension: 0.4,
-                    pointBackgroundColor: '#dc3545',
+                    pointBackgroundColor: style.color,
                     pointRadius: 4
                 }]
-            }]
-        },
-        options: {
+            },
             options: {
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { display: false },
-                    x: { display: true }
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
                 },
-                elements: {
-                    line: { borderWidth: 2 }
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function (value) {
+                                return 'Rp ' + value;
+                            }
+                        }
+                    }
                 }
             }
-        }
-    });
-
-    function updateChart(type, id, el) {
-        const chartVar = window['chart_' + id];
-        const dataVar = window['chartData_' + id];
-
-        chartVar.data.labels = dataVar[type].labels;
-        chartVar.data.datasets[0].data = dataVar[type].data;
-        chartVar.update();
-
-        document.querySelectorAll('.chart-filter button').forEach(btn => {
-            btn.classList.remove('active');
         });
 
+        // global
+        window['chart_{{ $id }}'] = chart;
+        window['chartData_{{ $id }}'] = chartData;
+        window['getChartStyle_{{ $id }}'] = getChartStyle;
+
+    });
+</script>
+
+<script>
+    function updateChart(type, id, el) {
+
+        const chart = window['chart_' + id];
+        const data = window['chartData_' + id];
+        const getStyle = window['getChartStyle_' + id];
+
+        if (!chart || !data) return;
+
+        const style = getStyle(type);
+
+        chart.data.labels = data[type]?.labels || [];
+        chart.data.datasets[0].data = data[type]?.data || [];
+
+        chart.data.datasets[0].borderColor = style.color;
+        chart.data.datasets[0].backgroundColor = style.gradient;
+        chart.data.datasets[0].pointBackgroundColor = style.color;
+
+        chart.update();
+
+        // active button
+        const parent = el.parentElement;
+        parent.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
         el.classList.add('active');
     }
-
-    // global access
-    window['chart_' + '{{ $id }}'] = chart_{{ $id }};
-    window['chartData_' + '{{ $id }}'] = chartData_{{ $id }};
 </script>

@@ -12,7 +12,7 @@ class LapanganController extends Controller
         return Http::withToken(session('token'))->acceptJson();
     }
 
-    // 🔥 GET LIST
+    // GET LIST
     public function index()
     {
         try {
@@ -28,7 +28,7 @@ class LapanganController extends Controller
         return view('admin.pages.lapangan', compact('lapangan'));
     }
 
-    // 🔥 CREATE
+    // CREATE
     public function store(Request $req)
     {
         $this->api()->post(env('API_URL') . '/api/lapangan', [
@@ -41,7 +41,7 @@ class LapanganController extends Controller
         return back()->with('success', 'Lapangan berhasil ditambah');
     }
 
-    // 🔥 UPDATE
+    // UPDATE
     public function update(Request $req, $id)
     {
         $this->api()->patch(env('API_URL') . "/api/lapangan/$id", [
@@ -54,7 +54,7 @@ class LapanganController extends Controller
         return back()->with('success', 'Lapangan berhasil diupdate');
     }
 
-    // 🔥 DELETE
+    // DELETE
     public function destroy($id)
     {
         $this->api()->delete(env('API_URL') . "/api/lapangan/$id");
