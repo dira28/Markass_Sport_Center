@@ -2,6 +2,10 @@
 
 @section('title', 'Booking')
 
+<script>
+    window.isLoggedIn = {{ session('token') ? 'true' : 'false' }};
+</script>
+
 @push('styles')
     @vite([
         'resources/css/user/pages/booking.css',

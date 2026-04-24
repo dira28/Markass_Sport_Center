@@ -1,34 +1,36 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    let activeCard = document.querySelector(".card-lapangan.active");
-
-    let lapanganAktif = activeCard?.dataset.id;
-    let hargaPerJam = parseInt(activeCard?.dataset.harga || 0);
+    // ===== STATE =====
+    let lapanganAktif = null;
+    let hargaPagi = 0;
+    let hargaMalam = 0;
+    let hargaPerJam = 0;
 
     let jamAktif = null;
     let durasi = 1;
 
-    let summaryNama = document.getElementById("summary-nama");
-    let summaryTanggal = document.getElementById("summary-tanggal");
-    let summaryJam = document.getElementById("summary-jam");
-    let totalHarga = document.getElementById("total");
+    // ===== ELEMENT =====
+    const summaryNama = document.getElementById("summary-nama");
+    const summaryTanggal = document.getElementById("summary-tanggal");
+    const summaryJam = document.getElementById("summary-jam");
+    const totalHarga = document.getElementById("total");
 
-    let durasiEl = document.getElementById("durasi");
-    let summaryDurasi = document.getElementById("summary-durasi");
+    const durasiEl = document.getElementById("durasi");
+    const summaryDurasi = document.getElementById("summary-durasi");
 
-    // FORMAT RANGE JAM
+    const tanggalInput = document.getElementById("tanggal");
+
+    // ===== FORMAT JAM =====
     function formatJamRange(start, durasi) {
         if (!start) return "-";
 
-        let startHour = parseInt(start.split(":")[0]);
-        let endHour = startHour + durasi;
+        let s = parseInt(start.split(":")[0]);
+        let e = s + durasi;
 
-        let startText = (startHour < 10 ? "0" : "") + startHour + ":00";
-        let endText = (endHour < 10 ? "0" : "") + endHour + ":00";
-
-        return startText + " - " + endText;
+        return `${String(s).padStart(2, "0")}:00 - ${String(e).padStart(2, "0")}:00`;
     }
 
+    // ===== UPDATE UI =====
     function updateUI() {
         if (!jamAktif || !hargaPerJam) {
             totalHarga.textContent = "Rp0";
@@ -36,15 +38,15 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        totalHarga.textContent =
-            "Rp" + (hargaPerJam * durasi).toLocaleString("id-ID");
-
-        // UPDATE RANGE JAM
+        let total = hargaPerJam * durasi;
+        totalHarga.textContent = "Rp" + total.toLocaleString("id-ID");
         summaryJam.textContent = formatJamRange(jamAktif, durasi);
     }
 
+    // ===== RESET JAM =====
     function resetJam() {
         jamAktif = null;
+        hargaPerJam = 0;
         summaryJam.textContent = "-";
 
         document.querySelectorAll(".jam-btn").forEach(btn => {
@@ -52,14 +54,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // ===== LOAD SLOT =====
     async function loadAvailability(tanggal) {
+        if (!lapanganAktif) return;
+
         try {
-            let res = await fetch(`/booking/slots?tanggal=${tanggal}&lapangan_id=${lapanganAktif}`);
+            let res = await fetch(`/booking/slots?tanggal=${tanggal}&lapangan_id=${lapanganAktif}`, {
+                credentials: "same-origin" // 🔥 FIX SESSION
+            });
+
             let blocked = await res.json();
 
             document.querySelectorAll(".jam-btn").forEach(btn => {
                 btn.classList.remove("jam-booked", "active");
-                btn.classList.add("btn-light");
                 btn.disabled = false;
             });
 
@@ -69,11 +76,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (blocked.includes(btn.dataset.jam)) {
                     btn.classList.add("jam-booked");
                     btn.disabled = true;
-
-                    if (jamAktif === btn.dataset.jam) {
-                        jamAktif = null;
-                        summaryJam.textContent = "-";
-                    }
                 }
             });
 
@@ -82,30 +84,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // PILIH LAPANGAN
-    document.querySelectorAll(".sport, .card-lapangan").forEach(el => {
+    // ===== PILIH LAPANGAN =====
+    document.querySelectorAll(".card-lapangan").forEach(el => {
         el.addEventListener("click", function () {
 
             lapanganAktif = this.dataset.id;
-            hargaPerJam = parseInt(this.dataset.harga);
-            let nama = this.dataset.nama;
+            hargaPagi = parseInt(this.dataset.hargaPagi || 0);
+            hargaMalam = parseInt(this.dataset.hargaMalam || 0);
 
-            document.querySelectorAll(".sport").forEach(b => b.classList.remove("active"));
+            summaryNama.textContent = this.dataset.nama;
+
             document.querySelectorAll(".card-lapangan").forEach(c => c.classList.remove("active"));
+            this.classList.add("active");
 
-            document.querySelectorAll(`[data-id="${lapanganAktif}"]`)
-                .forEach(x => x.classList.add("active"));
-
-            summaryNama.textContent = nama;
-
-            let tgl = document.getElementById("tanggal").value;
-            if (tgl) loadAvailability(tgl);
-
+            resetJam();
             updateUI();
+
+            if (tanggalInput.value) {
+                loadAvailability(tanggalInput.value);
+            }
         });
     });
 
-    // PILIH JAM
+    // ===== PILIH JAM =====
     document.querySelectorAll(".jam-btn").forEach(btn => {
         btn.addEventListener("click", function () {
 
@@ -116,24 +117,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
             jamAktif = this.dataset.jam;
 
+            let jam = parseInt(jamAktif);
+
+            // harga pagi / malam
+            hargaPerJam = (jam >= 6 && jam < 16) ? hargaPagi : hargaMalam;
+
             updateUI();
         });
     });
 
-    // PILIH TANGGAL
-    document.getElementById("tanggal").addEventListener("change", function () {
-        let tanggal = this.value;
+    // ===== PILIH TANGGAL =====
+    tanggalInput.addEventListener("change", function () {
+        let tgl = this.value;
 
-        summaryTanggal.textContent = tanggal;
+        summaryTanggal.textContent = tgl || "-";
 
-        if (tanggal) {
-            loadAvailability(tanggal);
+        if (tgl && lapanganAktif) {
+            loadAvailability(tgl); // 🔥 tadinya mati, sekarang aktif
         }
 
         updateUI();
     });
 
-    // DURASI
+    // ===== DURASI =====
     document.getElementById("plus").onclick = () => {
         durasi++;
         updateDurasi();
@@ -150,22 +156,31 @@ document.addEventListener("DOMContentLoaded", function () {
         updateUI();
     }
 
-    // BOOKING
+    // ===== BOOKING =====
     document.getElementById("btnBooking").addEventListener("click", async function () {
 
-        let tanggal = document.getElementById("tanggal").value;
+        // cek login
+        if (!window.isLoggedIn) {
+            alert("Login dulu ya");
+            window.location.href = "/login";
+            return;
+        }
 
+        let tanggal = tanggalInput.value;
+
+        if (!lapanganAktif) return alert("Pilih lapangan dulu");
         if (!tanggal) return alert("Pilih tanggal dulu");
         if (!jamAktif) return alert("Pilih jam dulu");
 
         let startHour = parseInt(jamAktif);
         let endHour = startHour + durasi;
 
-        let jamSelesai = (endHour < 10 ? "0" : "") + endHour + ":00";
+        let jamSelesai = String(endHour).padStart(2, "0") + ":00";
 
         try {
             let res = await fetch("/booking", {
                 method: "POST",
+                credentials: "same-origin", // 🔥 WAJIB FIX LOGIN
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
@@ -180,14 +195,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let result = await res.json();
 
+            console.log("API:", result);
+
             if (result.status === "success") {
                 alert("Booking berhasil");
-                loadAvailability(tanggal);
+                loadAvailability(tanggal); // refresh slot
             } else {
-                alert(result.message);
+                alert(result.message || "Gagal booking");
             }
 
         } catch (err) {
+            console.error(err);
             alert("Server error");
         }
 

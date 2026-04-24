@@ -2,99 +2,105 @@
 
 @section('content')
 
-<div class="booking-header">
-    <div>
-        <h4>Manajemen Booking</h4>
-        <small>Admin / Booking</small>
-    </div>
-</div>
-
-<div class="card-box mt-4">
-
-    <h5 class="mb-3">Data Booking</h5>
-
-    {{-- ERROR ALERT --}}
-    @if(isset($error))
-        <div class="alert alert-danger">
-            {{ $error }}
+    <div class="booking-header">
+        <div>
+            <h4>Manajemen Booking</h4>
+            <small>Admin / Booking</small>
         </div>
-    @endif
+    </div>
 
-    <table class="table align-middle">
-        <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>ID</th>
-                <th>Pengguna</th>
-                <th>Lapangan</th>
-                <th>Status</th>
-                <th>Harga</th>
-            </tr>
-        </thead>
+    <div class="card-box mt-4">
 
-<tbody>
-@forelse ($bookings as $item)
+        <h5 class="mb-3">Data Booking</h5>
 
-    @php
-        $tanggal = \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
+        {{-- ERROR ALERT --}}
+        @if(isset($error))
+            <div class="alert alert-danger">
+                {{ $error }}
+            </div>
+        @endif
 
-        $status = $item['status'] ?? '-';
-        $pembayaran = $item['status_pembayaran'] ?? '-';
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>ID</th>
+                    <th>Pengguna</th>
+                    <th>Lapangan</th>
+                    <th>Status</th>
+                    <th>Harga</th>
+                </tr>
+            </thead>
 
-        if ($status == 'booked') {
-            $statusText = 'Berlangsung';
-            $badge = 'success';
-        } elseif ($status == 'available') {
-            $statusText = 'Tersedia';
-            $badge = 'secondary';
-        } else {
-            $statusText = ucfirst($status);
-            $badge = 'dark';
-        }
+            <tbody>
+                @forelse ($bookings as $item)
 
-        if ($pembayaran == 'pending') {
-            $statusText .= ' (Menunggu Bayar)';
-            $badge = 'warning';
-        } elseif ($pembayaran == 'expired') {
-            $statusText = 'Expired';
-            $badge = 'danger';
-        } elseif ($pembayaran == 'paid') {
-            $statusText .= ' (Lunas)';
-        }
-    @endphp
+                    @php
+                        $tanggal = \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
 
-    <tr>
-        <td>
-            {{ $tanggal->translatedFormat('d M Y') }} <br>
-        </td>
+                        $status = $item['status'] ?? '-';
+                        $pembayaran = $item['status_pembayaran'] ?? '-';
 
-        <td>{{ $item['id_booking'] }}</td>
+                        if ($status == 'booked') {
+                            $statusText = 'Berlangsung';
+                            $badge = 'success';
+                        } elseif ($status == 'available') {
+                            $statusText = 'Tersedia';
+                            $badge = 'secondary';
+                        } else {
+                            $statusText = ucfirst($status);
+                            $badge = 'dark';
+                        }
 
-        <td>{{ $item['user']['nama'] ?? '-' }}</td>
+                        if ($pembayaran == 'pending') {
+                            $statusText .= ' (Menunggu Bayar)';
+                            $badge = 'warning';
+                        } elseif ($pembayaran == 'expired') {
+                            $statusText = 'Expired';
+                            $badge = 'danger';
+                        } elseif ($pembayaran == 'paid') {
+                            $statusText .= ' (Lunas)';
+                        }
+                    @endphp
 
-        <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
+                    <tr>
+                        <td>
+                            {{ $tanggal->translatedFormat('d M Y') }}
+                        </td>
 
-        <td>
-            <span class="badge bg-{{ $badge }}">
-                {{ $statusText }}
-            </span>
-        </td>
+                        <td>
+                            #{{ strtoupper(substr($item['id_booking'], 0, 6)) }}
+                        </td>
 
-        <td>
-            Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
-        </td>
-    </tr>
+                        <td>{{ $item['user']['nama'] ?? '-' }}</td>
 
-@empty
-    <tr>
-        <td colspan="6" class="text-center">
-            Tidak ada data booking
-        </td>
-    </tr>
-@endforelse
-</tbody>
-    </table>
+                        <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
 
-</div>
+                        {{-- JAM --}}
+                        <td>
+                            {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}
+                        </td>
+
+                        <td>
+                            <span class="badge bg-{{ $badge }}">
+                                {{ $statusText }}
+                            </span>
+                        </td>
+
+                        <td>
+                            Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Tidak ada data booking
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+    </div>
 
 @endsection

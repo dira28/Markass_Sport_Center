@@ -7,7 +7,7 @@
 
     <!-- JAM -->
     <div class="jadwal mb-3">
-        @for ($i = 9; $i <= 23; $i++)
+        @for ($i = 6; $i <= 23; $i++)
             <button class="btn btn-light btn-sm jam-btn" data-jam="{{ sprintf('%02d:00', $i) }}">
                 {{ sprintf('%02d:00', $i) }}
             </button>
@@ -19,6 +19,12 @@
         <button class="btn btn-light" id="minus">-</button>
         <b><span id="durasi">1</span> Jam</b>
         <button class="btn btn-light" id="plus">+</button>
+    </div>
+
+    <!-- HARGA AKTIF -->
+    <div class="d-flex justify-content-between mb-2">
+        <small>Harga / Jam</small>
+        <small id="harga-perjam">Rp0</small>
     </div>
 
     <hr>
@@ -52,7 +58,6 @@
         <span id="total">Rp0</span>
     </div>
 
-    <!-- BUTTON -->
     <button id="btnBooking" class="btn btn-red w-100 mt-3">
         Booking Sekarang →
     </button>

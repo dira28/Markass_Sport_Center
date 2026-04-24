@@ -1,19 +1,19 @@
 /* WRAPPER */
 .harga-wrapper {
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 18px;
+    background: linear-gradient(145deg, #f9fafb, #ffffff);
+    padding: 22px;
+    border-radius: 20px;
 }
 
-/* CARD BASE */
+/* CARD */
 .card-lapangan {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 15px;
+    align-items: center;
 
-    padding: 18px;
-    border-radius: 16px;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 18px;
 
     background: #ffffff;
     margin-bottom: 16px;
@@ -21,63 +21,159 @@
     cursor: pointer;
 
     border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-
     transition: all 0.25s ease;
+    position: relative;
 }
 
-/* HOVER EFFECT */
+/* HOVER */
 .card-lapangan:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
     border-color: #f87171;
 }
 
-/* ACTIVE (SELECTED) */
+/* ACTIVE */
 .card-lapangan.active {
     border: 2px solid #dc3545;
     background: #fff5f5;
-    box-shadow: 0 8px 20px rgba(220, 53, 69, 0.15);
+    box-shadow: 0 10px 25px rgba(220, 53, 69, 0.15);
 }
 
-/* TEXT */
-.card-lapangan h6 {
+/* INFO */
+.lapangan-info {
+    flex: 1;
+}
+
+.lapangan-info h6 {
     font-size: 16px;
     font-weight: 600;
+    margin-bottom: 4px;
 }
 
-.card-lapangan small {
+/* DESKRIPSI */
+.desc-lapangan {
     font-size: 13px;
     color: #6b7280;
+    line-height: 1.5;
+}
+
+/* JAM INFO */
+.info-jam {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* PAGI */
+.jam-pagi {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* MALAM */
+.jam-malam {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 500;
 }
 
 /* HARGA */
 .harga {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 95px;
+}
+
+/* BOX */
+.harga-box {
+    background: #f9fafb;
+    padding: 6px 10px;
+    border-radius: 10px;
+    text-align: right;
+    transition: 0.2s;
+}
+
+.harga-box small {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.harga-box b {
     color: #dc3545;
-    font-weight: bold;
-    font-size: 15px;
+    font-size: 14px;
 }
 
-/* JAM BUTTON */
-.jam-btn {
-    transition: all 0.2s ease;
-    border-radius: 8px;
+/* HOVER HARGA */
+.card-lapangan:hover .harga-box {
+    background: #fff1f2;
 }
 
-.jam-btn:hover:not(.jam-booked) {
-    background-color: #f3f4f6;
+/* EMPTY */
+.empty-state {
+    text-align: center;
+    padding: 30px;
+    color: #9ca3af;
 }
 
-/* ACTIVE JAM */
-.jam-btn.active {
-    background-color: #dc3545 !important;
-    color: white !important;
+/* RESPONSIVE */
+
+/* TABLET */
+@media (max-width: 768px) {
+
+    .card-lapangan {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+    }
+
+    .harga {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+
+    .harga-box {
+        width: 48%;
+        text-align: center;
+    }
+
+    .lapangan-info h6 {
+        font-size: 15px;
+    }
+
+    .desc-lapangan {
+        font-size: 12px;
+    }
 }
 
-/* BOOKED */
-.jam-booked {
-    background-color: #dc3545 !important;
-    color: white !important;
-    opacity: 0.7;
-    cursor: not-allowed;
+/* HP KECIL */
+@media (max-width: 480px) {
+
+    .harga-wrapper {
+        padding: 16px;
+    }
+
+    .card-lapangan {
+        padding: 14px;
+    }
+
+    .harga-box b {
+        font-size: 13px;
+    }
+
+    .info-jam span {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
 }

@@ -11,7 +11,7 @@ class HistoryBookingController extends Controller
     {
         $token = session('token');
 
-        // 🔐 Cek token login
+        // Cek token login
         if (!$token) {
             return redirect()->route('login')->with('error', 'Silakan login dulu!');
         }
@@ -25,7 +25,6 @@ class HistoryBookingController extends Controller
                     'id_lapangan' => $request->lapangan,
                 ]);
 
-            // ❌ Kalau API gagal
             if ($response->failed()) {
                 return view('admin.pages.booking', [
                     'bookings' => [],
@@ -35,7 +34,7 @@ class HistoryBookingController extends Controller
 
             $result = $response->json();
 
-            // 🧠 Ambil data aman
+            // Ambil data aman
             $bookings = $result['data'] ?? [];
 
         } catch (\Exception $e) {
