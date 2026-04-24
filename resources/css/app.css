@@ -225,4 +225,10 @@ body {
         border-radius: 50%;
         object-fit: cover;
     }
+
+    .active-range {
+        background: #b02a37 !important;
+        color: white !important;
+        border: none;
+    }
 }

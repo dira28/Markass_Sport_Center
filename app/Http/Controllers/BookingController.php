@@ -31,7 +31,7 @@ class BookingController extends Controller
         if (!$token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Token tidak ditemukan, silakan login ulang'
+                'message' => 'Silakan login dulu'
             ], 401);
         }
 
@@ -45,17 +45,23 @@ class BookingController extends Controller
                     'jam_selesai' => $request->jam_selesai,
                 ]);
 
-            dd($res->status(), $res->body());
+            // 🔥 HANDLE RESPONSE
+            if ($res->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $res->json()
+                ]);
+            }
 
             return response()->json([
-                'status' => 'success',
-                'data' => $res->json()
-            ]);
+                'status' => 'error',
+                'message' => $res->json()['message'] ?? 'Booking gagal'
+            ], $res->status());
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => 'Server error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -73,7 +79,6 @@ class BookingController extends Controller
                 ->acceptJson()
                 ->get(env('API_URL') . '/api/booking', [
                     'tanggal' => $request->tanggal,
-                    'id_lapangan' => $request->lapangan_id,
                 ]);
 
             if ($res->failed()) {
@@ -85,6 +90,11 @@ class BookingController extends Controller
             $blocked = [];
 
             foreach ($data as $booking) {
+
+                if ($booking['id_lapangan'] !== $request->lapangan_id) {
+                    continue;
+                }
+
                 $start = (int) substr($booking['jam_mulai'], 0, 2);
                 $end = (int) substr($booking['jam_selesai'], 0, 2);
 
@@ -93,7 +103,7 @@ class BookingController extends Controller
                 }
             }
 
-            return response()->json($blocked);
+            return response()->json(array_values(array_unique($blocked)));
 
         } catch (\Exception $e) {
             return response()->json([]);
