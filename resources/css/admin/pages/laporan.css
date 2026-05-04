@@ -1,0 +1,140 @@
+/* Scoped Laporan Page CSS - Bootstrap Safe */
+.laporan-page {
+  background: #f5f7fb;
+  padding: 2rem 0;
+}
+
+.laporan-page .page-title {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+}
+
+.laporan-page .filter-form {
+  background: #fff !important;
+  padding: 1.5rem !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.laporan-page .form-label {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+.laporan-page .form-control {
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.laporan-page .kpi-card, 
+.laporan-page .stat-card {
+  background: #fff !important;
+  border-left: 4px solid #3b82f6 !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+.laporan-page .revenue-card {
+  border-left-color: #10b981 !important;
+}
+
+.laporan-page .kpi-number, 
+.laporan-page .stat-card h3,
+.laporan-page .revenue-card h3 {
+  color: #111827 !important;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+}
+
+.laporan-page .kpi-label,
+.laporan-page h5,
+.laporan-page .card-title {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+.laporan-page .table {
+  color: #111827 !important;
+}
+
+.laporan-page .table thead th {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+  font-weight: 600 !important;
+  padding: 12px !important;
+  border: none !important;
+}
+
+.laporan-page .table tbody td {
+  color: #111827 !important;
+  padding: 12px !important;
+  border-color: #e5e7eb !important;
+}
+
+.laporan-page .table tbody tr:hover {
+  background-color: #f9fafb !important;
+}
+
+.laporan-page .table-striped tbody tr:nth-of-type(odd) {
+  background-color: transparent !important;
+}
+
+.laporan-page .badge {
+  font-weight: 600 !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  font-size: 0.8rem !important;
+}
+
+.laporan-page .badge-warning {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.laporan-page .badge-success {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.laporan-page .badge-secondary {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
+}
+
+.laporan-page .badge-info {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.laporan-page .btn-primary {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.laporan-page .btn-success {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+.laporan-page .text-muted {
+  color: #6b7280 !important;
+}
+
+.laporan-page .text-center {
+  text-align: center !important;
+}
+
+.laporan-page .text-end {
+  text-align: right !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .laporan-page .table {
+    font-size: 0.85rem;
+  }
+}

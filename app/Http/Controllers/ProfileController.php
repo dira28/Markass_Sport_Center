@@ -21,12 +21,9 @@ class ProfileController extends Controller
 
             $result = $response->json();
 
-            // Debug: log the response
-            \Log::info('Profile API Response', ['result' => $result, 'status' => $response->status()]);
-
             if (isset($result['success']) && $result['success'] === true) {
-                $user = $result['data'];
-                return view('user.pages.profile', compact('user'));
+                session(['user' => $result['data']]);
+                return view('user.pages.profile');
             }
 
             // If API fails, redirect to login or show error

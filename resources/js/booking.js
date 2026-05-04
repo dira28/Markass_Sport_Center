@@ -9,7 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let jamAktif = null;
     let durasi = 1;
 
-    let controller = null; // 🔥 anti tabrakan request
+    let controller = null; 
+    let blockedSlots = []; 
 
     // ===== ELEMENT =====
     const summaryNama = document.getElementById("summary-nama");
@@ -37,19 +38,15 @@ document.addEventListener("DOMContentLoaded", function () {
         let s = parseInt(start.split(":")[0]);
         let e = s + durasi;
 
-        let valid = true;
-
-        document.querySelectorAll(".jam-btn").forEach(btn => {
-            let jam = parseInt(btn.dataset.jam.split(":")[0]);
-
-            if (jam >= s && jam < e) {
-                if (btn.classList.contains("jam-booked")) {
-                    valid = false;
-                }
+        // Check against blockedSlots array (more reliable)
+        for (let i = s; i < e; i++) {
+            let jamStr = String(i).padStart(2, "0") + ":00";
+            if (blockedSlots.includes(jamStr)) {
+                return false;
             }
-        });
+        }
 
-        return valid;
+        return true;
     }
 
     // ===== HIGHLIGHT RANGE =====
@@ -92,11 +89,11 @@ document.addEventListener("DOMContentLoaded", function () {
         summaryJam.textContent = formatJamRange(jamAktif, durasi);
     }
 
-    // ===== RESET SLOT =====
-    function resetAllSlots() {
+    // ===== RESET SELECTION ONLY (keep booked states) =====
+    function resetSelection() {
         document.querySelectorAll(".jam-btn").forEach(btn => {
-            btn.classList.remove("jam-booked", "active", "active-range");
-            btn.disabled = false;
+            btn.classList.remove("active", "active-range");
+            // Keep "jam-booked" states - will be set by loadAvailability
         });
 
         jamAktif = null;
@@ -104,37 +101,48 @@ document.addEventListener("DOMContentLoaded", function () {
         updateUI();
     }
 
-    // ===== LOAD SLOT =====
+// ===== LOAD STATUS JAM (NEW ENDPOINT) =====
     async function loadAvailability(tanggal) {
         if (!lapanganAktif) return;
 
-        // 🔥 CANCEL REQUEST LAMA
         if (controller) controller.abort();
         controller = new AbortController();
 
         try {
-            console.log("FETCH:", tanggal, lapanganAktif);
+            console.log("FETCH STATUS JAM:", tanggal, lapanganAktif);
 
-            let res = await fetch(`/booking/slots?tanggal=${tanggal}&lapangan_id=${lapanganAktif}`, {
+            let res = await fetch(`/booking/status-jam?tanggal=${tanggal}&lapangan_id=${lapanganAktif}`, {
                 credentials: "same-origin",
                 signal: controller.signal
             });
 
-            let blocked = await res.json();
-            console.log("BLOCKED:", blocked);
+            let statusData = await res.json();
+            console.log("STATUS:", statusData);
 
-            resetAllSlots();
+            blockedSlots = statusData.filter(item => item.status === 'terbooking').map(item => item.jam);
 
+            // Reset selection
+            resetSelection();
+
+            // Apply status to buttons
             document.querySelectorAll(".jam-btn").forEach(btn => {
-                if (blocked.includes(btn.dataset.jam)) {
+                let jam = btn.dataset.jam;
+                let status = statusData.find(item => item.jam === jam);
+                let isBooked = status && status.status === 'terbooking';
+                
+                if (isBooked) {
                     btn.classList.add("jam-booked");
                     btn.disabled = true;
+                } else {
+                    btn.classList.remove("jam-booked");
+                    btn.disabled = false;
                 }
             });
 
         } catch (err) {
             if (err.name === "AbortError") return;
-            console.error("ERROR SLOT:", err);
+            console.error("ERROR STATUS JAM:", err);
+            blockedSlots = [];
         }
     }
 
@@ -151,7 +159,8 @@ document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".card-lapangan").forEach(c => c.classList.remove("active"));
             this.classList.add("active");
 
-            resetAllSlots();
+            resetSelection();
+            blockedSlots = []; // Clear old blocked
 
             if (tanggalInput.value) {
                 loadAvailability(tanggalInput.value);
@@ -184,7 +193,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         summaryTanggal.textContent = tgl || "-";
 
-        resetAllSlots();
+        resetSelection();
+        blockedSlots = []; // Clear old blocked
 
         if (tgl && lapanganAktif) {
             loadAvailability(tgl);
@@ -252,8 +262,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let result = await res.json();
 
             if (result.status === "success") {
-                alert("Booking berhasil");
-                loadAvailability(tanggal);
+                alert("Booking berhasil!");
+                window.location.href = `/booking/payment/${result.data.id_booking}`;
             } else {
                 alert(result.message || "Gagal booking");
             }
@@ -263,6 +273,120 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Server error");
         }
 
+});
+
+    // ===== PAYMENT UPLOAD PREVIEW =====
+    const proofFile = document.getElementById('proofFile');
+    const uploadBox = document.getElementById('uploadBox');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const previewImg = document.getElementById('previewImg');
+    const statusBadge = document.getElementById('statusBadge');
+
+    // File select
+    proofFile.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.size > 2*1024*1024) {
+            alert('File terlalu besar (max 2MB)');
+            return;
+        }
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                uploadPreview.style.display = 'block';
+                statusBadge.textContent = 'Menunggu Verifikasi';
+                statusBadge.className = 'payment-badge menunggu-verifikasi mt-3 d-inline-block';
+                uploadBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
     });
 
+    // Drag & drop
+    uploadBox.addEventListener('dragover', e => {
+        e.preventDefault();
+        uploadBox.classList.add('dragover');
+    });
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.classList.remove('dragover');
+    });
+    uploadBox.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadBox.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        proofFile.files = e.dataTransfer.files;
+        proofFile.dispatchEvent(new Event('change', {bubbles: true}));
+    });
+    uploadBox.addEventListener('click', () => proofFile.click());
+
+    // Upload click (temp)
+    uploadBtn.addEventListener('click', function() {
+        alert('Upload berhasil! Menunggu verifikasi admin.');
+        uploadBox.style.display = 'none';
+        uploadPreview.style.display = 'block';
+        statusBadge.innerHTML = '<i class="fas fa-clock"></i> Menunggu Verifikasi Admin';
+    });
+
+    // Admin view proof modal function
+    function viewProof(id) {
+        alert('Proof for booking #' + id + ' (demo full image modal)');
+    }
+
+    // ===== LOAD MY BOOKINGS (PERSISTENCE) =====
+    async function loadMyBookings() {
+        try {
+            const res = await fetch('/booking/my-bookings', {
+                credentials: "same-origin"
+            });
+            const bookings = await res.json();
+
+            const paymentCard = document.getElementById('paymentCard');
+            const paymentTotal = document.getElementById('paymentTotal');
+            const statusBadge = document.getElementById('statusBadge');
+            const uploadBox = document.getElementById('uploadBox');
+            const uploadPreview = document.getElementById('uploadPreview');
+
+            // Find active pending/menunggu_verifikasi today
+            const today = new Date().toDateString();
+            const activeBooking = bookings.find(b => 
+                ['pending', 'menunggu_verifikasi'].includes(b.status) && 
+                new Date(b.tanggal).toDateString() === today
+            );
+
+            if (activeBooking) {
+                paymentCard.style.display = 'block';
+                paymentTotal.textContent = 'Rp ' + parseInt(activeBooking.total_harga || 0).toLocaleString('id-ID');
+                const statusText = activeBooking.status.replace('_', ' ').toUpperCase();
+                statusBadge.textContent = statusText;
+                statusBadge.className = `payment-badge ${activeBooking.status} mt-3 d-inline-block`;
+                
+                if (activeBooking.status === 'menunggu_verifikasi') {
+                    uploadBox.style.display = 'none';
+                    uploadPreview.style.display = 'block';
+                    document.getElementById('paymentSubtitle').textContent = 'Bukti sudah diupload, menunggu verifikasi admin';
+                } else {
+                    uploadBox.style.display = 'block';
+                    uploadPreview.style.display = 'none';
+                    document.getElementById('paymentSubtitle').textContent = 'Scan QR DANA di bawah dan upload bukti pembayaran';
+                }
+            } else {
+                paymentCard.style.display = 'none';
+            }
+        } catch (err) {
+            console.error('Error loading my bookings:', err);
+        }
+    }
+
+    // Auto refresh every 60s
+    setInterval(() => {
+        if (tanggalInput.value && lapanganAktif) loadAvailability(tanggalInput.value);
+        loadMyBookings();
+    }, 60000);
+
+    // Initial loads
+    loadMyBookings();
+
 });
+
+

@@ -33,6 +33,15 @@
     {{-- Footer --}}
     @include('user.components.footer')
 
+    <script>
+    setInterval(() => {
+        fetch('/check-expired')
+            .then(res => res.json())
+            .then(data => console.log('Expired checked'))
+            .catch(err => console.error(err));
+    }, 60000); // every 1 minute
+    </script>
+
     {{-- JS BOOTSTRAP --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

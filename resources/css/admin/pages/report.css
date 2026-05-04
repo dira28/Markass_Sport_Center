@@ -1,0 +1,267 @@
+.report-page {
+  --bg-primary: #111827;
+  --bg-secondary: #6b7280;
+  --bg-card: #ffffff;
+  --bg-light: #f5f7fb;
+  --border-color: #e5e7eb;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Scoped container */
+.report-page {
+  background: var(--bg-light);
+  padding: 2rem 0;
+  min-height: 100vh;
+}
+
+.report-page .page-title-box {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+.report-page .page-title {
+  color: var(--bg-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.report-page .breadcrumb-item a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.report-page .breadcrumb-item.active {
+  color: var(--bg-secondary);
+}
+
+/* Filter Card */
+.report-page .filter-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+.report-page .filter-label {
+  color: var(--bg-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.report-page .form-control {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.report-page .form-control:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* KPI Cards */
+.report-page .kpi-grid {
+  margin-bottom: 2rem;
+}
+
+.report-page .kpi-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  text-decoration: none;
+  border: 1px solid var(--border-color);
+}
+
+.report-page .kpi-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.report-page .kpi-booking {
+  border-left-color: #3b82f6;
+}
+
+.report-page .kpi-revenue {
+  border-left-color: #10b981;
+}
+
+.report-page .kpi-number {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--bg-primary);
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.report-page .kpi-label {
+  color: var(--bg-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Export Button */
+.report-page .export-section {
+  margin-bottom: 2rem;
+  text-align: right;
+}
+
+.report-page .btn-export {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.875rem 1.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.report-page .btn-export:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  color: white;
+}
+
+/* Table */
+.report-page .table-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.report-page .table-header {
+  background: #f9fafb;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-page .table-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--bg-primary);
+  margin: 0;
+}
+
+.report-page .table-subtitle {
+  color: var(--bg-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.report-page .table {
+  margin: 0;
+}
+
+.report-page .table thead th {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  border: none;
+  padding: 1.25rem 1.25rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.report-page .table tbody td {
+  padding: 1.25rem;
+  border-color: #f3f4f6;
+  vertical-align: middle;
+}
+
+.report-page .table tbody tr:hover {
+  background-color: #fdf2f8;
+}
+
+/* Status Badges */
+.report-page .status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.report-page .status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.report-page .status-expired {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.report-page .status-confirmed,
+.report-page .status-paid {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Empty State */
+.report-page .empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--bg-secondary);
+}
+
+.report-page .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.report-page .empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--bg-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .report-page .kpi-number {
+    font-size: 1.75rem;
+  }
+  
+  .report-page .table thead th,
+  .report-page .table tbody td {
+    padding: 1rem 0.75rem;
+  }
+  
+  .report-page .filter-card .row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* Smooth animations */
+.report-page * {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

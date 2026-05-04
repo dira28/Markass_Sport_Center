@@ -9,11 +9,11 @@
         <a href="{{ route('admin.profile') }}" class="profile-box text-decoration-none">
 
             <div class="avatar-circle-sm">
-                {{ strtoupper(substr(session('user')['nama'] ?? 'A', 0, 1)) }}
+                {{ strtoupper(substr(session('user.nama') ?? 'A', 0, 1)) }}
             </div>
 
             <span class="text-dark">
-                {{ session('user')['nama'] ?? 'Admin' }}
+                {{ session('user.nama') ?? 'Admin' }}
             </span>
 
         </a>

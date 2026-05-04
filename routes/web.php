@@ -10,6 +10,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserBookingController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\LaporanController;
+use Illuminate\Support\Facades\Http;
 
 // =====================
 // HALAMAN USER
@@ -24,6 +26,8 @@ Route::get('/dashboard', function () {
 
 Route::get('/booking', [BookingController::class, 'index']);
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+Route::get('/booking/my-bookings', [BookingController::class, 'getMyBookings'])->name('booking.my-bookings');
+Route::get('/booking/status-jam', [BookingController::class, 'getStatusJam'])->name('booking.status-jam');
 Route::get('/booking/slots', [BookingController::class, 'getBookedSlots'])
     ->name('booking.slots');
 
@@ -33,6 +37,16 @@ Route::get('/tentang', function () {
 
 Route::get('/my-bookings', [UserBookingController::class, 'index'])
     ->name('user.bookings');
+
+Route::get('/check-expired', function () {
+    if (!session('token')) return response()->json(['status' => 'no token']);
+
+    Http::withHeaders([
+        'Authorization' => 'Bearer ' . session('token')
+    ])->post('http://localhost:5000/api/booking/check-expired');
+
+    return response()->json(['status' => 'checked']);
+});
 
 // =====================
 // AUTH
@@ -65,9 +79,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/booking', [HistoryBookingController::class, 'index'])
         ->name('admin.booking');
 
-    Route::get('/laporan', function () {
-        return view('admin.pages.laporan');
-    })->name('admin.laporan');
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('admin.laporan');
+    Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('admin.laporan.export');
 
     Route::get('/admin/profile', function () {
         return view('admin.pages.profile');

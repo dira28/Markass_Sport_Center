@@ -66,7 +66,7 @@ class BookingController extends Controller
         }
     }
 
-    public function getBookedSlots(Request $request)
+    public function getMyBookings(Request $request)
     {
         $token = session('token');
 
@@ -76,9 +76,122 @@ class BookingController extends Controller
 
         try {
             $res = Http::withToken($token)
+                ->get(env('API_URL') . '/api/booking/user/my-bookings');
+
+            if ($res->successful()) {
+                return response()->json($res->json()['data'] ?? []);
+            }
+
+            return response()->json([]);
+        } catch (\Exception $e) {
+            return response()->json([]);
+        }
+    }
+
+    public function getStatusJam(Request $request)
+    {
+        $token = session('token');
+        $lapangan_id = $request->lapangan_id;
+        $tanggal = $request->tanggal;
+
+        if (!$token || !$lapangan_id || !$tanggal) {
+            return response()->json([]);
+        }
+
+        try {
+            $res = Http::withToken($token)
+                ->get(env('API_URL') . '/api/lapangan/' . $lapangan_id . '/status-jam', [
+                    'tanggal' => $tanggal
+                ]);
+
+            if ($res->successful()) {
+                return response()->json($res->json()['data'] ?? []);
+            }
+
+            return response()->json([]);
+        } catch (\Exception $e) {
+            return response()->json([]);
+        }
+    }
+
+    public function payment($id)
+    {
+        $token = session('token');
+        if (!$token) {
+            return redirect('/login');
+        }
+
+        try {
+            $res = Http::withToken($token)
+                ->get(env('API_URL') . '/api/booking/' . $id);
+
+            if ($res->successful()) {
+                $booking = $res->json()['data'] ?? null;
+                if ($booking) {
+                    $statusClass = match($booking['status'] ?? '') {
+                        'pending' => 'bg-warning',
+                        'menunggu_verifikasi' => 'bg-orange',
+                        'confirmed' => 'bg-success',
+                        'expired' => 'bg-danger',
+                        default => 'bg-secondary'
+                    };
+                    $statusText = ucfirst(str_replace('_', ' ', $booking['status'] ?? 'unknown'));
+                    return view('user.pages.payment', compact('booking', 'statusClass', 'statusText'));
+                }
+            }
+
+            return redirect('/booking')->with('error', 'Booking not found');
+        } catch (\Exception $e) {
+            return redirect('/booking')->with('error', 'Error loading booking');
+        }
+    }
+
+    public function uploadProof($id, Request $request)
+    {
+        $request->validate([
+            'proof' => 'required|image|mimes:jpeg,png,jpg,pdf|max:2048'
+        ]);
+
+        $token = session('token');
+        if (!$token) {
+            return back()->with('error', 'Login required');
+        }
+
+        try {
+            $file = $request->file('proof');
+            $filename = 'bukti/' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storePublicly($filename, 'bukti');
+
+            $res = Http::withToken($token)
+                ->post(env('API_URL') . '/api/booking/' . $id . '/upload-bukti', [
+                    'bukti_path' => $path
+                ]);
+
+            if ($res->successful()) {
+                return redirect("/booking/payment/$id")->with('success', 'Bukti uploaded! Waiting admin verification.');
+            }
+
+            return back()->with('error', 'Upload failed');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Upload error: ' . $e->getMessage());
+        }
+    }
+
+    public function getBookedSlots(Request $request)
+    {
+        $token = session('token');
+        $lapangan_id = $request->lapangan_id;
+
+        if (!$token || !$lapangan_id) {
+            return response()->json([]);
+        }
+
+        try {
+            $res = Http::withToken($token)
                 ->acceptJson()
                 ->get(env('API_URL') . '/api/booking', [
                     'tanggal' => $request->tanggal,
+                    'id_lapangan' => $lapangan_id,
                 ]);
 
             if ($res->failed()) {
@@ -86,12 +199,10 @@ class BookingController extends Controller
             }
 
             $data = $res->json()['data'] ?? [];
-
             $blocked = [];
 
             foreach ($data as $booking) {
-
-                if ($booking['id_lapangan'] !== $request->lapangan_id) {
+                if ($booking['id_lapangan'] != $lapangan_id) {
                     continue;
                 }
 

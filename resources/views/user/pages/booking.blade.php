@@ -9,6 +9,7 @@
 @push('styles')
     @vite([
         'resources/css/user/pages/booking.css',
+        'resources/css/user/pages/payment.css',
         'resources/css/user/components/lapangan-list.css',
         'resources/css/user/components/booking-summary.css'
     ])

@@ -14,31 +14,68 @@ class AdminDashboardController extends Controller
         }
 
         $token = session('token');
+        $includeAll = config('app.kpi_include_all', true); // Dev=true, Prod=false
 
         $revenueToday = 0;
         $totalBooking = 0;
         $latestBookings = [];
-
         $totalRevenue = 0;
         $totalUser = 0;
         $averagePerDay = 0;
-
         $daily = [];
         $monthly = [];
         $yearly = [];
 
         try {
-
-            //REVENUE HARI INI
+            // Keep existing revenue API (today KPIs)
             $resRevenue = Http::withToken($token)
                 ->acceptJson()
                 ->get(env('API_URL') . '/booking/revenue/daily');
 
             if ($resRevenue->successful()) {
                 $data = $resRevenue->json()['data'];
-
                 $revenueToday = $data['total_revenue'] ?? 0;
-                $totalBooking = $data['total_bookings'] ?? 0;
+                $totalBookingToday = $data['total_bookings'] ?? 0;
+            }
+
+            // Main booking data for KPIs
+            $resBooking = Http::withToken($token)
+                ->acceptJson()
+                ->get(env('API_URL') . '/api/booking');
+
+            if ($resBooking->successful()) {
+                $bookings = collect($resBooking->json()['data'] ?? []);
+
+                // FLEXIBLE FILTER - ONE PLACE
+                $filteredBookings = $includeAll 
+                    ? $bookings 
+                    : $bookings->filter(fn($b) => ($b['status_pembayaran'] ?? '') === 'confirmed');
+
+                $latestBookings = $filteredBookings->take(5)->values()->toArray();
+
+                // TOTAL BOOKING (flexible)
+                $totalBooking = $filteredBookings->count();
+
+                // TOTAL USERS (unique id_user)
+                $totalUser = $filteredBookings->unique('id_user')->count();
+
+                // TOTAL REVENUE
+                $totalRevenue = $filteredBookings->sum('total_harga');
+
+                // AVERAGE PER DAY
+                $days = $filteredBookings->groupBy(fn($b) => Carbon::parse($b['tanggal'])->format('Y-m-d'))->keys()->count();
+                $averagePerDay = $days > 0 ? $totalRevenue / $days : 0;
+
+                // CHART DATA (daily/monthly/yearly revenue)
+                $filteredBookings->each(function ($b) use (&$daily, &$monthly, &$yearly) {
+                    $tanggal = Carbon::parse($b['tanggal']);
+                    $day = $tanggal->format('d M');
+                    $month = $tanggal->format('M Y');
+                    $year = $tanggal->format('Y');
+                    $daily[$day] = ($daily[$day] ?? 0) + $b['total_harga'];
+                    $monthly[$month] = ($monthly[$month] ?? 0) + $b['total_harga'];
+                    $yearly[$year] = ($yearly[$year] ?? 0) + $b['total_harga'];
+                });
             }
 
             //BOOKING

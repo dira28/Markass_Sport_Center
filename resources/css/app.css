@@ -5,6 +5,7 @@
 @import './admin/pages/booking.css';
 @import "./admin/components/profit-overview.css";
 @import './admin/pages/profile.css';
+@import './user/pages/profile.css';
 @import "flowbite";
 /* ===================== */
 /* TAILWIND */

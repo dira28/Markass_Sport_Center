@@ -27,7 +27,8 @@ class LoginController extends Controller
 
                 session([
                     'token' => $user['token'],
-                    'role' => $user['role']
+                    'role' => $user['role'],
+                    'user' => $user
                 ]);
 
                 if ($user['role'] === 'admin') {

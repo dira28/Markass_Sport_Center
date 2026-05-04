@@ -52,14 +52,22 @@
                             $badge = 'dark';
                         }
 
-                        if ($pembayaran == 'pending') {
-                            $statusText .= ' (Menunggu Bayar)';
-                            $badge = 'warning';
-                        } elseif ($pembayaran == 'expired') {
-                            $statusText = 'Expired';
-                            $badge = 'danger';
-                        } elseif ($pembayaran == 'paid') {
-                            $statusText .= ' (Lunas)';
+                        $status = $item['status'] ?? 'pending';
+                        $pembayaran = $item['status_pembayaran'] ?? $status;
+                        
+                        $statusMap = [
+                            'pending' => ['Pending', 'warning'],
+                            'menunggu_verifikasi' => ['Menunggu Verifikasi', 'info'],
+                            'confirmed' => ['Confirmed', 'success'],
+                            'expired' => ['Expired', 'danger']
+                        ];
+                        
+                        $statusKey = strtolower(str_replace(' ', '_', $status));
+                        if (isset($statusMap[$statusKey])) {
+                            [$statusText, $badge] = $statusMap[$statusKey];
+                        } else {
+                            $statusText = ucfirst($status);
+                            $badge = 'dark';
                         }
                     @endphp
 
@@ -89,6 +97,19 @@
 
                         <td>
                             Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
+                        </td>
+                        <td>
+                            @if(isset($item['bukti_path']))
+                                <img src="{{ $item['bukti_path'] }}" style="width:40px;height:40px;border-radius:6px;cursor:pointer;" onclick="viewProof('{{ $item['id_booking'] }}')" title="View Proof" />
+                            @endif
+                            @if($statusKey === 'menunggu_verifikasi')
+                                <form method="POST" action="/booking/{{ $item['id_booking'] }}/acc" style="display:inline;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm mt-1" onclick="return confirm('ACC pembayaran?')">
+                                        <i class="fas fa-check"></i> ACC
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @empty

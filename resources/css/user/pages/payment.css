@@ -1,0 +1,122 @@
+/* Payment UI - Scoped Styles */
+.payment-page .payment-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  padding: 2rem;
+  margin-top: 1.5rem;
+  border: 1px solid #f0f0f0;
+}
+
+.payment-page .payment-card h5 {
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.payment-page .payment-card p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.payment-page .qr-container {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.payment-page .qr-container img {
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.payment-page .total-display {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.payment-page .total-display .amount {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.payment-page .upload-box {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 2rem 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: #f9fafb;
+}
+
+.payment-page .upload-box:hover,
+.payment-page .upload-box.dragover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.15);
+}
+
+.payment-page .upload-box.uploaded {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.payment-page .upload-preview {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 8px;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.payment-page .payment-btn {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 2rem;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.payment-page .payment-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(59,130,246,0.4);
+}
+
+.payment-page .payment-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.payment-badge.pending { background: #fef3c7; color: #92400e; }
+.payment-badge.menunggu-verifikasi { background: #dbeafe; color: #1e40af; }
+.payment-badge.confirmed { background: #d1fae5; color: #065f46; }
+.payment-badge.expired { background: #fee2e2; color: #991b1b; }
+
+@media (max-width: 768px) {
+  .payment-page .payment-card {
+    padding: 1.5rem;
+    margin: 1rem -1rem;
+    border-radius: 16px;
+  }
+  .payment-page .qr-container img {
+    width: 140px;
+    height: 140px;
+  }
+}
