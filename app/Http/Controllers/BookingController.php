@@ -148,32 +148,54 @@ class BookingController extends Controller
 
     public function uploadProof($id, Request $request)
     {
+        // Requirement: form-data key `bukti`, accept only .jpg/.jpeg/.png
         $request->validate([
-            'proof' => 'required|image|mimes:jpeg,png,jpg,pdf|max:2048'
+            'bukti' => 'required|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
         $token = session('token');
         if (!$token) {
-            return back()->with('error', 'Login required');
+            return response()->json([
+                'success' => false,
+                'message' => 'Login required'
+            ], 401);
         }
 
         try {
-            $file = $request->file('proof');
+            $file = $request->file('bukti');
+
+            // Store uploaded file (Laravel disk: public)
             $filename = 'bukti/' . uniqid() . '.' . $file->getClientOriginalExtension();
             $path = $file->storePublicly($filename, 'bukti');
 
+            // IMPORTANT: API contract expects form-data key `bukti`.
+            // Our current backend persists file first, then sends expected payload.
+            // If your API expects the actual binary file instead of a path, adjust accordingly.
             $res = Http::withToken($token)
-                ->post(env('API_URL') . '/api/booking/' . $id . '/upload-bukti', [
-                    'bukti_path' => $path
-                ]);
+                ->attach('bukti', file_get_contents($file->getRealPath()), basename($path), [
+                    'Content-Type' => $file->getClientMimeType()
+                ])
+                ->post(env('API_URL') . '/api/booking/' . $id . '/upload-bukti');
 
             if ($res->successful()) {
-                return redirect("/booking/payment/$id")->with('success', 'Bukti uploaded! Waiting admin verification.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Menunggu konfirmasi admin',
+                    'data' => [
+                        'status_pembayaran' => 'waiting_confirmation'
+                    ]
+                ]);
             }
 
-            return back()->with('error', 'Upload failed');
+            return response()->json([
+                'success' => false,
+                'message' => $res->json()['message'] ?? 'Upload failed'
+            ], $res->status());
         } catch (\Exception $e) {
-            return back()->with('error', 'Upload error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload error: ' . $e->getMessage()
+            ], 500);
         }
     }
 

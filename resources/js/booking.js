@@ -262,8 +262,14 @@ document.addEventListener("DOMContentLoaded", function () {
             let result = await res.json();
 
             if (result.status === "success") {
-                alert("Booking berhasil!");
-                window.location.href = `/booking/payment/${result.data.id_booking}`;
+                console.log('BOOKING RESULT:', result);
+                const bookingId = result?.data?.data?.id_booking || result?.data?.id_booking;
+                if (!bookingId) {
+                    console.error('Missing bookingId in booking response', result);
+                    alert('Booking berhasil, tapi ID booking tidak ditemukan.');
+                    return;
+                }
+                window.location.href = `/booking/payment/${bookingId}`;
             } else {
                 alert(result.message || "Gagal booking");
             }

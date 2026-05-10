@@ -31,6 +31,8 @@
                     $status = $item['status'] ?? 'pending';
                     
                     // Check if expired by date/time
+                    $paymentStatus = $item['status_pembayaran'] ?? $status;
+
                     $now = \Carbon\Carbon::now('Asia/Jakarta');
                     $bookingEnd = $tanggal->copy()->setTimeFromTimeString($jamMulai);
                     if ($status !== 'cancelled' && $now->gt($bookingEnd)) {
@@ -38,15 +40,15 @@
                     }
                     
                     $statusMap = [
-                        'pending' => ['Menunggu Bayar', 'bg-warning text-dark'],
-                        'paid' => ['Berhasil', 'bg-success'],
-                        'success' => ['Berhasil', 'bg-success'],
-                        'expired' => ['Kadaluarsa', 'bg-danger'],
-                        'cancelled' => ['Dibatalkan', 'bg-secondary'],
+                        'pending' => ['Menunggu Bayar', 'payment-badge pending'],
+                        'waiting_confirmation' => ['Menunggu Verifikasi Admin', 'payment-badge menunggu-verifikasi'],
+                        'confirmed' => ['Konfirmasi Berhasil', 'payment-badge confirmed'],
+                        'expired' => ['Kadaluarsa', 'payment-badge expired'],
+                        'cancelled' => ['Dibatalkan', 'payment-badge cancelled'],
                     ];
                     $default = ['Unknown', 'bg-light text-dark'];
                     
-                    [$statusText, $badge] = $statusMap[$status] ?? $default;
+                    [$statusText, $badge] = $statusMap[$paymentStatus] ?? $default;
                 @endphp
 
                 <tr>
@@ -63,7 +65,7 @@
                     </td>
 
                     <td>
-                        <span class="badge {{ $badge }}">
+                        <span class="{{ $badge }}">
                             {{ $statusText }}
                         </span>
                     </td>

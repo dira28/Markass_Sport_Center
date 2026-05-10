@@ -20,7 +20,7 @@
             </div>
         @endif
 
-        <table class="table align-middle">
+<table class="table align-middle admin-booking-table payment-admin-table">
             <thead>
                 <tr>
                     <th>Tanggal</th>
