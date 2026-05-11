@@ -8,7 +8,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const proofFile = document.getElementById('proofFile');
     const uploadBox = document.getElementById('uploadBox');
     const uploadPreview = document.getElementById('uploadPreview');
-    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadBtn = document.getElementById('uploadBtn'); // legacy (may not exist)
+
+    // UI required by current task
+    const pickBtn = document.getElementById('pickBtn');
+    const submitPaymentBtn = document.getElementById('submitPaymentBtn');
+
+    // NOTE: existing HTML uses #pickBtn (Choose Payment Proof) and #submitPaymentBtn (Kirim Pembayaran)
+
+
+
+
     const previewImg = document.getElementById('previewImg');
     const timerEl = document.getElementById('timer');
 
@@ -52,20 +62,44 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCountdown();
     countdownInterval = setInterval(updateCountdown, 1000);
 
-    // Initial status gating
+    function normalizePaymentStatus(status) {
+        if (!status) return 'pending';
+        const s = String(status).trim().toLowerCase();
+
+        // Normalize legacy backend value if it still exists
+        if (s === 'menunggu_verifikasi' || s.includes('menunggu')) return 'waiting_confirmation';
+        if (s === 'waiting_confirmation') return 'waiting_confirmation';
+        if (s === 'confirmed') return 'confirmed';
+        if (s === 'expired') return 'expired';
+        if (s === 'cancelled' || s === 'dibatalkan') return 'cancelled';
+        if (s === 'pending') return 'pending';
+
+        return s;
+    }
+
+    // Initial status gating (DO NOT force waiting state during interaction)
     if (statusBadge) {
-        const currentStatus = (statusBadge.dataset.paymentStatus || statusBadge.textContent).toLowerCase();
-        if (currentStatus.includes('menunggu') || currentStatus.includes('waiting_confirmation') || currentStatus.includes('confirmed') || currentStatus.includes('expired')) {
-            if (uploadBtn) uploadBtn.disabled = true;
+        const normalized = normalizePaymentStatus(statusBadge.dataset.paymentStatus || statusBadge.textContent);
+        statusBadge.dataset.paymentStatus = normalized;
+
+        const gated = ['waiting_confirmation', 'confirmed', 'expired', 'cancelled'];
+        if (gated.includes(normalized)) {
+            if (sendPaymentBtn) sendPaymentBtn.disabled = true;
             if (uploadBox) uploadBox.style.opacity = '0.5';
 
-            if (currentStatus.includes('menunggu')) {
-                showStatus('Menunggu Verifikasi', 'Bukti pembayaran Anda sedang diverifikasi admin.', 'info');
-            } else if (currentStatus.includes('confirmed')) {
+
+            if (normalized === 'confirmed') {
                 showStatus('Berhasil', 'Pembayaran sudah dikonfirmasi.', 'success');
+            } else if (normalized === 'expired') {
+                showStatus('Kadaluarsa', 'Waktu pembayaran sudah berakhir.', 'danger');
+            } else if (normalized === 'cancelled') {
+                showStatus('Dibatalkan', 'Booking dibatalkan.', 'secondary');
             }
+            // IMPORTANT: do not auto-show waiting_confirmation UI here; it should only appear after upload success.
         }
     }
+
+
 
     function showStatus(title, text, type) {
         if (paymentForm) paymentForm.style.display = 'none';
@@ -100,15 +134,36 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.onload = (ev) => {
             if (previewImg) previewImg.src = ev.target.result;
             if (uploadPreview) uploadPreview.style.display = 'block';
-            if (uploadBtn) {
-                uploadBtn.disabled = false;
-                uploadBtn.textContent = 'Upload & Bayar';
+
+            // Preview only: do NOT switch badge/state yet
+            const previewStatusBadge = document.getElementById('previewStatusBadge');
+            if (previewStatusBadge) previewStatusBadge.style.display = 'none';
+
+            // Enable Kirim Pembayaran button only after preview is ready
+            if (submitPaymentBtn) {
+                submitPaymentBtn.disabled = false;
             }
+
         };
         reader.readAsDataURL(file);
     });
 
-    uploadBox?.addEventListener('click', () => proofFile.click());
+    // BUTTON 1: Choose Payment Proof (open picker only)
+    pickBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        proofFile?.click();
+    });
+
+    // Clicking anywhere in the upload box (except the submit button) also opens the picker.
+    // This must NOT auto-submit or upload.
+    uploadBox?.addEventListener('click', (e) => {
+        const target = e?.target;
+        // If click was on the submit button, do nothing (submit has its own handler)
+        if (target && target.id === 'submitPaymentBtn') return;
+        proofFile?.click();
+    });
+
+
 
     uploadBox?.addEventListener('dragover', e => {
         e.preventDefault();
@@ -130,11 +185,17 @@ document.addEventListener('DOMContentLoaded', function() {
         proofFile.dispatchEvent(new Event('change'));
     });
 
-    uploadBtn?.addEventListener('click', async () => {
+    // BUTTON 2: Kirim Pembayaran (upload proof + submit) - manual only
+    const sendPaymentBtn = document.getElementById('sendPaymentBtn');
+    sendPaymentBtn?.addEventListener('click', async () => {
+
+        // Require file selected
+
         if (!proofFile.files || !proofFile.files[0]) {
             alert('Silakan pilih gambar bukti pembayaran dulu.');
             return;
         }
+
 
         const file = proofFile.files[0];
         const ext = (file.name.split('.').pop() || '').toLowerCase();
@@ -144,27 +205,36 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Prevent duplicate upload after success
-        if (uploadBtn.dataset.uploaded === 'true') return;
+            // Prevent duplicate upload after success
+            if (sendPaymentBtn?.dataset.uploaded === 'true') return;
+
 
         const formData = new FormData();
         formData.append('bukti', file);
 
-        uploadBtn.disabled = true;
-        uploadBox.style.opacity = '0.6';
-        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload...';
+        if (submitPaymentBtn) submitPaymentBtn.disabled = true;
+        if (uploadBox) uploadBox.style.opacity = '0.6';
+        if (submitPaymentBtn) submitPaymentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+
 
         try {
             const token = document.querySelector('meta[name="token"]')?.content || window.sessionStorage?.getItem('token');
             if (!token) {
-                uploadBtn.disabled = false;
-                uploadBox.style.opacity = '1';
-                uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload & Bayar';
+                if (submitPaymentBtn) {
+                    submitPaymentBtn.disabled = false;
+                    submitPaymentBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pembayaran';
+                    submitPaymentBtn.dataset.uploaded = 'false';
+                }
+                if (uploadBox) uploadBox.style.opacity = '1';
                 alert('Login required (token tidak ditemukan).');
                 return;
             }
 
-            const res = await fetch(`/booking/payment/${bookingId}/upload`, {
+
+
+
+
+            const res = await fetch(`/booking/payment/${bookingId}/upload-bukti`, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -172,31 +242,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+
             const result = await res.json();
             if (result.success) {
-                uploadBtn.dataset.uploaded = 'true';
-                uploadBox.style.opacity = '0.5';
-                uploadBtn.disabled = true;
+                if (submitPaymentBtn) {
+                    submitPaymentBtn.dataset.uploaded = 'true';
+                }
+                if (uploadBox) uploadBox.style.opacity = '0.5';
+
+                if (uploadPreview) uploadPreview.style.display = 'block';
 
                 if (statusBadge) {
-                    statusBadge.textContent = 'Waiting confirmation';
+                    statusBadge.dataset.paymentStatus = 'waiting_confirmation';
+                    statusBadge.textContent = 'MENUNGGU VERIFIKASI ADMIN';
                     statusBadge.className = 'badge bg-primary';
                 }
 
-                if (uploadPreview) uploadPreview.style.display = 'block';
-                showStatus('Berhasil', 'Payment proof uploaded successfully. Waiting for admin confirmation.', 'info');
+                if (sendPaymentBtn) {
+                    sendPaymentBtn.dataset.uploaded = 'true';
+                    sendPaymentBtn.disabled = true;
+                }
+
+
+
+                // Update badge ONLY after successful upload
+                if (statusBadge) {
+                    statusBadge.dataset.paymentStatus = 'waiting_confirmation';
+                    statusBadge.textContent = 'Waiting for admin verification';
+                    statusBadge.className = 'badge bg-primary';
+                }
+
+                showStatus('Berhasil', 'Payment proof submitted successfully', 'success');
+                if (statusBadge) {
+                    statusBadge.textContent = 'MENUNGGU VERIFIKASI ADMIN';
+                    statusBadge.className = 'badge bg-primary';
+                }
+
             } else {
-                uploadBtn.disabled = false;
-                uploadBox.style.opacity = '1';
-                uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload & Bayar';
+                if (submitPaymentBtn) {
+                    submitPaymentBtn.disabled = false;
+                    submitPaymentBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pembayaran';
+                }
+                if (uploadBox) uploadBox.style.opacity = '1';
                 alert('Upload gagal: ' + (result.message || 'Unknown error'));
             }
+
         } catch (err) {
-            uploadBtn.disabled = false;
-            uploadBox.style.opacity = '1';
-            uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload & Bayar';
+            if (submitPaymentBtn) {
+                submitPaymentBtn.disabled = false;
+                submitPaymentBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Pembayaran';
+                submitPaymentBtn.dataset.uploaded = 'false';
+            }
+            if (uploadBox) uploadBox.style.opacity = '1';
             alert('Error: ' + err.message);
         }
+
     });
 });
 

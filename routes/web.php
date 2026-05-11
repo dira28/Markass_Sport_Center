@@ -27,6 +27,9 @@ Route::get('/dashboard', function () {
 Route::get('/booking', [BookingController::class, 'index']);
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/booking/payment/{id}', [BookingController::class, 'payment'])->name('booking.payment');
+
+Route::patch('/booking/{id_booking}/confirm-payment', [BookingController::class, 'confirmPayment'])->name('booking.confirm-payment');
+Route::patch('/booking/{id_booking}/reject-payment', [BookingController::class, 'rejectPayment'])->name('booking.reject-payment');
 Route::get('/booking/my-bookings', [BookingController::class, 'getMyBookings'])->name('booking.my-bookings');
 Route::get('/booking/status-jam', [BookingController::class, 'getStatusJam'])->name('booking.status-jam');
 Route::get('/booking/slots', [BookingController::class, 'getBookedSlots'])

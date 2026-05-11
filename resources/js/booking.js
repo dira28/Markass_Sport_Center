@@ -171,13 +171,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // ===== PILIH JAM =====
     document.querySelectorAll(".jam-btn").forEach(btn => {
         btn.addEventListener("click", function () {
+            // Never allow selecting blocked start hours or blocked duration ranges
+            const start = this.dataset.jam;
+            if (!start) return;
 
             if (this.classList.contains("jam-booked")) return;
+            if (!isRangeValid(start, durasi)) return;
 
             document.querySelectorAll(".jam-btn").forEach(b => b.classList.remove("active"));
             this.classList.add("active");
 
-            jamAktif = this.dataset.jam;
+            jamAktif = start;
 
             let jam = parseInt(jamAktif.split(":")[0]);
             hargaPerJam = (jam >= 6 && jam < 16) ? hargaPagi : hargaMalam;
@@ -186,6 +190,7 @@ document.addEventListener("DOMContentLoaded", function () {
             highlightRange();
         });
     });
+
 
     // ===== PILIH TANGGAL =====
     tanggalInput.addEventListener("change", function () {
@@ -281,118 +286,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-    // ===== PAYMENT UPLOAD PREVIEW =====
-    const proofFile = document.getElementById('proofFile');
-    const uploadBox = document.getElementById('uploadBox');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const uploadPreview = document.getElementById('uploadPreview');
-    const previewImg = document.getElementById('previewImg');
-    const statusBadge = document.getElementById('statusBadge');
-
-    // File select
-    proofFile.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file && file.size > 2*1024*1024) {
-            alert('File terlalu besar (max 2MB)');
-            return;
-        }
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                uploadPreview.style.display = 'block';
-                statusBadge.textContent = 'Menunggu Verifikasi';
-                statusBadge.className = 'payment-badge menunggu-verifikasi mt-3 d-inline-block';
-                uploadBtn.disabled = false;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // Drag & drop
-    uploadBox.addEventListener('dragover', e => {
-        e.preventDefault();
-        uploadBox.classList.add('dragover');
-    });
-    uploadBox.addEventListener('dragleave', () => {
-        uploadBox.classList.remove('dragover');
-    });
-    uploadBox.addEventListener('drop', e => {
-        e.preventDefault();
-        uploadBox.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        proofFile.files = e.dataTransfer.files;
-        proofFile.dispatchEvent(new Event('change', {bubbles: true}));
-    });
-    uploadBox.addEventListener('click', () => proofFile.click());
-
-    // Upload click (temp)
-    uploadBtn.addEventListener('click', function() {
-        alert('Upload berhasil! Menunggu verifikasi admin.');
-        uploadBox.style.display = 'none';
-        uploadPreview.style.display = 'block';
-        statusBadge.innerHTML = '<i class="fas fa-clock"></i> Menunggu Verifikasi Admin';
-    });
-
-    // Admin view proof modal function
-    function viewProof(id) {
-        alert('Proof for booking #' + id + ' (demo full image modal)');
-    }
-
-    // ===== LOAD MY BOOKINGS (PERSISTENCE) =====
-    async function loadMyBookings() {
-        try {
-            const res = await fetch('/booking/my-bookings', {
-                credentials: "same-origin"
-            });
-            const bookings = await res.json();
-
-            const paymentCard = document.getElementById('paymentCard');
-            const paymentTotal = document.getElementById('paymentTotal');
-            const statusBadge = document.getElementById('statusBadge');
-            const uploadBox = document.getElementById('uploadBox');
-            const uploadPreview = document.getElementById('uploadPreview');
-
-            // Find active pending/menunggu_verifikasi today
-            const today = new Date().toDateString();
-            const activeBooking = bookings.find(b => 
-                ['pending', 'menunggu_verifikasi'].includes(b.status) && 
-                new Date(b.tanggal).toDateString() === today
-            );
-
-            if (activeBooking) {
-                paymentCard.style.display = 'block';
-                paymentTotal.textContent = 'Rp ' + parseInt(activeBooking.total_harga || 0).toLocaleString('id-ID');
-                const statusText = activeBooking.status.replace('_', ' ').toUpperCase();
-                statusBadge.textContent = statusText;
-                statusBadge.className = `payment-badge ${activeBooking.status} mt-3 d-inline-block`;
-                
-                if (activeBooking.status === 'menunggu_verifikasi') {
-                    uploadBox.style.display = 'none';
-                    uploadPreview.style.display = 'block';
-                    document.getElementById('paymentSubtitle').textContent = 'Bukti sudah diupload, menunggu verifikasi admin';
-                } else {
-                    uploadBox.style.display = 'block';
-                    uploadPreview.style.display = 'none';
-                    document.getElementById('paymentSubtitle').textContent = 'Scan QR DANA di bawah dan upload bukti pembayaran';
-                }
-            } else {
-                paymentCard.style.display = 'none';
-            }
-        } catch (err) {
-            console.error('Error loading my bookings:', err);
-        }
-    }
-
-    // Auto refresh every 60s
-    setInterval(() => {
-        if (tanggalInput.value && lapanganAktif) loadAvailability(tanggalInput.value);
-        loadMyBookings();
-    }, 60000);
-
-    // Initial loads
-    loadMyBookings();
+// Payment upload/proof logic must live on the dedicated payment page (`/booking/payment/{id_booking}`)
+// and use `resources/js/payment.js` + `BookingController@uploadProof`.
+// This booking page script only manages availability selection + booking creation.
 
 });
+
+
+
 
 

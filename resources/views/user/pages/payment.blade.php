@@ -35,7 +35,26 @@
                             <p><strong>Lapangan:</strong> <span id="lapanganNama">{{ $booking['lapangan']['nama_lapangan'] ?? 'N/A' }}</span></p>
 <p><strong>Booking Date:</strong> <span id="bookingDate">{{ $booking['tanggal'] ?? 'N/A' }}</span></p>
                             <p><strong>Start &amp; End Time:</strong> <span id="bookingTime">{{ $booking['jam_mulai'] }} - {{ $booking['jam_selesai'] }}</span></p>
-                            <p><strong>Durasi:</strong> <span id="bookingDuration">{{ $booking['durasi'] ?? ($booking['duration'] ?? '-') }}</span></p>
+                            @php
+                                $durasiValue = $booking['durasi'] ?? $booking['duration'] ?? null;
+                                if (!$durasiValue) {
+                                    $jmMulai = $booking['jam_mulai'] ?? null;
+                                    $jmSelesai = $booking['jam_selesai'] ?? null;
+                                    if ($jmMulai && $jmSelesai) {
+                                        try {
+                                            $startHour = (int) substr($jmMulai, 0, 2);
+                                            $endHour = (int) substr($jmSelesai, 0, 2);
+                                            $durasiValue = max(1, $endHour - $startHour);
+                                        } catch (\Throwable $e) {
+                                            $durasiValue = '-';
+                                        }
+                                    } else {
+                                        $durasiValue = '-';
+                                    }
+                                }
+                            @endphp
+                            <p><strong>Durasi:</strong> <span id="bookingDuration">{{ $durasiValue }}</span> Jam</p>
+
 <p><strong>Status:</strong>
                                 <span class="badge {{ $statusClass ?? 'bg-secondary' }}" id="statusBadge" data-payment-status="{{ $booking['status_pembayaran'] ?? $booking['status'] ?? 'pending' }}">
                                     {{ $statusText ?? ucfirst(str_replace('_',' ', $booking['status_pembayaran'] ?? $booking['status'] ?? 'pending')) }}
@@ -58,30 +77,40 @@
                 <div class="qr-section mt-4">
                     <h6 class="text-center mb-3">Scan QR DANA</h6>
                     <div class="qr-container">
-<img src="{{ asset('images/qr-dana.jpg') }}" alt="QR DANA Payment" class="qr-image">
+                        <div class="qr-card">
+                            <img src="{{ asset('images/qr-dana.jpg') }}" alt="QR DANA Payment" class="qr-image">
+                        </div>
+                        <div class="qr-instructions">
+                            Scan QR DANA lalu upload bukti pembayaran.
+                        </div>
                     </div>
+
                 </div>
 
                 <div id="paymentForm" class="upload-section mt-4">
-                    <h6>Upload Bukti Pembayaran</h6>
-                    <div class="upload-box" id="uploadBox">
+                    <h6 class="upload-title">Upload Bukti Pembayaran</h6>
+                    <div class="upload-box" id="uploadBox" role="button" tabindex="0">
+
                         <i class="fas fa-cloud-upload-alt text-muted" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
-                        <div>
-                            <strong>Pilih atau drag gambar bukti transfer</strong>
-<p class="text-muted small mb-0">JPG, PNG (max 2MB)</p>
+                        <div id="uploadPlaceholder">
+                            <strong>Choose or drag payment proof image</strong>
+                            <p class="text-muted small mb-0">JPG, PNG (max 2MB)</p>
                         </div>
                         <input type="file" id="proofFile" accept="image/jpeg,image/png,.jpg,.jpeg,.png" class="d-none">
-                        <button class="btn payment-btn mt-3" id="uploadBtn">
-                            <i class="fas fa-upload"></i> Upload & Bayar
+                        <button class="btn payment-btn mt-3" id="pickBtn" type="button">
+                            <i class="fas fa-image"></i> Pilih Bukti Pembayaran
                         </button>
+
                     </div>
 
                     <div id="uploadPreview" style="display: none;" class="mt-4 text-center">
                         <img id="previewImg" class="upload-preview mb-3" style="max-width: 200px; border-radius: 12px;">
-                        <div class="payment-badge menunggu-verifikasi">
-                            <i class="fas fa-clock"></i> Menunggu Verifikasi Admin
-                        </div>
+
+                        <button class="btn payment-btn mt-3" id="sendPaymentBtn" type="button" disabled>
+                            <i class="fas fa-paper-plane"></i> Kirim Pembayaran
+                        </button>
                     </div>
+
                 </div>
 
                 <div id="statusMessage" style="display: none;" class="mt-4 text-center">

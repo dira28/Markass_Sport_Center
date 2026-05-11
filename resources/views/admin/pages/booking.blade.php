@@ -20,17 +20,25 @@
             </div>
         @endif
 
+{{-- Proof modal (View Proof) --}}
+@include('admin.components.proof-modal')
+
 <table class="table align-middle admin-booking-table payment-admin-table">
             <thead>
                 <tr>
+
                     <th>Tanggal</th>
                     <th>ID</th>
                     <th>Pengguna</th>
                     <th>Lapangan</th>
-                    <th>Status</th>
+                    <th>Jam</th>
+                    <th>Status Pembayaran</th>
                     <th>Harga</th>
+                    <th>Bukti Pembayaran</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
+
 
             <tbody>
                 @forelse ($bookings as $item)
@@ -38,37 +46,47 @@
                     @php
                         $tanggal = \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
 
-                        $status = $item['status'] ?? '-';
-                        $pembayaran = $item['status_pembayaran'] ?? '-';
+                        // ===== Normalize payment status to ONLY these values =====
+                        // pending | waiting_confirmation | confirmed | expired | cancelled
+                        $rawPaymentStatus = $item['status_pembayaran'] ?? $item['status'] ?? 'pending';
+                        $paymentStatus = $rawPaymentStatus;
 
-                        if ($status == 'booked') {
-                            $statusText = 'Berlangsung';
-                            $badge = 'success';
-                        } elseif ($status == 'available') {
-                            $statusText = 'Tersedia';
-                            $badge = 'secondary';
-                        } else {
-                            $statusText = ucfirst($status);
-                            $badge = 'dark';
+                        // Safe normalization (old API tokens)
+                        if ($paymentStatus === 'menunggu_verifikasi') {
+                            $paymentStatus = 'waiting_confirmation';
                         }
 
-                        $status = $item['status'] ?? 'pending';
-                        $pembayaran = $item['status_pembayaran'] ?? $status;
-                        
+                        // If backend still sends other legacy Indonesian tokens, map them safely.
+                        if (is_string($paymentStatus)) {
+                            $paymentStatus = strtolower(trim($paymentStatus));
+                            if ($paymentStatus === 'menunggu_verifikasi') $paymentStatus = 'waiting_confirmation';
+                        }
+
+
+                        // Normalize any accidental legacy values
+                        if (isset($paymentStatus) && is_string($paymentStatus)) {
+                            $paymentStatus = strtolower(trim($paymentStatus));
+                            if ($paymentStatus === 'menunggu_verifikasi') $paymentStatus = 'waiting_confirmation';
+                        }
+
+
+                        // Defensive: normalize to allowed set only
+                        if (!in_array($paymentStatus, ['pending','waiting_confirmation','confirmed','expired','cancelled'], true)) {
+                            $paymentStatus = 'pending';
+                        }
+
+
                         $statusMap = [
                             'pending' => ['Pending', 'warning'],
-                            'menunggu_verifikasi' => ['Menunggu Verifikasi', 'info'],
+                            'waiting_confirmation' => ['Waiting confirmation', 'primary'],
                             'confirmed' => ['Confirmed', 'success'],
-                            'expired' => ['Expired', 'danger']
+                            'expired' => ['Expired', 'secondary'],
+                            'cancelled' => ['Cancelled', 'dark'],
                         ];
-                        
-                        $statusKey = strtolower(str_replace(' ', '_', $status));
-                        if (isset($statusMap[$statusKey])) {
-                            [$statusText, $badge] = $statusMap[$statusKey];
-                        } else {
-                            $statusText = ucfirst($status);
-                            $badge = 'dark';
-                        }
+
+                        $statusText = $statusMap[$paymentStatus][0] ?? ucfirst(str_replace('_', ' ', $paymentStatus));
+                        $badge = $statusMap[$paymentStatus][1] ?? 'secondary';
+
                     @endphp
 
                     <tr>
@@ -95,18 +113,31 @@
                             </span>
                         </td>
 
+                        {{-- HARGA --}}
                         <td>
                             Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
                         </td>
+
+                        {{-- BUKTI --}}
                         <td>
                             @if(isset($item['bukti_path']))
-                                <img src="{{ $item['bukti_path'] }}" style="width:40px;height:40px;border-radius:6px;cursor:pointer;" onclick="viewProof('{{ $item['id_booking'] }}')" title="View Proof" />
+                                <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none" data-proof-url="{{ $item['bukti_path'] }}" alt="Proof" />
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="openProofModal('{{ $item['id_booking'] }}')">
+                                    <i class="fas fa-eye"></i> View Proof
+                                </button>
+                            @else
+                                <span class="text-muted">-</span>
                             @endif
-                            @if($statusKey === 'menunggu_verifikasi')
-                                <form method="POST" action="/booking/{{ $item['id_booking'] }}/acc" style="display:inline;">
+                        </td>
+
+                        {{-- AKSI --}}
+                        <td>
+                            @if($paymentStatus === 'waiting_confirmation')
+                                <form method="POST" action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
                                     @csrf
-                                    <button type="submit" class="btn btn-success btn-sm mt-1" onclick="return confirm('ACC pembayaran?')">
-                                        <i class="fas fa-check"></i> ACC
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve Payment?')">
+                                        <i class="fas fa-check"></i> Approve
                                     </button>
                                 </form>
                             @endif

@@ -74,19 +74,22 @@
                         Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
                     </td>
                     <td>
-@if($status == 'pending')
+                        @if($paymentStatus === 'pending')
                             <a href="/booking/payment/{{ $item['id_booking'] }}" class="btn btn-warning btn-sm">
                                 <i class="fas fa-credit-card"></i> Bayar Sekarang
                             </a>
-                        @elseif($status == 'menunggu_verifikasi')
-                            Menunggu verifikasi admin
+                        @elseif($paymentStatus === 'waiting_confirmation')
+                            Menunggu Verifikasi Admin
+
                             @if(isset($item['bukti_path']))
                                 <br><small><a href="{{ $item['bukti_path'] }}" target="_blank">Lihat Bukti</a></small>
                             @endif
-                        @elseif($status == 'confirmed' || $status == 'paid')
+                        @elseif($paymentStatus === 'confirmed')
                             <span class="badge bg-success">Lunas</span>
-                        @elseif($status == 'expired')
+                        @elseif($paymentStatus === 'expired')
                             <span class="badge bg-danger">Expired</span>
+                        @elseif($paymentStatus === 'cancelled')
+                            <span class="badge bg-dark text-white">Dibatalkan</span>
                         @endif
                     </td>
                 </tr>

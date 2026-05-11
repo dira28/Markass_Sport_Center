@@ -153,6 +153,7 @@ class BookingController extends Controller
             'bukti' => 'required|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
+
         $token = session('token');
         if (!$token) {
             return response()->json([
@@ -199,8 +200,43 @@ class BookingController extends Controller
         }
     }
 
+    public function confirmPayment($id_booking)
+    {
+        $token = session('token');
+        if (!$token) {
+            return response()->json(['success' => false, 'message' => 'Login required'], 401);
+        }
+
+        try {
+            $res = Http::withToken($token)
+                ->patch(env('API_URL') . '/api/booking/' . $id_booking . '/confirm-payment');
+
+            if ($res->successful()) {
+                return response()->json(['success' => true, 'message' => 'Pembayaran approved']);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $res->json()['message'] ?? 'Confirm payment failed'
+            ], $res->status() ?: 500);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // reject/payment cancellation not supported by backend currently
+    public function rejectPayment($id_booking)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Reject payment not supported'
+        ], 400);
+    }
+
+
     public function getBookedSlots(Request $request)
     {
+
         $token = session('token');
         $lapangan_id = $request->lapangan_id;
 
