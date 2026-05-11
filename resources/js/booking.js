@@ -119,7 +119,21 @@ document.addEventListener("DOMContentLoaded", function () {
             let statusData = await res.json();
             console.log("STATUS:", statusData);
 
-            blockedSlots = statusData.filter(item => item.status === 'terbooking').map(item => item.jam);
+            blockedSlots = statusData
+                .filter(item => {
+                    // treat expired/cancelled as available again
+                    const s = (item.status ?? '').toLowerCase();
+                    if (s.includes('expired') || s.includes('cancelled')) return false;
+
+                    // backward compat: API might return `terbooking`
+                    if (s === 'terbooking') return true;
+
+                    // new required statuses
+                    if (s === 'pending' || s === 'waiting_confirmation' || s === 'confirmed') return true;
+
+                    return false;
+                })
+                .map(item => item.jam);
 
             // Reset selection
             resetSelection();
@@ -128,9 +142,20 @@ document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".jam-btn").forEach(btn => {
                 let jam = btn.dataset.jam;
                 let status = statusData.find(item => item.jam === jam);
-                let isBooked = status && status.status === 'terbooking';
-                
-                if (isBooked) {
+                const s = (status?.status ?? '').toLowerCase();
+
+                const isBlocked =
+                    s === 'terbooking' ||
+                    s === 'pending' ||
+                    s === 'waiting_confirmation' ||
+                    s === 'confirmed';
+
+                // If API says expired/cancelled, keep clickable
+                const isUnblocked = s.includes('expired') || s.includes('cancelled');
+
+                const finalBlocked = isBlocked && !isUnblocked;
+
+                if (finalBlocked) {
                     btn.classList.add("jam-booked");
                     btn.disabled = true;
                 } else {
@@ -286,11 +311,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+// Availability selection + booking creation only.
 // Payment upload/proof logic must live on the dedicated payment page (`/booking/payment/{id_booking}`)
-// and use `resources/js/payment.js` + `BookingController@uploadProof`.
-// This booking page script only manages availability selection + booking creation.
+// and use resources/js/payment.js.
 
 });
+
+
+
+
+
+
 
 
 

@@ -99,6 +99,18 @@ class BookingController extends Controller
         }
 
         try {
+            // Force-expire before returning availability so expired bookings reopen immediately
+            Http::withToken($token)
+                ->acceptJson()
+                ->get(env('API_URL') . '/api/booking', [
+                    'status_pembayaran' => 'pending'
+                ]);
+
+            // Run expire job locally (Laravel) by calling the API expiration command.
+            // If API implements it, it will update status_pembayaran => expired.
+            Http::withToken($token)
+                ->patch(env('API_URL') . '/api/booking/expire-pending');
+
             $res = Http::withToken($token)
                 ->get(env('API_URL') . '/api/lapangan/' . $lapangan_id . '/status-jam', [
                     'tanggal' => $tanggal
@@ -128,7 +140,7 @@ class BookingController extends Controller
             if ($res->successful()) {
                 $booking = $res->json()['data'] ?? null;
                 if ($booking) {
-                    $statusClass = match($booking['status'] ?? '') {
+                    $statusClass = match ($booking['status'] ?? '') {
                         'pending' => 'bg-warning',
                         'menunggu_verifikasi' => 'bg-orange',
                         'confirmed' => 'bg-success',
@@ -166,8 +178,7 @@ class BookingController extends Controller
             $file = $request->file('bukti');
 
             // Store uploaded file (Laravel disk: public)
-            $filename = 'bukti/' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storePublicly($filename, 'bukti');
+            $path = $file->store('bukti', 'public');
 
             // IMPORTANT: API contract expects form-data key `bukti`.
             // Our current backend persists file first, then sends expected payload.
@@ -179,11 +190,20 @@ class BookingController extends Controller
                 ->post(env('API_URL') . '/api/booking/' . $id . '/upload-bukti');
 
             if ($res->successful()) {
+                $payload = $res->json();
+                $data = $payload['data'] ?? $payload;
+
+                // Forward backend contract so frontend/admin can render latest bukti_pembayaran
+                $latestBukti = $data['bukti_pembayaran'] ?? $data['bukti'] ?? null;
+                $statusPembayaran = $data['status_pembayaran'] ?? $data['status'] ?? 'waiting_confirmation';
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Menunggu konfirmasi admin',
                     'data' => [
-                        'status_pembayaran' => 'waiting_confirmation'
+                        'id_booking' => $data['id_booking'] ?? $id,
+                        'bukti_pembayaran' => $latestBukti,
+                        'status_pembayaran' => $statusPembayaran,
                     ]
                 ]);
             }

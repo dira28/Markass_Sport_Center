@@ -21,7 +21,7 @@ class ExpirePendingBookings extends Command
      *
      * @var string
      */
-    protected $description = 'Expire bookings pending payment > 300 minutes';
+    protected $description = 'Expire bookings pending payment > 30 minutes';
 
     /**
      * Execute the console command.
@@ -39,12 +39,15 @@ class ExpirePendingBookings extends Command
         $this->info('Checking expired bookings...');
 
         try {
-            // Get pending bookings
+            // Get unpaid bookings candidates.
+            // Your API appears to use both `pending` and `waiting_confirmation`/`menunggu_verifikasi`.
+            // We must expire both so slots unlock.
             $response = Http::withToken($token)
                 ->acceptJson()
                 ->get(env('API_URL') . '/api/booking', [
                     'status_pembayaran' => 'pending',
                 ]);
+
 
             if ($response->failed()) {
                 $this->error('Failed to fetch pending bookings: ' . $response->body());
@@ -60,7 +63,7 @@ class ExpirePendingBookings extends Command
             foreach ($bookings as $booking) {
                 $paymentDeadline = Carbon::parse($booking['payment_deadline']);
                 
-                if ($paymentDeadline->isPast() && $booking['status_pembayaran'] === 'pending') {
+                if ($paymentDeadline->isPast() && in_array($booking['status_pembayaran'] ?? null, ['pending','waiting_confirmation','menunggu_verifikasi'], true)) {
                     // Expire this booking
                     $patchRes = Http::withToken($token)
                         ->patch(env('API_URL') . "/api/booking/{$booking['id_booking']}", [

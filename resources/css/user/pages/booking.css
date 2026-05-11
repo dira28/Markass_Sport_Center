@@ -34,3 +34,47 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+/* ===== BOOKED SLOT ===== */
+.jam-btn.jam-booked {
+    background: #ff4d4f !important;
+    border: 1px solid #ff4d4f !important;
+    color: #fff !important;
+    cursor: not-allowed !important;
+    opacity: 0.9;
+    pointer-events: none;
+    box-shadow: none !important;
+}
+
+/* hover booked */
+.jam-btn.jam-booked:hover {
+    background: #ff4d4f !important;
+    border-color: #ff4d4f !important;
+    color: #fff !important;
+}
+
+/* active booked protection */
+.jam-btn.jam-booked.active,
+.jam-btn.jam-booked.active-range {
+    background: #ff4d4f !important;
+    border-color: #ff4d4f !important;
+    color: #fff !important;
+}
+
+/* selected available slot */
+.jam-btn.active,
+.jam-btn.active-range {
+    background: #111827 !important;
+    color: white !important;
+    border-color: #111827 !important;
+}
+
+/* disabled generic */
+.jam-btn:disabled {
+    cursor: not-allowed;
+}
+
+/* smooth animation */
+.jam-btn {
+    transition: all 0.2s ease;
+}

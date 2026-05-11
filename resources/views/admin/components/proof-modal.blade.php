@@ -61,7 +61,7 @@
             const rawTrim = raw.trim();
             const url = /^(https?:\/\/|\/)/i.test(rawTrim)
                 ? rawTrim
-                : `http://127.0.0.1:5000/uploads/${rawTrim}`;
+                : `http://localhost:5000/uploads/${rawTrim}`;
 
             if (imgEl) {
                 imgEl.src = url;

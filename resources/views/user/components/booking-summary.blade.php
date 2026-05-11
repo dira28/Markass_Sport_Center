@@ -62,40 +62,5 @@
         Booking Sekarang →
     </button>
 
-    <!-- PAYMENT CARD -->
-    <div id="paymentCard" class="payment-card" style="display: none;">
-        <h5>Complete Payment</h5>
-        <p id="paymentSubtitle">Scan QR DANA di bawah dan upload bukti pembayaran</p>
-        
-        <div class="qr-container">
-            <img src="/images/qr-dana.jpg" alt="QR DANA" />
-        </div>
-
-        <div class="total-display">
-            <div>Total Pembayaran</div>
-            <div class="amount" id="paymentTotal">Rp 0</div>
-        </div>
-
-        <div class="upload-box" id="uploadBox">
-            <i class="fas fa-cloud-upload-alt text-muted" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-            <div>
-                <strong>Klik atau drag gambar bukti pembayaran</strong>
-                <p class="text-muted small mb-0">JPG, PNG max 2MB</p>
-            </div>
-            <input type="file" id="proofFile" accept="image/*" class="d-none">
-            <button class="payment-btn" id="uploadBtn" disabled>Upload Bukti</button>
-        </div>
-
-        <div id="uploadPreview" style="display: none;">
-            <img class="upload-preview" id="previewImg">
-            <div class="payment-badge menunggu-verifikasi mt-2 d-inline-block">
-                Menunggu Verifikasi Admin
-            </div>
-        </div>
-
-        <div class="payment-badge pending mt-3 d-inline-block" id="statusBadge">
-            Pending
-        </div>
-    </div>
-
 </div>
+

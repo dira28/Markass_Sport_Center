@@ -120,8 +120,8 @@
 
                         {{-- BUKTI --}}
                         <td>
-                            @if(isset($item['bukti_path']))
-                                <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none" data-proof-url="{{ $item['bukti_path'] }}" alt="Proof" />
+                            @if(isset($item['bukti_pembayaran']) && trim((string)($item['bukti_pembayaran'] ?? '')) !== '')
+                                <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none" data-proof-url="{{ $item['bukti_pembayaran'] }}" alt="Proof" />
                                 <button type="button" class="btn btn-outline-primary btn-sm" onclick="openProofModal('{{ $item['id_booking'] }}')">
                                     <i class="fas fa-eye"></i> View Proof
                                 </button>
@@ -156,3 +156,4 @@
     </div>
 
 @endsection
+
