@@ -30,10 +30,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const deadlineMs = deadlineValue ? new Date(deadlineValue).getTime() : NaN;
 
     function showStatus(title, text, type = 'info') {
-        if (paymentForm) paymentForm.style.display = 'none';
+        if (messageTitle) {
+            messageTitle.textContent = title;
+        }
 
-        if (messageTitle) messageTitle.textContent = title;
-        if (messageText) messageText.textContent = text;
+        if (messageText) {
+            messageText.textContent = text;
+        }
 
         if (statusMessage) {
             statusMessage.className = `mt-4 text-center alert alert-${type}`;
@@ -109,6 +112,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (s.includes('menunggu')) return 'waiting_confirmation';
 
         if (s === 'waiting_confirmation') return 'waiting_confirmation';
+
+        // legacy backend/payment tokens
+        if (s === 'approve') return 'confirmed';
+        if (s === 'paid') return 'confirmed';
+
         if (s === 'confirmed') return 'confirmed';
         if (s === 'expired') return 'expired';
         if (s === 'cancelled') return 'cancelled';
@@ -116,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return s;
     }
+
 
     // =========================
     // INITIAL STATUS
@@ -125,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const normalized =
             normalizePaymentStatus(
+                window.paymentStatus ||
                 statusBadge.dataset.paymentStatus ||
                 statusBadge.textContent
             );
@@ -397,31 +407,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const data = result.data || {};
 
-            const backendStatus =
-                data.status_pembayaran ||
-                data.status ||
-                'waiting_confirmation';
-
-            const normalizedStatus =
-                normalizePaymentStatus(backendStatus);
+            // IMPORTANT: frontend MUST render from status_pembayaran only
+            const backendStatus = data.status_pembayaran || 'pending';
+            const normalizedStatus = normalizePaymentStatus(backendStatus);
 
             if (statusBadge) {
-
                 statusBadge.dataset.paymentStatus = normalizedStatus;
 
-                statusBadge.textContent =
-                    normalizedStatus === 'waiting_confirmation'
-                        ? 'MENUNGGU VERIFIKASI ADMIN'
-                        : normalizedStatus.toUpperCase();
-
-                statusBadge.className = 'badge bg-primary';
+                if (normalizedStatus === 'waiting_confirmation') {
+                    statusBadge.className = 'badge bg-primary';
+                    statusBadge.textContent = 'WAITING FOR ADMIN VERIFICATION';
+                    showStatus(
+                        'Success',
+                        'Payment proof uploaded successfully. Waiting for admin confirmation.',
+                        'success'
+                    );
+                } else if (normalizedStatus === 'confirmed') {
+                    statusBadge.className = 'badge bg-success';
+                    statusBadge.textContent = 'PAYMENT CONFIRMED';
+                    showStatus(
+                        'Success',
+                        'Your payment has been confirmed by admin.',
+                        'success'
+                    );
+                } else if (normalizedStatus === 'expired') {
+                    statusBadge.className = 'badge bg-danger';
+                    statusBadge.textContent = 'Expired';
+                    showStatus(
+                        'Kadaluarsa',
+                        'Payment has expired.',
+                        'danger'
+                    );
+                } else if (normalizedStatus === 'cancelled') {
+                    statusBadge.className = 'badge bg-secondary';
+                    statusBadge.textContent = 'Cancelled';
+                    showStatus(
+                        'Dibatalkan',
+                        'Payment has been cancelled.',
+                        'secondary'
+                    );
+                } else {
+                    statusBadge.className = 'badge bg-warning';
+                    statusBadge.textContent = 'Pending';
+                }
             }
 
-            showStatus(
-                'Berhasil',
-                result.message || 'Payment proof submitted successfully.',
-                'success'
-            );
+            // UX rules: never hide the send button; just disable it permanently
+            if (submitPaymentBtn) submitPaymentBtn.disabled = true;
+            if (uploadBox) uploadBox.style.opacity = '0.5';
+
 
         } catch (err) {
 

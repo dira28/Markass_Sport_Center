@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
@@ -45,7 +46,7 @@ class BookingController extends Controller
                     'jam_selesai' => $request->jam_selesai,
                 ]);
 
-            // 🔥 HANDLE RESPONSE
+            // HANDLE RESPONSE
             if ($res->successful()) {
                 return response()->json([
                     'status' => 'success',
@@ -129,35 +130,94 @@ class BookingController extends Controller
     public function payment($id)
     {
         $token = session('token');
+
         if (!$token) {
             return redirect('/login');
         }
 
         try {
+
             $res = Http::withToken($token)
                 ->get(env('API_URL') . '/api/booking/' . $id);
 
             if ($res->successful()) {
+
                 $booking = $res->json()['data'] ?? null;
+
                 if ($booking) {
-                    $statusClass = match ($booking['status'] ?? '') {
+
+                    // AMBIL STATUS PEMBAYARAN (ONLY status_pembayaran)
+                    $paymentStatus = strtolower(
+                        $booking['status_pembayaran'] ?? 'pending'
+                    );
+
+                    // Normalize old payment tokens
+                    if ($paymentStatus === 'menunggu_verifikasi') {
+                        $paymentStatus = 'waiting_confirmation';
+                    }
+
+                    if ($paymentStatus === 'approve' || $paymentStatus === 'paid') {
+                        $paymentStatus = 'confirmed';
+                    }
+
+
+
+
+                    // NORMALIZE STATUS VALUES
+                    if ($paymentStatus === 'menunggu_verifikasi') {
+                        $paymentStatus = 'waiting_confirmation';
+                    }
+
+                    if ($paymentStatus === 'approve' || $paymentStatus === 'paid') {
+                        $paymentStatus = 'confirmed';
+                    }
+
+
+                    // NORMALIZE STATUS
+
+                    // (already normalized above)
+
+
+                    // CLASS BADGE
+                    $statusClass = match ($paymentStatus) {
                         'pending' => 'bg-warning',
-                        'menunggu_verifikasi' => 'bg-orange',
+                        'waiting_confirmation' => 'bg-primary',
                         'confirmed' => 'bg-success',
                         'expired' => 'bg-danger',
+                        'cancelled' => 'bg-secondary',
                         default => 'bg-secondary'
                     };
-                    $statusText = ucfirst(str_replace('_', ' ', $booking['status'] ?? 'unknown'));
-                    return view('user.pages.payment', compact('booking', 'statusClass', 'statusText'));
+
+                    // TEXT STATUS
+                    $statusText = match ($paymentStatus) {
+                        'pending' => 'Pending',
+                        'waiting_confirmation' => 'Menunggu Verifikasi',
+                        'confirmed' => 'Sudah Dibayar',
+                        'expired' => 'Expired',
+                        'cancelled' => 'Cancelled',
+                        default => 'Pending'
+                    };
+
+
+                    // SIMPAN STATUS YANG SUDAH DINORMALISASI
+                    $booking['status_pembayaran'] = $paymentStatus;
+
+                    return view(
+                        'user.pages.payment',
+                        compact('booking', 'statusClass', 'statusText')
+                    );
                 }
             }
 
-            return redirect('/booking')->with('error', 'Booking not found');
+            return redirect('/booking')
+                ->with('error', 'Booking not found');
+
         } catch (\Exception $e) {
-            return redirect('/booking')->with('error', 'Error loading booking');
+
+            return redirect('/booking')
+                ->with('error', 'Error loading booking');
         }
     }
-
     public function uploadProof($id, Request $request)
     {
         // Requirement: form-data key `bukti`, accept only .jpg/.jpeg/.png
@@ -197,15 +257,22 @@ class BookingController extends Controller
                 $latestBukti = $data['bukti_pembayaran'] ?? $data['bukti'] ?? null;
                 $statusPembayaran = $data['status_pembayaran'] ?? $data['status'] ?? 'waiting_confirmation';
 
+                // Normalize old backend values into allowed set
+                $normalizedStatus = strtolower(trim((string) $statusPembayaran));
+                if ($normalizedStatus === 'menunggu_verifikasi') {
+                    $normalizedStatus = 'waiting_confirmation';
+                }
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Menunggu konfirmasi admin',
                     'data' => [
                         'id_booking' => $data['id_booking'] ?? $id,
                         'bukti_pembayaran' => $latestBukti,
-                        'status_pembayaran' => $statusPembayaran,
+                        'status_pembayaran' => $normalizedStatus,
                     ]
                 ]);
+
             }
 
             return response()->json([
@@ -223,24 +290,32 @@ class BookingController extends Controller
     public function confirmPayment($id_booking)
     {
         $token = session('token');
+
         if (!$token) {
-            return response()->json(['success' => false, 'message' => 'Login required'], 401);
+            return redirect()->back()->with('error', 'Login required');
         }
 
         try {
+
             $res = Http::withToken($token)
                 ->patch(env('API_URL') . '/api/booking/' . $id_booking . '/confirm-payment');
 
             if ($res->successful()) {
-                return response()->json(['success' => true, 'message' => 'Pembayaran approved']);
+
+                return redirect()
+                    ->back()
+                    ->with('success', 'Pembayaran berhasil di-approve');
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => $res->json()['message'] ?? 'Confirm payment failed'
-            ], $res->status() ?: 500);
+            return redirect()
+                ->back()
+                ->with('error', $res->json()['message'] ?? 'Confirm payment failed');
+
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -280,7 +355,44 @@ class BookingController extends Controller
             $blocked = [];
 
             foreach ($data as $booking) {
+
                 if ($booking['id_lapangan'] != $lapangan_id) {
+                    continue;
+                }
+
+                $paymentStatus = strtolower(
+                    (string) ($booking['status_pembayaran'] ?? 'pending')
+                );
+
+                if ($paymentStatus === 'approve' || $paymentStatus === 'paid') {
+                    $paymentStatus = 'confirmed';
+                }
+
+                if ($paymentStatus === 'menunggu_verifikasi') {
+                    $paymentStatus = 'waiting_confirmation';
+                }
+
+
+                if ($paymentStatus === 'pending') {
+
+                    $createdAt = \Carbon\Carbon::parse($booking['created_at']);
+
+                    $now = \Carbon\Carbon::now('Asia/Jakarta');
+
+                    $minutes = $createdAt->diffInMinutes($now);
+
+                    if ($minutes >= 30) {
+
+                        Http::withToken($token)
+                            ->patch(env('API_URL') . '/api/booking/' . $booking['id_booking'], [
+                                'status_pembayaran' => 'expired'
+                            ]);
+
+                        continue;
+                    }
+                }
+
+                if (in_array($paymentStatus, ['expired', 'cancelled'], true)) {
                     continue;
                 }
 
@@ -288,7 +400,9 @@ class BookingController extends Controller
                 $end = (int) substr($booking['jam_selesai'], 0, 2);
 
                 for ($i = $start; $i < $end; $i++) {
-                    $blocked[] = str_pad($i, 2, '0', STR_PAD_LEFT) . ":00";
+
+                    $blocked[] =
+                        str_pad($i, 2, '0', STR_PAD_LEFT) . ":00";
                 }
             }
 

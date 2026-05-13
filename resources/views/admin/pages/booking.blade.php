@@ -20,10 +20,10 @@
             </div>
         @endif
 
-{{-- Proof modal (View Proof) --}}
-@include('admin.components.proof-modal')
+        {{-- Proof modal (View Proof) --}}
+        @include('admin.components.proof-modal')
 
-<table class="table align-middle admin-booking-table payment-admin-table">
+        <table class="table align-middle admin-booking-table payment-admin-table">
             <thead>
                 <tr>
 
@@ -48,30 +48,51 @@
 
                         // ===== Normalize payment status to ONLY these values =====
                         // pending | waiting_confirmation | confirmed | expired | cancelled
-                        $rawPaymentStatus = $item['status_pembayaran'] ?? $item['status'] ?? 'pending';
+                        $rawPaymentStatus = $item['status_pembayaran'] ?? 'pending';
                         $paymentStatus = $rawPaymentStatus;
 
-                        // Safe normalization (old API tokens)
+                        // NORMALIZE STATUS VALUES
                         if ($paymentStatus === 'menunggu_verifikasi') {
                             $paymentStatus = 'waiting_confirmation';
                         }
 
-                        // If backend still sends other legacy Indonesian tokens, map them safely.
+                        if ($paymentStatus === 'approve' || $paymentStatus === 'paid') {
+                            $paymentStatus = 'confirmed';
+                        }
+
+
+                        // Safe normalization (lowercase + mapping)
                         if (is_string($paymentStatus)) {
                             $paymentStatus = strtolower(trim($paymentStatus));
-                            if ($paymentStatus === 'menunggu_verifikasi') $paymentStatus = 'waiting_confirmation';
                         }
+
+                        if ($paymentStatus === 'menunggu_verifikasi') {
+                            $paymentStatus = 'waiting_confirmation';
+                        }
+
+                        if ($paymentStatus === 'approve' || $paymentStatus === 'paid') {
+                            $paymentStatus = 'confirmed';
+                        }
+
 
 
                         // Normalize any accidental legacy values
                         if (isset($paymentStatus) && is_string($paymentStatus)) {
                             $paymentStatus = strtolower(trim($paymentStatus));
-                            if ($paymentStatus === 'menunggu_verifikasi') $paymentStatus = 'waiting_confirmation';
+                        }
+
+                        if ($paymentStatus === 'menunggu_verifikasi') {
+                            $paymentStatus = 'waiting_confirmation';
+                        }
+
+                        if ($paymentStatus === 'approve' || $paymentStatus === 'paid') {
+                            $paymentStatus = 'confirmed';
                         }
 
 
+
                         // Defensive: normalize to allowed set only
-                        if (!in_array($paymentStatus, ['pending','waiting_confirmation','confirmed','expired','cancelled'], true)) {
+                        if (!in_array($paymentStatus, ['pending', 'waiting_confirmation', 'confirmed', 'expired', 'cancelled'], true)) {
                             $paymentStatus = 'pending';
                         }
 
@@ -120,9 +141,11 @@
 
                         {{-- BUKTI --}}
                         <td>
-                            @if(isset($item['bukti_pembayaran']) && trim((string)($item['bukti_pembayaran'] ?? '')) !== '')
-                                <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none" data-proof-url="{{ $item['bukti_pembayaran'] }}" alt="Proof" />
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="openProofModal('{{ $item['id_booking'] }}')">
+                            @if(isset($item['bukti_pembayaran']) && trim((string) ($item['bukti_pembayaran'] ?? '')) !== '')
+                                <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none"
+                                    data-proof-url="{{ $item['bukti_pembayaran'] }}" alt="Proof" />
+                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                    onclick="openProofModal('{{ $item['id_booking'] }}')">
                                     <i class="fas fa-eye"></i> View Proof
                                 </button>
                             @else
@@ -132,16 +155,34 @@
 
                         {{-- AKSI --}}
                         <td>
-                            @if($paymentStatus === 'waiting_confirmation')
-                                <form method="POST" action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve Payment?')">
+                            {{-- IMPORTANT: button must ALWAYS exist; only enabled/disabled changes --}}
+
+                            <form method="POST" action="/booking/{{ $item['id_booking'] }}/confirm-payment"
+                                style="display:inline;">
+                                @csrf
+                                @method('PATCH')
+
+                                @php
+                                    $isWaiting = $paymentStatus === 'waiting_confirmation';
+                                    $isConfirmed = $paymentStatus === 'confirmed';
+                                @endphp
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-success btn-sm"
+                                    {{ (!$isWaiting || $isConfirmed) ? 'disabled' : '' }}
+                                    onclick="return confirm('Approve Payment?')"
+                                >
+                                    @if($isConfirmed)
+                                        <i class="fas fa-check-double"></i> Approved
+                                    @else
                                         <i class="fas fa-check"></i> Approve
-                                    </button>
-                                </form>
-                            @endif
+                                    @endif
+                                </button>
+
+                            </form>
                         </td>
+
                     </tr>
                 @empty
                     <tr>
@@ -156,4 +197,3 @@
     </div>
 
 @endsection
-

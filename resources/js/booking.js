@@ -121,19 +121,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
             blockedSlots = statusData
                 .filter(item => {
-                    // treat expired/cancelled as available again
-                    const s = (item.status ?? '').toLowerCase();
+                    // treat expired/cancelled as available again (ignore ONLY these)
+                    const s = (item.status_pembayaran ?? item.status ?? '').toLowerCase();
                     if (s.includes('expired') || s.includes('cancelled')) return false;
+
+                    // block: pending/waiting_confirmation/confirmed (and legacy tokens)
+                    if (
+                        s === 'pending' ||
+                        s === 'waiting_confirmation' ||
+                        s === 'confirmed' ||
+                        s === 'paid' ||
+                        s === 'menunggu_verifikasi' ||
+                        s === 'approve'
+                    ) {
+                        return true;
+                    }
 
                     // backward compat: API might return `terbooking`
                     if (s === 'terbooking') return true;
 
-                    // new required statuses
-                    if (s === 'pending' || s === 'waiting_confirmation' || s === 'confirmed') return true;
-
                     return false;
                 })
                 .map(item => item.jam);
+
 
             // Reset selection
             resetSelection();
@@ -157,11 +167,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (finalBlocked) {
                     btn.classList.add("jam-booked");
+                    btn.classList.add("booked-slot");
                     btn.disabled = true;
+                    btn.style.cursor = 'not-allowed';
+                    btn.style.opacity = '0.8';
+                    btn.style.pointerEvents = 'none';
                 } else {
                     btn.classList.remove("jam-booked");
+                    btn.classList.remove("booked-slot");
                     btn.disabled = false;
+                    btn.style.cursor = '';
+                    btn.style.opacity = '';
+                    btn.style.pointerEvents = '';
                 }
+
+
             });
 
         } catch (err) {

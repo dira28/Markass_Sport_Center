@@ -134,6 +134,10 @@
             </div>
         </div>
 
+        <script>
+            window.paymentStatus = "{{ $booking['status_pembayaran'] ?? 'pending' }}";
+        </script>
+        
         @vite('resources/js/payment.js')
 
         <script>

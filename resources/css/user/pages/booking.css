@@ -35,32 +35,6 @@ body {
     flex-direction: column;
 }
 
-/* ===== BOOKED SLOT ===== */
-.jam-btn.jam-booked {
-    background: #ff4d4f !important;
-    border: 1px solid #ff4d4f !important;
-    color: #fff !important;
-    cursor: not-allowed !important;
-    opacity: 0.9;
-    pointer-events: none;
-    box-shadow: none !important;
-}
-
-/* hover booked */
-.jam-btn.jam-booked:hover {
-    background: #ff4d4f !important;
-    border-color: #ff4d4f !important;
-    color: #fff !important;
-}
-
-/* active booked protection */
-.jam-btn.jam-booked.active,
-.jam-btn.jam-booked.active-range {
-    background: #ff4d4f !important;
-    border-color: #ff4d4f !important;
-    color: #fff !important;
-}
-
 /* selected available slot */
 .jam-btn.active,
 .jam-btn.active-range {
@@ -69,12 +43,34 @@ body {
     border-color: #111827 !important;
 }
 
-/* disabled generic */
+/* Already booked slots (must be blocked immediately) */
+.jam-btn.jam-booked {
+    background: #dc3545 !important;
+    color: white !important;
+    pointer-events: none;
+    opacity: 0.8 !important;
+    cursor: not-allowed !important;
+    border: none !important;
+}
+
+
+/* hover booked */
+.jam-btn.jam-booked:hover {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+
+/* Ensure disabled state stays disabled */
 .jam-btn:disabled {
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
 /* smooth animation */
 .jam-btn {
+    cursor: pointer;
     transition: all 0.2s ease;
 }
+
+

@@ -1,8 +1,22 @@
 /* Scoped Laporan Page CSS - Bootstrap Safe */
+.report-page {
+  background: var(--bg-light);
+}
+
+/* keep old selector compatibility */
 .laporan-page {
   background: #f5f7fb;
   padding: 2rem 0;
 }
+
+/* Improve text visibility for cards and table */
+.report-page .text-muted { color: #6b7280 !important; }
+.report-page .kpi-number { color: #111827 !important; }
+.report-page .kpi-label { color: #374151 !important; }
+
+
+
+
 
 .laporan-page .page-title {
   color: #111827 !important;
@@ -138,3 +152,49 @@
     font-size: 0.85rem;
   }
 }
+
+/* ==============================
+   Laporan page: status badges
+   ============================== */
+.laporan-table .status-badge {
+  padding: 0.45rem 0.9rem !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  line-height: 1;
+  border: none !important;
+  color: inherit !important;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Paid */
+.laporan-table .status-paid {
+  background: #d1fae5 !important; /* green */
+  color: #065f46 !important;
+}
+
+/* Pending */
+.laporan-table .status-pending {
+  background: #fef3c7 !important; /* yellow */
+  color: #92400e !important;
+}
+
+/* Expired */
+.laporan-table .status-expired {
+  background: #e5e7eb !important; /* gray */
+  color: #111827 !important;
+}
+
+/* Cancelled/Rejected */
+.laporan-table .status-cancelled {
+  background: #fee2e2 !important; /* red */
+  color: #991b1b !important;
+}
+
+/* Info/other */
+.laporan-table .status-info {
+  background: #dbeafe !important;
+  color: #1e40af !important;
+}
+
