@@ -1,317 +1,439 @@
-/* GLOBAL & TYPOGRAPHY */
-body {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    background: #fffcfc;
-    color: #333;
+/* ========================================
+   GLOBAL
+======================================== */
+body{
+    font-family:'Inter','Segoe UI',sans-serif;
+    background:#f5f5f5;
+    color:#222;
+    overflow-x:hidden;
 }
 
-/* HERO SECTION */
-.hero-dashboard {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(143, 34, 34, 0.4)),
-                url('https://images.unsplash.com/photo-1574629810360-7efbbe195018');
-    background-size: cover;
-    background-position: center;
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    color: white;
+/* ========================================
+   HERO SECTION
+======================================== */
+.hero-dashboard{
+    min-height:88vh;
+    display:flex;
+    align-items:center;
+    position:relative;
+    overflow:hidden;
+
+    background:
+    linear-gradient(to right, rgba(0,0,0,.75), rgba(0,0,0,.30)),
+    url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1600');
+
+    background-size:cover;
+    background-position:center;
+    padding:120px 0 180px;
 }
 
-.hero-dashboard h1 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 20px;
+.hero-dashboard::before{
+    content:'';
+    position:absolute;
+    bottom:-120px;
+    left:-5%;
+    width:110%;
+    height:220px;
+    background:#f5f5f5;
+    border-radius:50%;
+    z-index:1;
 }
 
-.hero-dashboard p {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 30px;
+.hero-dashboard .container{
+    position:relative;
+    z-index:2;
 }
 
-/* BUTTONS */
-.btn-red-dashboard {
-    background: #b02a2a;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 50px;
-    border: none;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(176, 42, 42, 0.3);
+/* PERBAIKAN UKURAN JUDUL */
+.hero-dashboard h1{
+    font-size:clamp(2.4rem,4vw,4rem);
+    font-weight:900;
+    line-height:1.15;
+    color:#fff;
+    margin-bottom:20px;
+    max-width:600px;
 }
 
-.btn-red-dashboard:hover {
-    background: #8f2222;
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(143, 34, 34, 0.4);
+.hero-dashboard p{
+    font-size:1rem;
+    line-height:1.8;
+    color:#f1f1f1;
+    max-width:520px;
+    margin-bottom:30px;
 }
 
-.btn-outline-white {
-    background: transparent;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 50px;
-    border: 2px solid white;
-    font-weight: 600;
-    text-decoration: none;
-    transition: 0.3s;
+/* ========================================
+   BUTTON
+======================================== */
+.hero-btns{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
 }
 
-.btn-outline-white:hover {
-    background: white;
-    color: #8f2222;
+.btn-red-dashboard{
+    background:#d32f2f;
+    color:#fff;
+    border:none;
+    padding:13px 28px;
+    border-radius:50px;
+    font-weight:700;
+    text-decoration:none;
+    transition:.3s;
+    box-shadow:0 8px 20px rgba(211,47,47,.25);
 }
 
-/* SECTION TITLES */
-.section-title-dashboard {
-    font-weight: 800;
-    color: #8f2222;
-    position: relative;
-    display: inline-block;
+.btn-red-dashboard:hover{
+    background:#b71c1c;
+    transform:translateY(-3px);
+    color:#fff;
 }
 
-.title-line {
-    width: 60px;
-    height: 4px;
-    background: #b02a2a;
-    margin: 10px auto 40px;
-    border-radius: 2px;
+.btn-outline-white{
+    border:2px solid #fff;
+    color:#fff;
+    padding:12px 28px;
+    border-radius:50px;
+    text-decoration:none;
+    font-weight:700;
+    transition:.3s;
 }
 
-/* CARDS */
-.card-dashboard {
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-    border: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    transition: all 0.4s ease;
-    height: 100%;
-    margin: 0 10px;
+.btn-outline-white:hover{
+    background:#fff;
+    color:#111;
 }
 
-.card-dashboard:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 35px rgba(143, 34, 34, 0.15);
+/* ========================================
+   TITLE
+======================================== */
+.section-title-dashboard{
+    font-size:2.5rem;
+    font-weight:800;
+    color:#111;
 }
 
-.card-img-wrapper {
-    overflow: hidden;
-    height: 200px;
+.title-line{
+    width:70px;
+    height:4px;
+    background:#d32f2f;
+    margin:12px auto 0;
+    border-radius:20px;
 }
 
-.card-dashboard img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: 0.5s;
+/* ========================================
+   ROW JARAK CARD
+======================================== */
+.row.g-4{
+    row-gap:25px !important;
 }
 
-.card-dashboard:hover img {
-    transform: scale(1.1);
+/* TAMBAH JARAK ANTAR KOTAK */
+.row.g-4 > div{
+    padding-left:18px;
+    padding-right:18px;
 }
 
-.card-dashboard .card-body {
-    padding: 25px;
+/* ========================================
+   CARD
+======================================== */
+.card-dashboard{
+    background:#fff;
+    border-radius:24px;
+    overflow:hidden;
+    transition:.35s;
+    height:100%;
+    box-shadow:0 8px 25px rgba(0,0,0,.06);
 }
 
-.card-dashboard h5 {
-    font-weight: 700;
-    margin-bottom: 10px;
+.card-dashboard:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 35px rgba(0,0,0,.1);
 }
 
-.card-dashboard .price {
-    color: #8f2222;
-    font-weight: 800;
-    font-size: 1.1rem;
+.card-img-wrapper{
+    height:220px;
+    overflow:hidden;
 }
 
-.card-dashboard .price span {
-    font-size: 0.8rem;
-    color: #888;
+.card-dashboard img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.4s;
 }
 
-/* HILANGKAN JARAK KE BAWAH */
-.row.g-4 {
-    row-gap: 0;
+.card-dashboard:hover img{
+    transform:scale(1.05);
 }
 
-/* TIMELINE CUSTOM */
-.timeline-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+.card-dashboard .card-body{
+    padding:24px;
 }
 
-.step {
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(5px);
-    padding: 30px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.2);
-    text-align: center;
+.card-dashboard h5{
+    font-size:1.4rem;
+    font-weight:800;
+    margin-bottom:15px;
+    line-height:1.3;
 }
 
-/* PERBESAR ANGKA STEP */
-.step-number {
-    width: 60px;
-    height: 60px;
-    background: white;
-    color: #8f2222;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 1.5rem;
-    margin: 0 auto 20px;
+.card-dashboard .price{
+    font-size:1.9rem;
+    font-weight:900;
+    color:#c62828;
+    margin-bottom:20px;
 }
 
-/* TESTIMONIALS */
-.testimonial-card {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.03);
-    height: 100%;
-    text-align: center;
+.card-dashboard .price span{
+    font-size:1rem;
+    color:#777;
+    font-weight:600;
 }
 
-/* TAMBAHAN: FOTO BENAR-BENAR TENGAH */
-.testimonial-card img {
-    width: 70px;
-    height: 70px;
-    border: 3px solid #b02a2a;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
-    margin: 0 auto 15px auto;
+/* ========================================
+   FEATURE BOX
+======================================== */
+.feature-box{
+    background:#fff;
+    padding:35px 25px;
+    border-radius:24px;
+    height:100%;
+    transition:.3s;
+    box-shadow:0 8px 25px rgba(0,0,0,.05);
 }
 
-/* GRID TESTIMONI */
-.testimonial-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
+.feature-box:hover{
+    transform:translateY(-6px);
 }
 
-.testimonial-row .col-md-4 {
-    display: flex;
+.feature-box img{
+    width:65px;
+    margin-bottom:18px;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    .hero-dashboard {
-        text-align: center;
-        padding-top: 100px;
-    }
-    .hero-btns .btn-red-dashboard {
-        margin-bottom: 10px;
-        width: 100%;
-    }
-    .btn-outline-white {
-        width: 100%;
-    }
+.feature-box h5{
+    font-size:1.4rem;
+    font-weight:800;
+    margin-bottom:12px;
 }
 
-.nav-tabs .nav-link {
-    border: none;
-    color: var(--text-dark);
-    transition: 0.25s;
+.feature-box p{
+    color:#666;
+    line-height:1.7;
+    margin:0;
 }
 
-.nav-tabs .nav-link:hover {
-    color: var(--primary);
+/* ========================================
+   TIMELINE
+======================================== */
+.timeline-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
 }
 
-.nav-tabs .nav-link.active {
-    border-bottom: 3px solid var(--primary);
+.step{
+    background:#fff;
+    border-radius:24px;
+    padding:35px 25px;
+    text-align:center;
+    transition:.3s;
+    box-shadow:0 8px 25px rgba(0,0,0,.05);
 }
 
-.tab-content p, .tab-content li {
-    line-height: 1.7;
+.step:hover{
+    transform:translateY(-6px);
 }
 
-.list-group-item {
-    background: transparent;
+.step-number{
+    width:60px;
+    height:60px;
+    background:#d32f2f;
+    color:#fff;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.5rem;
+    font-weight:800;
+    margin:0 auto 20px;
 }
 
-/* LOGIN BUTTON */
-.navbar .btn-danger {
-    background-color: #b02a2a !important;
-    border-color: #b02a2a !important;
+.step h5{
+    font-size:1.3rem;
+    font-weight:800;
+    margin-bottom:12px;
 }
 
-.navbar .btn-danger:hover {
-    background-color: #8f2222 !important;
-    border-color: #8f2222 !important;
+.step p{
+    color:#666;
+    line-height:1.7;
 }
 
-/* FIX JARAK */
-.card-dashboard .price {
-    margin-bottom: 15px;
+/* ========================================
+   TESTIMONIAL
+======================================== */
+.testimonial-card{
+    background:#fff;
+    padding:35px 25px;
+    border-radius:24px;
+    text-align:center;
+    box-shadow:0 8px 25px rgba(0,0,0,.05);
+    transition:.3s;
+    height:100%;
 }
 
-.card-dashboard .btn-red-dashboard {
-    margin-top: 5px;
+.testimonial-card:hover{
+    transform:translateY(-6px);
 }
 
-/* ========================= */
-/* TAMBAHAN BARU */
-/* ========================= */
-
-/* BUTTON TAMBAH KOMENTAR */
-.add-comment-btn {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    background: #b02a2a;
-    color: #fff;
-    border: none;
-    border-radius: 50px;
-    padding: 12px 18px;
-    font-size: 14px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    cursor: pointer;
-    z-index: 999;
+.testimonial-card img{
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:50%;
+    border:4px solid #d32f2f;
+    margin:0 auto 18px auto;
+    display:block;
 }
 
-.add-comment-btn:hover {
-    background: #8f2222;
+.testimonial-card p{
+    color:#666;
+    line-height:1.8;
+    margin-bottom:12px;
 }
 
-/* MODAL KOMENTAR */
-.comment-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
+.testimonial-card h6{
+    font-size:1.1rem;
+    font-weight:800;
 }
 
-.comment-box {
-    background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    margin: 100px auto;
+/* ========================================
+   BUTTON KOMENTAR
+======================================== */
+.add-comment-btn{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    border:none;
+    background:#d32f2f;
+    color:#fff;
+    padding:14px 24px;
+    border-radius:50px;
+    font-size:14px;
+    font-weight:700;
+    z-index:999;
+    transition:.3s;
+    box-shadow:0 10px 25px rgba(211,47,47,.3);
+}
+
+.add-comment-btn:hover{
+    background:#b71c1c;
+    transform:translateY(-3px);
+}
+
+/* ========================================
+   MODAL
+======================================== */
+.comment-modal{
+    display:none;
+    position:fixed;
+    z-index:9999;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.55);
+    backdrop-filter:blur(4px);
+}
+
+.comment-box{
+    background:#fff;
+    width:90%;
+    max-width:450px;
+    margin:6% auto;
+    padding:30px;
+    border-radius:24px;
+}
+
+.comment-box h5{
+    font-size:1.8rem;
+    font-weight:800;
+    margin-bottom:20px;
 }
 
 .comment-box input,
-.comment-box textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+.comment-box textarea{
+    width:100%;
+    border:none;
+    background:#f3f3f3;
+    border-radius:15px;
+    padding:14px 18px;
+    margin-bottom:15px;
+    outline:none;
+}
+
+.comment-box textarea{
+    resize:none;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+@media(max-width:992px){
+
+    .hero-dashboard{
+        text-align:center;
+        padding-top:100px;
+    }
+
+    .hero-dashboard h1{
+        font-size:3rem;
+        margin:auto auto 20px auto;
+    }
+
+    .hero-dashboard p{
+        margin:auto auto 30px auto;
+    }
+
+    .hero-btns{
+        justify-content:center;
+    }
+}
+
+@media(max-width:768px){
+
+    .hero-dashboard{
+        min-height:80vh;
+        padding:90px 0 140px;
+    }
+
+    .hero-dashboard h1{
+        font-size:2.3rem;
+    }
+
+    .hero-dashboard p{
+        font-size:.95rem;
+    }
+
+    .btn-red-dashboard,
+    .btn-outline-white{
+        width:100%;
+        text-align:center;
+    }
+
+    .section-title-dashboard{
+        font-size:2rem;
+    }
+
+    .card-dashboard .price{
+        font-size:1.5rem;
+    }
+
+    /* JARAK MOBILE */
+    .row.g-4 > div{
+        padding-left:12px;
+        padding-right:12px;
+    }
 }
