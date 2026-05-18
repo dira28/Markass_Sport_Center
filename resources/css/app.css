@@ -232,4 +232,46 @@ body {
         color: white !important;
         border: none;
     }
+
+}
+
+/* ========================= */
+/* FOOTER RESPONSIVE */
+/* ========================= */
+
+@media (max-width: 767px) {
+
+    .footer-main {
+        text-align: center;
+    }
+
+    .footer-main img {
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+
+    .footer-main .footer-link li {
+        margin-bottom: 8px;
+    }
+
+    .footer-main h5 {
+        margin-top: 15px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+
+    .footer-main {
+        text-align: left;
+    }
+
+    .footer-main img {
+        max-width: 140px;
+    }
+}
+
+.footer-main .footer-link li a:hover {
+    color: #fff;
+    transition: 0.3s;
 }
