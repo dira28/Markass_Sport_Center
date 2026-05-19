@@ -2,211 +2,211 @@
 
 @section('title', 'Laporan')
 
-@push('styles')
-@vite(['resources/css/admin/pages/report.css', 'resources/css/admin/pages/laporan.css'])
 
-@endpush
-
+@vite(['resources/js/app.js'])
 @section('content')
-<div class="container-fluid report-page">
 
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="/admin/dashboard">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Laporan</li>
-                    </ol>
-                </div>
-                <h4 class="page-title">Laporan Booking</h4>
-            </div>
+    @php
+        $statusMap = [
+            'paid' => 'Paid',
+            'confirmed' => 'Paid',
+            'pending' => 'Pending',
+            'waiting_confirmation' => 'Pending',
+            'menunggu_verifikasi' => 'Pending',
+            'expired' => 'Expired',
+            'cancelled' => 'Cancelled',
+        ];
+
+        $paidBooking = collect($bookings)
+            ->whereIn('status_pembayaran', ['paid', 'confirmed'])
+            ->count();
+
+        $pendingBooking = collect($bookings)
+            ->whereIn('status_pembayaran', ['pending', 'waiting_confirmation', 'menunggu_verifikasi'])
+            ->count();
+    @endphp
+
+    <div class="container-fluid report-page">
+
+        {{-- TITLE --}}
+        <div class="page-title-box">
+            <h4 class="page-title">Laporan Booking</h4>
         </div>
-    </div>
 
-    {{-- FILTER CARD --}}
-    <div class="filter-card mt-4">
-        <form method="GET">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label filter-label">Dari Tanggal</label>
-                    <input type="date" name="from_date" value="{{ $fromDate }}" class="form-control">
-                </div>
+        {{-- FILTER --}}
+        <div class="filter-card">
+            <form method="GET" action="{{ route('admin.laporan') }}">
+                <div class="row g-3 align-items-end">
 
-                <div class="col-md-4">
-                    <label class="form-label filter-label">Sampai Tanggal</label>
-                    <input type="date" name="to_date" value="{{ $toDate }}" class="form-control">
-                </div>
-
-                <div class="col-md-4 d-grid">
-                    <button type="submit" class="btn btn-export btn-lg">
-                        <i class="fas fa-filter"></i>
-                        <span>Filter</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="mt-3">
-                <h5 class="text-muted mb-0">Showing {{ $totalBooking }} bookings from {{ $fromDate }} to {{ $toDate }}</h5>
-            </div>
-        </form>
-    </div>
-
-    {{-- KPI CARDS --}}
-    <div class="kpi-grid row mt-4 g-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card kpi-booking h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#dbeafe; color:#1d4ed8;">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <div>
-                            <div class="kpi-label">Total Booking</div>
-                            <div class="kpi-number">{{ number_format($totalBooking, 0, ',', '.') }}</div>
-                        </div>
+                    <div class="col-md-4">
+                        <label class="filter-label">Dari</label>
+                        <input type="date" name="from_date" value="{{ $fromDate }}" class="form-control">
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card kpi-revenue h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#d1fae5; color:#065f46;">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div>
-                            <div class="kpi-label">Total Revenue</div>
-                            <div class="kpi-number">Rp{{ number_format($totalRevenue, 0, ',', '.') }}</div>
-                        </div>
+                    <div class="col-md-4">
+                        <label class="filter-label">Sampai</label>
+                        <input type="date" name="to_date" value="{{ $toDate }}" class="form-control">
                     </div>
-                </div>
-            </div>
-        </div>
 
-        @php
-            $paidBooking = collect($bookings)->filter(function($b){
-                return ($b['status_pembayaran'] ?? '') === 'paid' || ($b['status_pembayaran'] ?? '') === 'confirmed';
-            })->count();
-            $pendingBooking = collect($bookings)->filter(function($b){
-                return ($b['status_pembayaran'] ?? '') === 'pending' || ($b['status_pembayaran'] ?? '') === 'waiting_confirmation' || ($b['status_pembayaran'] ?? '') === 'menunggu_verifikasi';
-            })->count();
-        @endphp
+                    {{-- BUTTON FILTER + RESET --}}
+                    <div class="col-md-4 d-flex gap-2">
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card h-100" style="border-left-color:#10b981;">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#d1fae5; color:#065f46;">
-                            <i class="fas fa-circle-check"></i>
-                        </div>
-                        <div>
-                            <div class="kpi-label">Paid Booking</div>
-                            <div class="kpi-number">{{ number_format($paidBooking, 0, ',', '.') }}</div>
-                        </div>
+                        <button type="submit" class="btn-filter w-50">
+                            Filter
+                        </button>
+
+                        <a href="{{ route('admin.laporan') }}" class="btn-reset w-50">
+                            Reset
+                        </a>
+
                     </div>
+
                 </div>
-            </div>
+
+                <p class="filter-info mt-3 mb-0">
+                    {{ $totalBooking }} booking dari {{ $fromDate }} - {{ $toDate }}
+                </p>
+            </form>
         </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card h-100" style="border-left-color:#f59e0b;">
-                <div class="card-body">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#fef3c7; color:#92400e;">
-                            <i class="fas fa-hourglass-half"></i>
-                        </div>
-                        <div>
-                            <div class="kpi-label">Pending Booking</div>
-                            <div class="kpi-number">{{ number_format($pendingBooking, 0, ',', '.') }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        {{-- KPI --}}
+        <div class="kpi-grid">
 
-    {{-- EXPORT BUTTON --}}
-    <div class="export-section text-end mt-4">
-        <a href="{{ route('admin.laporan.export', ['from_date' => $fromDate, 'to_date' => $toDate]) }}" class="btn btn-export">
-            <i class="fas fa-download"></i>
-            <span>Export PDF</span>
-        </a>
-    </div>
-
-    {{-- TABLE --}}
-    <div class="table-card mt-4">
-        <div class="table-header">
-            <div>
-                <h5 class="table-title mb-0">{{ $totalBooking }} Bookings</h5>
-                <p class="table-subtitle mb-0">Periode {{ $fromDate }} - {{ $toDate }}</p>
+            <div class="kpi-card booking">
+                <div class="kpi-label">Total Booking</div>
+                <div class="kpi-number">{{ $totalBooking }}</div>
             </div>
+
+            <div class="kpi-card revenue">
+                <div class="kpi-label">Revenue</div>
+                <div class="kpi-number">Rp{{ number_format($totalRevenue, 0, ',', '.') }}</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Paid</div>
+                <div class="kpi-number">{{ $paidBooking }}</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">Pending</div>
+                <div class="kpi-number">{{ $pendingBooking }}</div>
+            </div>
+
         </div>
 
-        <div class="table-responsive p-0">
-            <table class="table laporan-table table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Lapangan</th>
-                        <th>Tanggal</th>
-                        <th>Jam</th>
-                        <th class="text-center">User</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-end">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($bookings as $booking)
-                        @php
-                            $st = $booking['status_pembayaran'] ?? 'pending';
-                        @endphp
+        {{-- EXPORT --}}
+        <div class="export">
+            <a href="{{ route('admin.laporan.export', ['from_date' => $fromDate, 'to_date' => $toDate]) }}"
+                class="btn-export">
+                Export PDF
+            </a>
+        </div>
+
+        {{-- TABLE --}}
+        <div class="table-card">
+
+            <div class="table-header">
+                <h5>{{ $totalBooking }} Bookings</h5>
+                <small>{{ $fromDate }} - {{ $toDate }}</small>
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table laporan-table">
+
+                    <thead>
                         <tr>
-                            <td><strong class="text-nowrap">#{{ $booking['id_booking'] }}</strong></td>
-                            <td>{{ $booking['nama_lapangan'] ?? 'N/A' }}</td>
-                            <td>
-                                @php
-                                    try {
-                                        echo \Carbon\Carbon::parse($booking['tanggal'])->translatedFormat('d M Y');
-                                    } catch (\Throwable $e) {
-                                        echo e($booking['tanggal']);
-                                    }
-                                @endphp
-                            </td>
-                            <td>{{ $booking['jam_mulai'] }} - {{ $booking['jam_selesai'] }}</td>
-                            <td class="text-center">{{ $booking['nama_user'] ?? $booking['id_user'] }}</td>
-                            <td class="text-center">
-                                @if($st === 'pending')
-                                    <span class="badge status-badge status-pending">Pending</span>
-                                @elseif($st === 'expired')
-                                    <span class="badge status-badge status-expired">Expired</span>
-                                @elseif($st === 'paid' || $st === 'confirmed')
-                                    <span class="badge status-badge status-paid">Paid</span>
-                                @elseif($st === 'cancelled')
-                                    <span class="badge status-badge status-cancelled">Cancelled</span>
-                                @else
-                                    <span class="badge status-badge status-info">{{ ucfirst($st) }}</span>
-                                @endif
-                            </td>
-                            <td class="text-end fw-bold">Rp{{ number_format($booking['total_harga'] ?? 0, 0, ',', '.') }}</td>
+                            <th>ID</th>
+                            <th>Lapangan</th>
+                            <th>Tanggal</th>
+                            <th>Jadwal</th>
+                            <th>Durasi</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Total</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="empty-state">
-                                <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
-                                <div class="empty-title">No bookings found</div>
-                                <div class="empty-subtitle text-muted">Try adjusting your date range</div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+
+                        @forelse($bookings as $booking)
+
+                            @php
+                                $st = strtolower($booking['status_pembayaran'] ?? 'pending');
+
+                                $start = \Carbon\Carbon::parse($booking['jam_mulai']);
+                                $end = \Carbon\Carbon::parse($booking['jam_selesai']);
+                                $durasi = $start->diffInHours($end);
+                            @endphp
+
+                            <tr>
+
+                                {{-- ID --}}
+                                <td>
+                                    <strong>#{{ strtoupper(substr($booking['id_booking'], 0, 6)) }}</strong>
+                                </td>
+
+                                {{-- LAPANGAN --}}
+                                <td>
+                                    {{ $booking['lapangan']['nama_lapangan'] ?? '-' }}
+                                </td>
+
+                                {{-- TANGGAL BOOKING (CREATED_AT) --}}
+                                <td>
+                                    <div style="font-weight:600;">
+                                        {{ \Carbon\Carbon::parse($booking['created_at'])->format('d M Y') }}
+                                    </div>
+                                    <small style="color:#6b7280;">Booking dibuat</small>
+                                </td>
+
+                                {{-- JADWAL MAIN (TANGGAL + JAM) --}}
+                                <td>
+                                    <div style="font-weight:600;">
+                                        {{ \Carbon\Carbon::parse($booking['tanggal'])->format('d M Y') }}
+                                    </div>
+                                    <small style="color:#6b7280;">
+                                        {{ substr($booking['jam_mulai'], 0, 5) }} - {{ substr($booking['jam_selesai'], 0, 5) }}
+                                    </small>
+                                </td>
+
+                                {{-- DURASI --}}
+                                <td>
+                                    <span class="badge-duration">{{ $durasi }} Jam</span>
+                                </td>
+
+                                {{-- USER --}}
+                                <td class="text-center">
+                                    {{ $booking['nama_user'] ?? 'User' }}
+                                </td>
+
+                                {{-- STATUS --}}
+                                <td class="text-center">
+                                    <span class="status-badge status-{{ $st }}">
+                                        {{ ucfirst($st) }}
+                                    </span>
+                                </td>
+
+                                {{-- TOTAL --}}
+                                <td class="text-end">
+                                    Rp{{ number_format($booking['total_harga'] ?? 0, 0, ',', '.') }}
+                                </td>
+
+                            </tr>
+
+                        @empty
+                            <tr>
+                                <td colspan="8" class="empty">No bookings found</td>
+                            </tr>
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </div>
+
     </div>
 
-</div>
 @endsection
-
-

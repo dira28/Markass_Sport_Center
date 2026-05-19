@@ -149,40 +149,110 @@ document.addEventListener("DOMContentLoaded", function () {
             resetSelection();
 
             // Apply status to buttons
-            document.querySelectorAll(".jam-btn").forEach(btn => {
-                let jam = btn.dataset.jam;
-                let status = statusData.find(item => item.jam === jam);
-                const s = (status?.status ?? '').toLowerCase();
+            const now = new Date();
 
-                const isBlocked =
-                    s === 'terbooking' ||
-                    s === 'pending' ||
-                    s === 'waiting_confirmation' ||
-                    s === 'confirmed';
+            // Helper: parse jam range objects coming from backend.
+            // API may return fields named jam_mulai/jam_selesai or start_time/end_time.
+            function normalizeStatus(raw) {
+                return (raw ?? '').toString().toLowerCase().trim();
+            }
 
-                // If API says expired/cancelled, keep clickable
-                const isUnblocked = s.includes('expired') || s.includes('cancelled');
+            function parseDateTimeFromBooking(booking, field) {
+                // Prefer explicit ISO timestamps
+                const v = booking?.[field] ?? booking?.[`${field}_at`] ?? booking?.[field.replace('end_time', 'jam_selesai')] ?? booking?.[field.replace('start_time', 'jam_mulai')];
+                if (!v) return null;
+                const d = new Date(v);
+                if (Number.isNaN(d.getTime())) return null;
+                return d;
+            }
 
-                const finalBlocked = isBlocked && !isUnblocked;
+            function buildTodayDateFromJamString(jamStr) {
+                // jamStr like "08:00"; assume same day in Asia/Jakarta
+                if (!jamStr) return null;
+                const [hh, mm] = jamStr.split(':').map(x => parseInt(x, 10));
+                if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
 
-                if (finalBlocked) {
-                    btn.classList.add("jam-booked");
-                    btn.classList.add("booked-slot");
-                    btn.disabled = true;
-                    btn.style.cursor = 'not-allowed';
-                    btn.style.opacity = '0.8';
-                    btn.style.pointerEvents = 'none';
-                } else {
-                    btn.classList.remove("jam-booked");
-                    btn.classList.remove("booked-slot");
-                    btn.disabled = false;
-                    btn.style.cursor = '';
-                    btn.style.opacity = '';
-                    btn.style.pointerEvents = '';
+                // Construct local Date object (browser local). Backend already provides correct date server-side.
+                const d = new Date(now);
+                d.setHours(hh, mm, 0, 0);
+                return d;
+            }
+
+            function isBlockedSlotForButton(btnJam, bookingObj) {
+                if (!bookingObj) return false;
+
+                const status = normalizeStatus(bookingObj.status_pembayaran ?? bookingObj.status ?? bookingObj.status_booking);
+
+                // Auto-expire rule: pending + created_at > 30 minutes => expired
+                const createdAt = parseDateTimeFromBooking(bookingObj, 'created_at');
+                const isPending = status === 'pending';
+                if (isPending && createdAt) {
+                    const diffMin = (now.getTime() - createdAt.getTime()) / 60000;
+                    if (diffMin > 30) {
+                        bookingObj.__effectiveStatus = 'expired';
+                    }
                 }
 
+                const effectiveStatus = normalizeStatus(bookingObj.__effectiveStatus ?? status);
 
+                const isExpired = effectiveStatus === 'expired' || effectiveStatus === 'completed';
+                if (isExpired) return false;
+
+                // Determine end_time / jam_selesai
+                const endTime =
+                    parseDateTimeFromBooking(bookingObj, 'end_time') ||
+                    parseDateTimeFromBooking(bookingObj, 'jam_selesai') ||
+                    buildTodayDateFromJamString(bookingObj.jam_selesai ?? bookingObj.end_time);
+
+                // If current time already passed, lock should be released (auto-completed / time passed)
+                if (endTime && now.getTime() > endTime.getTime()) {
+                    bookingObj.__effectiveStatus = 'completed';
+                    return false;
+                }
+
+                // Core locking rules
+                // Locked if status in pending/waiting_confirmation/confirmed AND current time < end_time
+                const lockedStatuses = ['pending', 'waiting_confirmation', 'confirmed', 'paid', 'approve', 'menunggu_verifikasi'];
+                const isLockedStatus = lockedStatuses.includes(effectiveStatus);
+
+                if (!isLockedStatus) return false;
+
+                if (!endTime) {
+                    // If we cannot determine end time, safest: keep blocked for these statuses
+                    return true;
+                }
+
+                return now.getTime() < endTime.getTime();
+            }
+
+            document.querySelectorAll(".jam-btn").forEach(btn => {
+                const jam = btn.dataset.jam;
+                const bookingForJam = statusData.find(item => item.jam === jam);
+
+                // compute blocked using core logic
+                const blocked = isBlockedSlotForButton(jam, bookingForJam);
+
+                // Ensure disabled attribute is the single source of clickability
+                if (blocked) {
+                    btn.disabled = true;
+                    btn.classList.add("jam-booked");
+                    btn.classList.add("booked-slot");
+
+                    // Label "BOOKED"
+                    btn.dataset.booked = '1';
+                    btn.innerHTML = `
+                        <span class="jam-text">${jam}</span>
+                        <span class="jam-booked-label">BOOKED</span>
+                    `;
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove("jam-booked");
+                    btn.classList.remove("booked-slot");
+                    btn.dataset.booked = '0';
+                    btn.innerHTML = `<span class="jam-text">${jam}</span>`;
+                }
             });
+
 
         } catch (err) {
             if (err.name === "AbortError") return;
@@ -216,11 +286,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // ===== PILIH JAM =====
     document.querySelectorAll(".jam-btn").forEach(btn => {
         btn.addEventListener("click", function () {
-            // Never allow selecting blocked start hours or blocked duration ranges
+            // Must never act when disabled
+            if (this.disabled) return;
+
             const start = this.dataset.jam;
             if (!start) return;
 
-            if (this.classList.contains("jam-booked")) return;
             if (!isRangeValid(start, durasi)) return;
 
             document.querySelectorAll(".jam-btn").forEach(b => b.classList.remove("active"));

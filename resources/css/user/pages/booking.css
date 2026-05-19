@@ -45,20 +45,29 @@ body {
 
 /* Already booked slots (must be blocked immediately) */
 .jam-btn.jam-booked {
-    background: #dc3545 !important;
-    color: white !important;
+    background: rgba(220, 53, 69, 0.15) !important;
+    border: 1px solid rgba(220, 53, 69, 0.35) !important;
+    color: rgba(107, 114, 128, 1) !important;
     pointer-events: none;
-    opacity: 0.8 !important;
+    opacity: 0.55 !important;
     cursor: not-allowed !important;
-    border: none !important;
 }
 
+.jam-btn.jam-booked .jam-booked-label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.3px;
+    font-weight: 800;
+    color: #dc3545 !important;
+    margin-top: 2px;
+}
 
 /* hover booked */
 .jam-btn.jam-booked:hover {
-    background: #dc3545 !important;
-    color: white !important;
+    background: rgba(220, 53, 69, 0.15) !important;
+    color: rgba(107, 114, 128, 1) !important;
 }
+
 
 
 /* Ensure disabled state stays disabled */

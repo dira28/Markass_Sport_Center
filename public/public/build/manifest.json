@@ -1,0 +1,29 @@
+{
+  "resources/css/admin/pages/report.css": {
+    "file": "assets/report-CDHFCRSG.css",
+    "src": "resources/css/admin/pages/report.css",
+    "isEntry": true,
+    "name": "report",
+    "names": [
+      "report.css"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DT20PqOC.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DVcgFVbn.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "css": [
+      "assets/report-CDHFCRSG.css"
+    ]
+  }
+}
