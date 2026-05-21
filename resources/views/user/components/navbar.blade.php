@@ -33,10 +33,9 @@
 
         <!-- LOGO -->
         <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-            
+
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUS3cLEY3Wpkum4hAwNZAj_mFyL6q7HQbm6Q&s"
-                 alt="Logo Markass"
-                 style="max-width:45px;">
+                alt="Logo Markass" style="max-width:45px;">
 
             <!-- HANYA TAMBAH CLASS -->
             <span class="ms-2 brand-text">
@@ -72,7 +71,7 @@
                         Tentang
                     </a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('my-bookings') ? 'active' : '' }}" href="/my-bookings">
                         Riwayat Booking
@@ -82,11 +81,48 @@
             </ul>
 
             @if(session('token'))
-                <a href="{{ route('profile') }}" class="ms-3">
-                    <img src="https://img.freepik.com/premium-vector/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector-illustration_561158-3485.jpg" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%;">
-                </a>
+
+                <div class="dropdown ms-3">
+
+                    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" role="button"
+                        data-bs-toggle="dropdown">
+
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(session('user.name') ?? 'User') }}&background=0D8ABC&color=fff"
+                            style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+
+                        <span class="ms-2 d-none d-md-inline">
+                            {{ session('user.name') ?? 'User' }}
+                        </span>
+
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end">
+
+                        <li>
+                            <a class="dropdown-item" href="{{ route('profile') }}">
+                                <i class="fa fa-user me-2"></i> Profile
+                            </a>
+                        </li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ route('logout') }}">
+                                <i class="fa fa-sign-out-alt me-2"></i> Logout
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+
             @else
-                <a class="btn btn-danger btn-sm ms-3" href="{{ route('login') }}">Login</a>
+
+                <a class="btn btn-danger btn-sm ms-3" href="{{ route('login') }}">
+                    Login
+                </a>
+
             @endif
 
         </div>

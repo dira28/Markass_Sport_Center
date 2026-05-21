@@ -10,6 +10,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserBookingController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\GoogleAuthController;
+
+Route::get('/google-success', [GoogleAuthController::class, 'googleSuccess']);
 
 // =====================
 // HALAMAN USER

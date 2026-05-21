@@ -4,9 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     @vite('resources/css/auth/login.css')
 </head>
+
+@vite('resources/js/auth.js')
 
 <body>
 
@@ -38,35 +41,25 @@
 
             <div class="form-group">
                 <label class="form-label">Username</label>
-                <input 
-                    type="text" 
-                    name="nama"
-                    class="form-input" 
-                    placeholder="Enter your name" 
-                    required
-                >
+                <input type="text" name="nama" class="form-input" placeholder="Enter your name" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Email</label>
-                <input 
-                    type="email" 
-                    name="email"
-                    class="form-input" 
-                    placeholder="Enter your email" 
-                    required
-                >
+                <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Password</label>
-                <input 
-                    type="password" 
-                    name="password"
-                    class="form-input" 
-                    placeholder="Create a password" 
-                    required
-                >
+
+                <div class="password-box">
+                    <input type="password" name="password" id="registerPassword" class="form-input"
+                        placeholder="Create a password" required>
+
+                    <span class="toggle-password" onclick="toggleRegisterPassword()">
+                        <i class="fa-solid fa-eye" id="registerEye"></i>
+                    </span>
+                </div>
             </div>
 
             <button type="submit" class="btn-login">REGISTER</button>

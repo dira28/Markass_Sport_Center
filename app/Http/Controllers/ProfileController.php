@@ -10,34 +10,27 @@ class ProfileController extends Controller
     public function profile()
     {
         $token = session('token');
+
         if (!$token) {
-            return redirect()->route('login');
+            return redirect()->route('login')->with('error', 'Token tidak ditemukan');
         }
 
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $token
-            ])->get('http://localhost:5000/api/auth/profile');
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->get('http://localhost:5000/api/auth/profile');
 
-            $result = $response->json();
+        $result = $response->json();
 
-            // Debug: log the response
-            \Log::info('Profile API Response', ['result' => $result, 'status' => $response->status()]);
+        \Log::info('PROFILE RESPONSE', $result);
 
-            if (isset($result['success']) && $result['success'] === true) {
-                $user = $result['data'];
-                return view('user.pages.profile', compact('user'));
-            }
-
-            // If API fails, redirect to login or show error
-            return redirect()->route('login')->with('error', $result['message'] ?? 'Failed to get profile');
-
-        } catch (\Exception $e) {
-            \Log::error('Profile API Error', ['error' => $e->getMessage()]);
-            return redirect()->route('login')->with('error', 'Server error!');
+        if (!empty($result['success']) && $result['success'] === true) {
+            $user = $result['data'];
+            return view('user.pages.profile', compact('user'));
         }
+
+        return redirect()->route('login')->with('error', 'User tidak ditemukan / token invalid');
     }
-
+    
     public function logout()
     {
         session()->forget(['token', 'role']);
