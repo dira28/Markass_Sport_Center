@@ -1,0 +1,110 @@
+/* card utama profit overview */
+.profit-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    transition: 0.3s ease;
+}
+
+/* efek hover card */
+.profit-card:hover {
+    transform: translateY(-3px);
+}
+
+/* header chart (judul + filter) */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* judul chart */
+.chart-header h5 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* container tombol filter */
+.chart-filter {
+    display: flex;
+    gap: 6px;
+    background: #f1f3f5;
+    padding: 5px;
+    border-radius: 12px;
+}
+
+/* tombol filter default */
+.chart-filter button {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+    transition: 0.2s;
+}
+
+/* hover tombol filter */
+.chart-filter button:hover {
+    background: rgba(220,53,69,0.1);
+    color: #dc3545;
+}
+
+/* tombol aktif (yang dipilih) */
+.chart-filter button.active {
+    background: #dc3545;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(220,53,69,0.25);
+}
+
+/* ukuran chart */
+/* scope to avoid affecting other canvases */
+.card-box canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 320px !important;
+}
+
+/* Improve chart header spacing on small screens */
+@media (max-width: 575px) {
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .chart-header h5 {
+        font-size: 15px;
+    }
+
+    .chart-filter {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .chart-filter button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .card-box canvas {
+        height: 260px !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+    .chart-filter {
+        flex-wrap: wrap;
+    }
+
+    .card-box canvas {
+        height: 280px !important;
+    }
+}
+

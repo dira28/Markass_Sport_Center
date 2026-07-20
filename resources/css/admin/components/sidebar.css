@@ -1,0 +1,144 @@
+.admin-sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #1e1e2f;
+    color: #ffffff;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 100;
+}
+
+.admin-sidebar .logo {
+    padding: 20px;
+}
+
+.admin-sidebar .logo h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.admin-sidebar .menu {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.admin-sidebar .menu li {
+    margin: 5px 10px;
+    border-radius: 10px;
+    transition: all 0.25s ease;
+}
+
+.admin-sidebar .menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+
+    color: #cbd5e1;
+    text-decoration: none;
+    border-radius: 10px;
+
+    transition: all 0.25s ease;
+}
+
+.admin-sidebar .menu li i {
+    font-size: 18px;
+}
+
+.admin-sidebar .menu li:hover a {
+    background: #2e2e40;
+    color: #ffffff;
+    transform: translateX(5px);
+}
+
+.admin-sidebar .menu .active a {
+    background: linear-gradient(to right, #8a1e1e, #b02a2a);
+    color: #ffffff;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(176, 42, 42, 0.4);
+}
+
+.admin-sidebar .menu .active i {
+    color: #ffffff;
+}
+
+/* ===================== */
+/* RESPONSIVE SIDEBAR */
+/* ===================== */
+
+/* Tablet/Mobile: reduce height and allow content scroll */
+@media (max-width: 991px) {
+    .admin-sidebar {
+        width: 210px;
+    }
+
+    /* Keep sidebar visible but avoid clipping */
+    .admin-sidebar {
+        overflow-y: auto;
+        height: 100vh;
+    }
+}
+
+/* Mobile: convert to off-canvas */
+@media (max-width: 575px) {
+    /* Drawer sidebar: never become a normal stacked block */
+    .admin-sidebar {
+        width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+
+        /* overlay behavior */
+        box-shadow: 12px 0 30px rgba(0, 0, 0, 0.25);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+
+        /* ensure above content */
+        z-index: 1001;
+    }
+
+    /* When opened */
+    .admin-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    /* simple backdrop */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 1000;
+    }
+
+    /* show backdrop only when sidebar is open */
+    .admin-sidebar.is-open ~ .admin-main,
+    .admin-sidebar.is-open {
+        /* no-op selector safety */
+    }
+
+    body.sidebar-open::before {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Make sure content is full width and not pushed */
+    .admin-main {
+        margin-left: 0 !important;
+        padding: 16px !important;
+        width: 100% !important;
+        z-index: 1;
+    }
+}
+
+
+

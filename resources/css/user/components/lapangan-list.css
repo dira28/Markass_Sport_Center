@@ -1,0 +1,83 @@
+/* WRAPPER */
+.harga-wrapper {
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 18px;
+}
+
+/* CARD BASE */
+.card-lapangan {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding: 18px;
+    border-radius: 16px;
+
+    background: #ffffff;
+    margin-bottom: 16px;
+
+    cursor: pointer;
+
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+
+    transition: all 0.25s ease;
+}
+
+/* HOVER EFFECT */
+.card-lapangan:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+    border-color: #f87171;
+}
+
+/* ACTIVE (SELECTED) */
+.card-lapangan.active {
+    border: 2px solid #dc3545;
+    background: #fff5f5;
+    box-shadow: 0 8px 20px rgba(220, 53, 69, 0.15);
+}
+
+/* TEXT */
+.card-lapangan h6 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.card-lapangan small {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* HARGA */
+.harga {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* JAM BUTTON */
+.jam-btn {
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+.jam-btn:hover:not(.jam-booked) {
+    background-color: #f3f4f6;
+}
+
+/* ACTIVE JAM */
+.jam-btn.active {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* BOOKED */
+.jam-booked {
+    background-color: #dc3545 !important;
+    color: white !important;
+    opacity: 0.7;
+    cursor: not-allowed;
+}

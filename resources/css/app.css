@@ -1,13 +1,270 @@
-/* Tailwind directives */
+@import './user/pages/dashboard.css';
+@import './admin/components/navbar.css';
+@import './admin/components/sidebar.css';
+@import './admin/pages/dashboard.css';
+@import './admin/pages/booking.css';
+@import "./admin/components/profit-overview.css";
+@import './admin/pages/profile.css';
+@import "flowbite";
+/* ===================== */
+/* TAILWIND */
+/* ===================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import "flowbite";
+/* ===================== */
+/* 🎨 COLOR SYSTEM */
+/* ===================== */
+:root {
+    --primary: #e53935;
+    --primary-dark: #c62828;
+    --bg-light: #ffffff;
+    --bg-soft: #ffeaea;
+    --bg-page: #f4f6f9;
+    --text-dark: #222222;
+    --text-muted: #777777;
+}
 
-@layer base {
-    body {
-        font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
-                     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+.admin-main {
+    margin-left: 250px;
+    min-height: 100vh;
+    background: #f5f6fa;
+}
+
+/* ===================== */
+/* GLOBAL */
+/* ===================== */
+body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--bg-page);
+    /* abu-abu terang */
+    color: var(--text-dark);
+}
+
+/* ===================== */
+/* MAIN CONTENT */
+/* ===================== */
+.main-content {
+    background: var(--bg-light);
+    padding: 30px;
+    border-radius: 15px;
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+/* ===================== */
+/* HARGA WRAPPER */
+/* ===================== */
+.harga-wrapper {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 15px;
+}
+
+/* ===================== */
+/* HERO */
+/* ===================== */
+.hero-booking {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d');
+    background-size: cover;
+    background-position: center;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.hero-booking h2 {
+    font-weight: 700;
+}
+
+.hero-booking p {
+    opacity: 0.9;
+}
+
+/* ===================== */
+/* CARD LAPANGAN */
+/* ===================== */
+.card-lapangan {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px;
+    border-radius: 14px;
+    background: var(--bg-light);
+    margin-bottom: 16px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    min-height: 110px;
+    transition: 0.25s;
+}
+
+.card-lapangan:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.card-lapangan.active {
+    border: 2px solid var(--primary);
+    background: var(--bg-soft);
+}
+
+.card-lapangan img {
+    width: 110px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* ===================== */
+/* TEXT */
+/* ===================== */
+.card-lapangan h6 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-lapangan small {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ===================== */
+/* HARGA */
+/* ===================== */
+.harga {
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* ===================== */
+/* BOOKING SUMMARY (PUTIH) */
+/* ===================== */
+.booking-summary {
+    background: var(--bg-light);
+    /* PUTIH */
+    color: var(--text-dark);
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ===================== */
+/* BUTTON */
+/* ===================== */
+.btn-red-custom,
+.btn-red {
+    background: var(--primary);
+    color: white;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: 0.25s;
+}
+
+.btn-red:hover,
+.btn-red-custom:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.feature-box img,
+.step img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===================== */
+/* SPORT BUTTON */
+/* ===================== */
+.sport.active {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+}
+
+/* ===================== */
+/* JADWAL */
+/* ===================== */
+.jadwal button {
+    margin: 3px;
+}
+
+.jadwal button.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* ===================== */
+/* RESPONSIVE */
+/* ===================== */
+@media (max-width: 768px) {
+    .hero-booking {
+        height: 220px;
+        text-align: center;
+    }
+
+    .card-lapangan {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-lapangan img {
+        width: 100%;
+        height: 150px;
+    }
+
+    /* profile */
+    .profile-img-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
     }
 }
+
+/* ========================= */
+/* FOOTER RESPONSIVE */
+/* ========================= */
+
+@media (max-width: 767px) {
+
+    .footer-main {
+        text-align: center;
+    }
+
+    .footer-main img {
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+
+    .footer-main .footer-link li {
+        margin-bottom: 8px;
+    }
+
+    .footer-main h5 {
+        margin-top: 15px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+
+    .footer-main {
+        text-align: left;
+    }
+
+    .footer-main img {
+        max-width: 140px;
+    }
+}
+
+.footer-main .footer-link li a:hover {
+    color: #fff;
+    transition: 0.3s;
+}
+
