@@ -15,7 +15,7 @@ class LoginController extends Controller
         ]);
 
         try {
-            $response = Http::post('http://localhost:5000/api/auth/login', [
+            $response = Http::post('https://markasssportcenter.rplrus.com/api/auth/login', [
                 'email' => $request->email,
                 'password' => $request->password
             ]);

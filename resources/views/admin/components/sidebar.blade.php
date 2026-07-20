@@ -1,6 +1,17 @@
+<button
+    type="button"
+    class="btn btn-light position-fixed d-lg-none"
+    style="top: 15px; left: 15px; z-index: 1100; border-radius: 10px;"
+    aria-label="Toggle sidebar"
+    data-admin-sidebar-toggle
+>
+    <i class="bi bi-list"></i>
+</button>
+
 <div class="admin-sidebar">
 
     <div class="logo">
+
         <h5>MARKASS</h5>
         <small>Sport Center</small>
     </div>

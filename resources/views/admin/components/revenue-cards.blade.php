@@ -2,7 +2,7 @@
 
     <div class="col-md-6">
         <div class="revenue-card">
-            <p>Pendapatan Hari Ini</p>
+            <p>Pendapatan</p>
             <h3 class="text-danger">
                 Rp {{ number_format($revenueToday, 0, ',', '.') }}
             </h3>
@@ -14,7 +14,7 @@
 
     <div class="col-md-6">
         <div class="revenue-card">
-            <p>Total Booking Hari Ini</p>
+            <p>Total Booking</p>
             <h3>{{ $totalBooking }}</h3>
         </div>
     </div>

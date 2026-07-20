@@ -36,6 +36,29 @@
     transition: 0.25s ease;
 }
 
+@media (max-width: 575px) {
+    .kpi-card {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .kpi-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        font-size: 18px;
+    }
+
+    .kpi-card h4 {
+        font-size: 18px;
+    }
+
+    .kpi-card p {
+        font-size: 12px;
+    }
+}
+
+
 .kpi-card:hover {
     transform: translateY(-4px);
 }
@@ -105,7 +128,9 @@
 .chart-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 15px;
+    gap: 12px;
 }
 
 .chart-filter {
@@ -115,6 +140,7 @@
     padding: 5px;
     border-radius: 12px;
 }
+
 
 .chart-filter button {
     border: none;
@@ -140,6 +166,27 @@
     background: #f8f9fa;
 }
 
+/* Make tables responsive on mobile (horizontal scroll) */
+.table-responsive-admin {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive-admin .table {
+    min-width: 760px;
+}
+
+@media (max-width: 575px) {
+    .content-wrapper {
+        padding: 18px !important;
+    }
+
+    .table-responsive-admin .table {
+        min-width: 820px;
+    }
+}
+
 /* button */
 .btn-filter {
     background: #800020;
@@ -148,3 +195,30 @@
     padding: 10px 20px;
     border-radius: 10px;
 }
+
+@media (max-width: 575px) {
+    .btn-filter {
+        width: 100%;
+        padding: 10px 14px;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .chart-filter {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    /* avoid chart overflow */
+    .card-box canvas {
+        max-width: 100% !important;
+    }
+}
+
+

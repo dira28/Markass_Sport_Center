@@ -8,24 +8,30 @@
         @endif
     </div>
 
-    <table class="table">
+    <div class="table-responsive-admin">
+        <table class="table">
 
-        <!-- header -->
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>User</th>
-                <th>Lapangan</th>
-                <th>Tanggal</th>
-                <th>Status</th>
-            </tr>
-        </thead>
+            <!-- header -->
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Lapangan</th>
+                    <th>Tanggal</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
 
-        <!-- body -->
-        <tbody>
+            <!-- body -->
+            <tbody>
+
             @forelse($data as $item)
                 <tr>
-                    <td>{{ $item['id_booking'] }}</td>
+                    @php
+                        $rawNumericId = $item['id'] ?? (isset($item['id_booking']) ? preg_replace('/\D/', '', (string)$item['id_booking']) : null);
+                        $displayBookingId = 'BK-' . str_pad((int) ($rawNumericId ?: 0), 6, '0', STR_PAD_LEFT);
+                    @endphp
+                    <td>{{ $displayBookingId }}</td>
                     <td>{{ $item['user']['nama'] ?? '-' }}</td>
                     <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
                     <td>
@@ -39,7 +45,7 @@
                         @elseif($item['status_pembayaran'] == 'pending')
                             <span class="badge bg-warning px-3 py-2">Pending</span>
                         @else
-                            <span class="badge bg-danger px-3 py-2">Batal</span>
+                            <span class="badge bg-danger px-3 py-2">Expired</span>
                         @endif
                     </td>
                 </tr>
@@ -53,6 +59,7 @@
             @endforelse
         </tbody>
 
-    </table>
+        </table>
+    </div>
 
 </div>

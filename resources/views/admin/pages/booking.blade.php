@@ -20,19 +20,21 @@
         </div>
     @endif
 
-    <table class="table align-middle">
-        <thead>
-            <tr>
-                <th>Tanggal</th>
-                <th>ID</th>
-                <th>Pengguna</th>
-                <th>Lapangan</th>
-                <th>Status</th>
-                <th>Harga</th>
-            </tr>
-        </thead>
+    <div class="table-responsive-admin">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>ID</th>
+                    <th>Pengguna</th>
+                    <th>Lapangan</th>
+                    <th>Status</th>
+                    <th>Harga</th>
+                </tr>
+            </thead>
 
-<tbody>
+            <tbody>
+
 @forelse ($bookings as $item)
 
     @php
@@ -68,7 +70,11 @@
             {{ $tanggal->translatedFormat('d M Y') }} <br>
         </td>
 
-        <td>{{ $item['id_booking'] }}</td>
+        @php
+            $rawNumericId = $item['id'] ?? (isset($item['id_booking']) ? preg_replace('/\D/', '', (string)$item['id_booking']) : null);
+            $displayBookingId = 'BK-' . str_pad((int) ($rawNumericId ?: 0), 6, '0', STR_PAD_LEFT);
+        @endphp
+        <td>{{ $displayBookingId }}</td>
 
         <td>{{ $item['user']['nama'] ?? '-' }}</td>
 
@@ -93,7 +99,8 @@
     </tr>
 @endforelse
 </tbody>
-    </table>
+        </table>
+    </div>
 
 </div>
 

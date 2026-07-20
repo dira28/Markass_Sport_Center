@@ -28,102 +28,118 @@ class AdminDashboardController extends Controller
         $yearly = [];
 
         try {
-
-            //REVENUE HARI INI
-            $resRevenue = Http::withToken($token)
+            // Use EXACT same endpoint + JSON structure as HistoryBookingController
+            $response = Http::withToken($token)
                 ->acceptJson()
-                ->get(env('API_URL') . '/booking/revenue/daily');
+                ->get(env('API_URL') . '/api/booking');
 
-            if ($resRevenue->successful()) {
-                $data = $resRevenue->json()['data'];
-
-                $revenueToday = $data['total_revenue'] ?? 0;
-                $totalBooking = $data['total_bookings'] ?? 0;
+            if ($response->failed()) {
+                $bookings = [];
+            } else {
+                $result = $response->json();
+                $bookings = $result['data'] ?? [];
             }
 
-            //BOOKING
-            $resBooking = Http::withToken($token)
-                ->acceptJson()
-                ->get(env('API_URL') . '/booking');
+            // Latest 5 bookings from the same dataset used by Booking Management page
+            $latestBookings = array_slice($bookings, 0, 5);
 
-            if ($resBooking->successful()) {
-                $bookings = $resBooking->json()['data'] ?? [];
+            // KPI + Chart calculations based on real API bookings.
+            // Use consistent revenue basis: only count paid bookings if that field exists.
+            $filteredBookings = array_values(array_filter($bookings, function ($b) {
+                $paidStatus = $b['status_pembayaran'] ?? null;
+                // If the API provides status_pembayaran, require it to be paid/confirmed.
+                if ($paidStatus !== null) {
+                    return in_array($paidStatus, ['paid', 'confirmed'], true);
+                }
+                return true;
+            }));
 
-                $latestBookings = array_slice($bookings, 0, 5);
+            $totalRevenueTemp = 0;
+            $days = [];
+            $users = [];
 
-                $totalRevenueTemp = 0;
-                $days = [];
+            $todayYmd = Carbon::now('Asia/Jakarta')->format('Y-m-d');
+            $todayBookingCount = 0;
+            $todayRevenue = 0;
 
-                foreach ($bookings as $b) {
-
-                    //STATUS
-                    if (($b['status_pembayaran'] ?? '') !== 'confirmed')
-                        continue;
-
-                    $tanggal = Carbon::parse($b['tanggal']);
-
-                    $day = $tanggal->format('d M');
-                    $month = $tanggal->format('M Y');
-                    $year = $tanggal->format('Y');
-
-                    $totalRevenueTemp += $b['total_harga'];
-                    $days[$tanggal->format('Y-m-d')] = true;
-
-                    // DAILY
-                    $daily[$day] = ($daily[$day] ?? 0) + $b['total_harga'];
-
-                    // MONTHLY
-                    $monthly[$month] = ($monthly[$month] ?? 0) + $b['total_harga'];
-
-                    // YEARLY
-                    $yearly[$year] = ($yearly[$year] ?? 0) + $b['total_harga'];
+            foreach ($filteredBookings as $b) {
+                // user unik (support both id_user and nested user.id depending on API shape)
+                $userId = $b['id_user'] ?? ($b['user']['id'] ?? null);
+                if ($userId !== null) {
+                    $users[] = $userId;
                 }
 
-                $totalRevenue = $totalRevenueTemp;
+                $tanggal = isset($b['tanggal']) ? Carbon::parse($b['tanggal'])->timezone('Asia/Jakarta') : null;
+                if (!$tanggal) {
+                    continue;
+                }
 
-                $totalDays = count($days);
-                $averagePerDay = $totalDays > 0 ? $totalRevenue / $totalDays : 0;
+                $day = $tanggal->format('d M');
+                $month = $tanggal->format('M Y');
+                $year = $tanggal->format('Y');
+
+                $harga = $b['total_harga'] ?? 0;
+
+                $totalRevenueTemp += $harga;
+
+                $ymd = $tanggal->format('Y-m-d');
+                $days[$ymd] = true;
+
+                // DAILY
+                $daily[$day] = ($daily[$day] ?? 0) + $harga;
+
+                // MONTHLY
+                $monthly[$month] = ($monthly[$month] ?? 0) + $harga;
+
+                // YEARLY
+                $yearly[$year] = ($yearly[$year] ?? 0) + $harga;
+
+                // TODAY KPI (for revenue-summary box)
+                if ($ymd === $todayYmd) {
+                    $todayBookingCount++;
+                    $todayRevenue += $harga;
+                }
             }
 
-            // FINAL CHART DATA
+            $totalRevenue = $totalRevenueTemp;
+            $totalUser = count(array_unique($users));
+
+            $totalDays = count($days);
+            $averagePerDay = $totalDays > 0 ? $totalRevenue / $totalDays : 0;
+
+            // Keep existing revenue-summary and insight widgets working
+            $revenueToday = $todayRevenue;
+            $totalBooking = $todayBookingCount;
+
+            // CHART DATA (preserve existing structure expected by profit-overview)
             $chartData = [
                 'day' => [
-                    'labels' => array_values(array_keys($daily)),
-                    'data' => array_values($daily)
+                    'labels' => array_keys($daily),
+                    'data' => array_values($daily),
                 ],
                 'month' => [
-                    'labels' => array_values(array_keys($monthly)),
-                    'data' => array_values($monthly)
+                    'labels' => array_keys($monthly),
+                    'data' => array_values($monthly),
                 ],
                 'year' => [
-                    'labels' => array_values(array_keys($yearly)),
-                    'data' => array_values($yearly)
-                ]
+                    'labels' => array_keys($yearly),
+                    'data' => array_values($yearly),
+                ],
             ];
-
         } catch (\Exception $e) {
-
+            // Fail closed: empty datasets so Blade renders without breaking.
             $chartData = [
                 'day' => ['labels' => [], 'data' => []],
                 'month' => ['labels' => [], 'data' => []],
-                'year' => ['labels' => [], 'data' => []]
+                'year' => ['labels' => [], 'data' => []],
             ];
+            $latestBookings = [];
+            $revenueToday = 0;
+            $totalBooking = 0;
+            $totalRevenue = 0;
+            $totalUser = 0;
+            $averagePerDay = 0;
         }
-
-        $chartData = [
-            'day' => [
-                'labels' => ['01 Jul', '02 Jul', '03 Jul'],
-                'data' => [100000, 200000, 150000]
-            ],
-            'month' => [
-                'labels' => ['Jan', 'Feb', 'Mar'],
-                'data' => [1000000, 1500000, 1200000]
-            ],
-            'year' => [
-                'labels' => ['2023', '2024', '2025'],
-                'data' => [10000000, 15000000, 20000000]
-            ]
-        ];
 
         return view('admin.pages.dashboard', compact(
             'revenueToday',

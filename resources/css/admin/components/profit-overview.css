@@ -62,7 +62,49 @@
 }
 
 /* ukuran chart */
-canvas {
+/* scope to avoid affecting other canvases */
+.card-box canvas {
     width: 100% !important;
-    height: 300px !important;
+    max-width: 100% !important;
+    height: 320px !important;
 }
+
+/* Improve chart header spacing on small screens */
+@media (max-width: 575px) {
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .chart-header h5 {
+        font-size: 15px;
+    }
+
+    .chart-filter {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .chart-filter button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .card-box canvas {
+        height: 260px !important;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+    .chart-filter {
+        flex-wrap: wrap;
+    }
+
+    .card-box canvas {
+        height: 280px !important;
+    }
+}
+

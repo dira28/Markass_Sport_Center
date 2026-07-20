@@ -68,3 +68,77 @@
 .admin-sidebar .menu .active i {
     color: #ffffff;
 }
+
+/* ===================== */
+/* RESPONSIVE SIDEBAR */
+/* ===================== */
+
+/* Tablet/Mobile: reduce height and allow content scroll */
+@media (max-width: 991px) {
+    .admin-sidebar {
+        width: 210px;
+    }
+
+    /* Keep sidebar visible but avoid clipping */
+    .admin-sidebar {
+        overflow-y: auto;
+        height: 100vh;
+    }
+}
+
+/* Mobile: convert to off-canvas */
+@media (max-width: 575px) {
+    /* Drawer sidebar: never become a normal stacked block */
+    .admin-sidebar {
+        width: 260px;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+
+        /* overlay behavior */
+        box-shadow: 12px 0 30px rgba(0, 0, 0, 0.25);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+
+        /* ensure above content */
+        z-index: 1001;
+    }
+
+    /* When opened */
+    .admin-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    /* simple backdrop */
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 1000;
+    }
+
+    /* show backdrop only when sidebar is open */
+    .admin-sidebar.is-open ~ .admin-main,
+    .admin-sidebar.is-open {
+        /* no-op selector safety */
+    }
+
+    body.sidebar-open::before {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Make sure content is full width and not pushed */
+    .admin-main {
+        margin-left: 0 !important;
+        padding: 16px !important;
+        width: 100% !important;
+        z-index: 1;
+    }
+}
+
+
+

@@ -16,7 +16,7 @@ class RegisterController extends Controller
         ]);
 
         try {
-            $response = Http::post('http://localhost:5000/api/auth/register', [
+            $response = Http::post('https://markasssportcenter.rplrus.com/api/auth/register', [
                 'nama' => $request->nama,
                 'email' => $request->email,
                 'password' => $request->password

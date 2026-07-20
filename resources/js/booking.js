@@ -29,19 +29,62 @@ document.addEventListener("DOMContentLoaded", function () {
         return startText + " - " + endText;
     }
 
+    // ==========================================
+    // 1. UPDATE FUNGSI UPDATE UI DI JS KAMU
+    // ==========================================
     function updateUI() {
-        if (!jamAktif || !hargaPerJam) {
+        let activeCard = document.querySelector(".card-lapangan.active");
+        if (!activeCard || !jamAktif) {
             totalHarga.textContent = "Rp0";
             summaryJam.textContent = "-";
             return;
         }
 
-        totalHarga.textContent =
-            "Rp" + (hargaPerJam * durasi).toLocaleString("id-ID");
+        // DISESUAIKAN: Mengikuti nama atribut HTML kamu (hargaPagi & hargaMalam)
+        let hargaPagi = parseInt(activeCard.dataset.hargaPagi || 0);
+        let hargaMalam = parseInt(activeCard.dataset.hargaMalam || 0);
 
-        // UPDATE RANGE JAM
+        let total = 0;
+        let startHour = parseInt(jamAktif.split(":")[0]);
+
+        for (let i = 0; i < durasi; i++) {
+            let currentHour = startHour + i;
+
+            // Jam 09:00 s/d 15:00 pakai harga pagi, 16:00 ke atas pakai harga malam
+            if (currentHour <= 15) {
+                total += hargaPagi;
+            } else {
+                total += hargaMalam;
+            }
+        }
+
+        totalHarga.textContent = "Rp" + total.toLocaleString("id-ID");
         summaryJam.textContent = formatJamRange(jamAktif, durasi);
     }
+
+    // ==========================================
+    // 2. UPDATE BAGIAN PILIH LAPANGAN DI JS KAMU
+    // ==========================================
+    document.querySelectorAll(".sport, .card-lapangan").forEach(el => {
+        el.addEventListener("click", function () {
+
+            lapanganAktif = this.dataset.id;
+            let nama = this.dataset.nama;
+
+            document.querySelectorAll(".sport").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".card-lapangan").forEach(c => c.classList.remove("active"));
+
+            document.querySelectorAll(`[data-id="${lapanganAktif}"]`)
+                .forEach(x => x.classList.add("active"));
+
+            summaryNama.textContent = nama;
+
+            let tgl = document.getElementById("tanggal").value;
+            if (tgl) loadAvailability(tgl);
+
+            updateUI();
+        });
+    });
 
     function resetJam() {
         jamAktif = null;
@@ -53,9 +96,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function loadAvailability(tanggal) {
+        if (!lapanganAktif) return; // Validasi awal agar tidak mengirim request kosong
+
         try {
-            let res = await fetch(`/booking/slots?tanggal=${tanggal}&lapangan_id=${lapanganAktif}`);
-            let blocked = await res.json();
+            // PARAMETER DISAMAKAN: 'lapangan_id' diubah menjadi 'lapangan' sesuai request di Controller Laravel
+            let res = await fetch(`/booking/slots?tanggal=${tanggal}&lapangan=${lapanganAktif}`);
+            let data = await res.json();
+
+            // PENGAMAN KRN NODE.JS LAGI EROR: Jika Laravel/Node mengembalikan format error, jangan di-looping
+            if (data.status === "error" || !Array.isArray(data)) {
+                console.warn("Gagal memuat jadwal:", data.message || data);
+                // Jika ingin memunculkan pesan eror asli ke pengguna, buka komen baris di bawah:
+                // alert(data.message || "Gagal mengambil data slot");
+                return;
+            }
+
+            // Jika datanya valid (berbentuk Array), jalankan sisa kodenya
+            let blocked = data;
 
             document.querySelectorAll(".jam-btn").forEach(btn => {
                 btn.classList.remove("jam-booked", "active");
@@ -78,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
         } catch (err) {
-            console.error("ERROR SLOT:", err);
+            console.error("ERROR SLOT JADWAL:", err);
         }
     }
 

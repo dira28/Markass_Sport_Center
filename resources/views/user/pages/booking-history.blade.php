@@ -12,6 +12,7 @@
     <table class="table mt-3">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Tanggal</th>
                 <th>Lapangan</th>
                 <th>Jam</th>
@@ -41,9 +42,19 @@
                         $statusText = ucfirst($status);
                         $badge = 'secondary';
                     }
+
+                    // Booking ID display:
+                    // - Prefer numeric DB PK: $item['id'] if API includes it
+                    // - Otherwise, fallback using id_booking by stripping non-digits
+                    $rawNumericId = $item['id'] ?? (isset($item['id_booking']) ? preg_replace('/\D/', '', (string) $item['id_booking']) : null);
+                    $displayBookingId = 'BK-' . str_pad((int) ($rawNumericId ?: 0), 6, '0', STR_PAD_LEFT);
                 @endphp
 
                 <tr>
+                    <td>
+                        {{ $displayBookingId }}
+                    </td>
+
                     <td>
                         {{ $tanggal->translatedFormat('d M Y') }}
                     </td>
@@ -69,7 +80,7 @@
 
             @empty
                 <tr>
-                    <td colspan="5" class="text-center">
+                    <td colspan="6" class="text-center">
                         Belum ada booking
                     </td>
                 </tr>
@@ -79,3 +90,4 @@
 </div>
 
 @endsection
+

@@ -85,3 +85,53 @@
     font-size: 14px;
     font-weight: 600;
 }
+
+/* ===================== */
+/* RESPONSIVE NAVBAR */
+/* ===================== */
+
+@media (max-width: 991px) {
+    .admin-navbar {
+        padding: 12px 14px;
+        border-radius: 10px;
+    }
+
+    .admin-navbar .logo-img {
+        width: 95px;
+        height: 48px;
+    }
+}
+
+@media (max-width: 575px) {
+    .admin-navbar {
+        padding: 10px 12px;
+    }
+
+    .admin-navbar .nav-left {
+        gap: 8px;
+    }
+
+    .admin-navbar .logo-img {
+        width: 72px;
+        height: 40px;
+    }
+
+    .admin-navbar h5 {
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+    }
+
+    .admin-navbar .profile-box {
+        padding: 6px 8px;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .admin-navbar .profile-box span.text-dark {
+        display: none;
+    }
+}
+

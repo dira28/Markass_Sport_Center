@@ -61,11 +61,10 @@
         </div>
 
         <!-- GOOGLE -->
-        <a href="http://localhost:5000/api/auth/google" class="btn-google">
+        <a href="#" class="btn-google" style="pointer-events: none; opacity: 0.6; cursor: not-allowed;">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg">
-            Continue with Google
+            Continue with Google (Maintenance)
         </a>
-
         <div class="login-footer">
             Don't have an account? <a href="/register">Sign up</a>
         </div>

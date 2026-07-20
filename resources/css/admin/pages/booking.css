@@ -103,6 +103,38 @@
     background: #66001a;
 }
 
+/* ===================== */
+/* RESPONSIVE FILTERS */
+/* ===================== */
+
+@media (max-width: 575px) {
+    .filter-wrapper {
+        padding: 12px;
+    }
+
+    .filter-top {
+        margin-bottom: 10px;
+    }
+
+    .filter-bottom {
+        gap: 10px;
+    }
+
+    .select-box {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    .select-box select {
+        min-width: 0;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+}
+
+
 /* CARD */
 .card-box {
     background: #ffffff;

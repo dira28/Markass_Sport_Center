@@ -17,7 +17,7 @@ class ProfileController extends Controller
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token
-        ])->get('http://localhost:5000/api/auth/profile');
+        ])->get('https://markasssportcenter.rplrus.com/api/auth/profile');
 
         $result = $response->json();
 

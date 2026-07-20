@@ -189,7 +189,7 @@
 
             <div class="mt-3 d-flex gap-2">
                 <button type="submit" class="btn btn-danger w-100">Kirim</button>
-                <button type="button" onclick="closeCommentModal()" class="btn btn-secondary w-100">Batal</button>
+                <button type="button" onclick="closeCommentModal()" class="btn btn-secondary w-100">Expired</button>
             </div>
         </form>
     </div>
