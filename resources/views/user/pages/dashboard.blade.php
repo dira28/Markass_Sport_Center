@@ -46,6 +46,26 @@
 .add-comment-btn:hover {
     background: #a93226;
 }
+
+/* STYLE MODAL INPUT FORM FIX */
+.comment-modal input[type="text"],
+.comment-modal textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.comment-modal input[type="text"]:focus,
+.comment-modal textarea:focus {
+    border-color: #c0392b;
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+}
 </style>
 
 <section class="hero-dashboard" style="position: relative;">
@@ -161,7 +181,6 @@
         <h3 class="section-title-dashboard">Apa Kata Mereka?</h3>
 
         <div class="row mt-4 testimonial-row">
-            <!-- komentar lama -->
             <div class="col-md-4 mb-4">
                 <div class="testimonial-card">
                     <img src="https://randomuser.me/api/portraits/women/44.jpg">
@@ -173,23 +192,21 @@
     </div>
 </section>
 
-<!-- BUTTON -->
 <button class="add-comment-btn" onclick="openCommentModal()">
     + Tambah Komentar
 </button>
 
-<!-- MODAL -->
 <div class="comment-modal" id="commentModal">
     <div class="comment-box">
-        <h5 class="mb-3">Tambah Komentar</h5>
+        <h5 class="mb-3" style="font-weight: 800;">Tambah Komentar</h5>
 
         <form onsubmit="addComment(event)">
             <input type="text" id="namaKomentar" placeholder="Nama Anda" required>
             <textarea id="isiKomentar" rows="4" placeholder="Tulis komentar..." required></textarea>
 
             <div class="mt-3 d-flex gap-2">
-                <button type="submit" class="btn btn-danger w-100">Kirim</button>
-                <button type="button" onclick="closeCommentModal()" class="btn btn-secondary w-100">Batal</button>
+                <button type="submit" class="btn btn-danger w-100" style="background-color: #c0392b; border-color: #c0392b; font-weight: 700; border-radius: 12px;">Kirim</button>
+                <button type="button" onclick="closeCommentModal()" class="btn btn-secondary w-100" style="font-weight: 700; border-radius: 12px;">Batal</button>
             </div>
         </form>
     </div>

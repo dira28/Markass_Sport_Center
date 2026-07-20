@@ -19,7 +19,7 @@
                 <th>Total</th>
             </tr>
         </thead>
-
+    
         <tbody>
             @forelse ($bookings as $item)
 
