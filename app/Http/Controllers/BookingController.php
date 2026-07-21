@@ -95,27 +95,28 @@ class BookingController extends Controller
         $lapangan_id = $request->lapangan_id;
         $tanggal = $request->tanggal;
 
-        if (!$token || !$lapangan_id || !$tanggal) {
+        // HAPUS !$token dari sini agar guest tetap bisa cek jam!
+        if (!$lapangan_id || !$tanggal) {
             return response()->json([]);
         }
 
         try {
-            // Force-expire before returning availability so expired bookings reopen immediately
-            Http::withToken($token)
-                ->acceptJson()
-                ->get(env('API_URL') . '/api/booking', [
-                    'status_pembayaran' => 'pending'
-                ]);
+            // Panggil endpoint expire hanya jika ada token (optional)
+            if ($token) {
+                Http::withToken($token)
+                    ->acceptJson()
+                    ->get(env('API_URL') . '/api/booking', [
+                        'status_pembayaran' => 'pending'
+                    ]);
 
-            // Run expire job locally (Laravel) by calling the API expiration command.
-            // If API implements it, it will update status_pembayaran => expired.
-            Http::withToken($token)
-                ->patch(env('API_URL') . '/api/booking/expire-pending');
+                Http::withToken($token)
+                    ->patch(env('API_URL') . '/api/booking/expire-pending');
+            }
 
-            $res = Http::withToken($token)
-                ->get(env('API_URL') . '/api/lapangan/' . $lapangan_id . '/status-jam', [
-                    'tanggal' => $tanggal
-                ]);
+            // Ambil status jam dari API (tanpa butuh token login)
+            $res = Http::get(env('API_URL') . '/api/lapangan/' . $lapangan_id . '/status-jam', [
+                'tanggal' => $tanggal
+            ]);
 
             if ($res->successful()) {
                 return response()->json($res->json()['data'] ?? []);
@@ -413,4 +414,67 @@ class BookingController extends Controller
         }
     }
 
+    // Tambahkan di bagian paling bawah BookingController.php
+    public function getFullyBookedDates(Request $request)
+    {
+        $token = session('token');
+        $lapangan_id = $request->lapangan_id;
+
+        // HAPUS !$token dari sini juga
+        if (!$lapangan_id) {
+            return response()->json([]);
+        }
+
+        try {
+            // Panggil API publik/guest untuk fetch list booking lapangan
+            $res = Http::get(env('API_URL') . '/api/booking', [
+                'id_lapangan' => $lapangan_id,
+            ]);
+
+            if ($res->failed()) {
+                return response()->json([]);
+            }
+
+            $data = $res->json()['data'] ?? [];
+            $dateSlotCount = [];
+
+            $today = Carbon::now('Asia/Jakarta')->format('Y-m-d');
+
+            foreach ($data as $booking) {
+                if (($booking['tanggal'] ?? '') < $today) {
+                    continue;
+                }
+
+                $status = strtolower((string) ($booking['status_pembayaran'] ?? 'pending'));
+
+                if (in_array($status, ['expired', 'cancelled'], true)) {
+                    continue;
+                }
+
+                $start = (int) substr($booking['jam_mulai'], 0, 2);
+                $end = (int) substr($booking['jam_selesai'], 0, 2);
+                $duration = max(1, $end - $start);
+
+                $tgl = $booking['tanggal'];
+                if (!isset($dateSlotCount[$tgl])) {
+                    $dateSlotCount[$tgl] = 0;
+                }
+
+                $dateSlotCount[$tgl] += $duration;
+            }
+
+            $fullyBookedDates = [];
+            foreach ($dateSlotCount as $tgl => $totalJam) {
+                if ($totalJam >= 18) {
+                    $fullyBookedDates[] = $tgl;
+                }
+            }
+
+            return response()->json(array_values($fullyBookedDates));
+
+        } catch (\Exception $e) {
+            return response()->json([]);
+        }
+    }
 }
+

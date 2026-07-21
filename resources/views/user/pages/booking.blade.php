@@ -41,5 +41,10 @@
     </section>
 
     @vite('resources/js/booking.js')
+    {{-- Di @push('styles') --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    {{-- Di bawah sebelum @vite('resources/js/booking.js') --}}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 @endsection

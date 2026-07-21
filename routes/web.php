@@ -30,6 +30,7 @@ Route::get('/booking/payment/{id}', [BookingController::class, 'payment'])->name
 Route::post('/booking/payment/{id}/upload-bukti', [BookingController::class, 'uploadProof'])
     ->name('booking.upload-bukti');
 
+Route::get('/booking/fully-booked-dates', [BookingController::class, 'getFullyBookedDates']);
 Route::patch('/booking/{id_booking}/confirm-payment', [BookingController::class, 'confirmPayment'])->name('booking.confirm-payment');
 Route::patch('/booking/{id_booking}/reject-payment', [BookingController::class, 'rejectPayment'])->name('booking.reject-payment');
 Route::get('/booking/my-bookings', [BookingController::class, 'getMyBookings'])->name('booking.my-bookings');

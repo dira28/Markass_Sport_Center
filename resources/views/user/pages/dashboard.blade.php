@@ -5,10 +5,9 @@
 @section('content')
 
     <section class="hero-dashboard" style="position: relative;">
-        
+
         <!-- TAMBAHAN: area klik seluruh hero -->
-        <a href="{{ url('/booking') }}" 
-           style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;"></a>
+        <a href="{{ url('/booking') }}" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;"></a>
 
         <div class="container text-center text-md-start" style="position: relative; z-index:2;">
             <div class="col-lg-6">
@@ -40,18 +39,18 @@
                 @endphp
 
                 @foreach($lapangans as $lap)
-                <div class="col-md-6 col-lg-3">
-                    <div class="card-dashboard">
-                        <div class="card-img-wrapper">
-                            <img src="{{ asset('images/' . $lap['img']) }}" alt="{{ $lap['name'] }}">
-                        </div>
-                        <div class="card-body">
-                            <h5>{{ $lap['name'] }}</h5>
-                            <p class="price">Mulai Rp{{ $lap['price'] }} <span>/ Jam</span></p>
-                            <a href="{{ url('/booking') }}" class="btn-red-dashboard w-100">Booking Sekarang</a>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card-dashboard">
+                            <div class="card-img-wrapper">
+                                <img src="{{ asset('images/' . $lap['img']) }}" alt="{{ $lap['name'] }}">
+                            </div>
+                            <div class="card-body">
+                                <h5>{{ $lap['name'] }}</h5>
+                                <p class="price">Mulai Rp{{ $lap['price'] }} <span>/ Jam</span></p>
+                                <a href="{{ url('/booking') }}" class="btn-red-dashboard w-100">Booking Sekarang</a>
+                            </div>
                         </div>
                     </div>
-                </div>
                 @endforeach
             </div>
         </div>
@@ -131,7 +130,8 @@
                 <div class="col-md-4 mb-4">
                     <div class="testimonial-card">
                         <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle mb-3">
-                        <p class="fst-italic text-muted">"Proses bookingnya cepet banget, gak perlu nunggu admin bales WA!"</p>
+                        <p class="fst-italic text-muted">"Proses bookingnya cepet banget, gak perlu nunggu admin bales WA!"
+                        </p>
                         <h6>Andi Pratama</h6>
                     </div>
                 </div>
@@ -144,8 +144,80 @@
                     </div>
                 </div>
 
-            </div
-        </div>
-    </section>
+            </div </div>
+            <<<<<<< Updated upstream </section>
+
+                <button class="add-comment-btn" onclick="openCommentModal()">
+                    + Tambah Komentar
+                </button>
+
+                <div class="comment-modal" id="commentModal">
+                    <div class="comment-box">
+                        <h5 class="mb-3" style="font-weight: 800;">Tambah Komentar</h5>
+
+                        <form onsubmit="addComment(event)">
+                            <input type="text" id="namaKomentar" class="form-control mb-3" placeholder="Nama Anda" required>
+
+                            <textarea id="isiKomentar" class="form-control" rows="4" placeholder="Tulis komentar..."
+                                required></textarea>
+
+                            <div class="mt-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    Kirim
+                                </button>
+
+                                <button type="button" class="btn btn-secondary w-100" onclick="closeCommentModal()">
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    function openCommentModal() {
+                        document.getElementById('commentModal').style.display = 'block';
+                    }
+
+                    function closeCommentModal() {
+                        document.getElementById('commentModal').style.display = 'none';
+                    }
+
+                    function addComment(event) {
+                        event.preventDefault();
+
+                        const nama = document.getElementById('namaKomentar').value.trim();
+                        const komentar = document.getElementById('isiKomentar').value.trim();
+
+                        if (!nama || !komentar) {
+                            return;
+                        }
+
+                        const container = document.querySelector('.testimonial-row');
+
+                        container.insertAdjacentHTML('beforeend', `
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <img src="https://randomuser.me/api/portraits/lego/1.jpg" class="rounded-circle mb-3">
+                    <p class="fst-italic text-muted">"${komentar}"</p>
+                    <h6>${nama}</h6>
+                </div>
+            </div>
+        `);
+
+                        document.getElementById('namaKomentar').value = '';
+                        document.getElementById('isiKomentar').value = '';
+
+                        closeCommentModal();
+                    }
+
+                    window.onclick = function (event) {
+                        const modal = document.getElementById('commentModal');
+
+                        if (event.target === modal) {
+                            closeCommentModal();
+                        }
+                    }
+                </script>
 
 @endsection
