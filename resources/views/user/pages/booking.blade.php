@@ -6,6 +6,9 @@
     window.isLoggedIn = {{ session('token') ? 'true' : 'false' }};
 </script>
 
+{{-- Masukkan SweetAlert2 di sini --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 @push('styles')
     @vite([
         'resources/css/user/pages/booking.css',
@@ -13,6 +16,7 @@
         'resources/css/user/components/lapangan-list.css',
         'resources/css/user/components/booking-summary.css'
     ])
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 @endpush
 
 @section('content')
@@ -40,11 +44,7 @@
         </div>
     </section>
 
-    @vite('resources/js/booking.js')
-    {{-- Di @push('styles') --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-    {{-- Di bawah sebelum @vite('resources/js/booking.js') --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @vite('resources/js/booking.js')
 
 @endsection

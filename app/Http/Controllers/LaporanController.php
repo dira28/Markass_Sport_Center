@@ -9,24 +9,20 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
-    public function index(Request $request)
+    private function getFilteredBookings(Request $request)
     {
         $token = session('token');
 
         if (!$token) {
-            return redirect('/login');
+            return null;
         }
 
-        // =========================
-        // FILTER DATE (AMAN + FULL DAY)
-        // =========================
-        $fromDate = Carbon::parse($request->get('from_date', Carbon::now()->startOfMonth()))
-            ->startOfDay()
-            ->format('Y-m-d H:i:s');
+        // Ambil input tanggal, default ke awal & akhir bulan ini
+        $fromDateRaw = $request->get('from_date');
+        $toDateRaw = $request->get('to_date');
 
-        $toDate = Carbon::parse($request->get('to_date', Carbon::now()->endOfMonth()))
-            ->endOfDay()
-            ->format('Y-m-d H:i:s');
+        $fromDate = $fromDateRaw ? Carbon::parse($fromDateRaw)->startOfDay() : Carbon::now()->startOfMonth()->startOfDay();
+        $toDate = $toDateRaw ? Carbon::parse($toDateRaw)->endOfDay() : Carbon::now()->endOfMonth()->endOfDay();
 
         $bookings = collect();
 
@@ -34,78 +30,62 @@ class LaporanController extends Controller
             $response = Http::withToken($token)
                 ->acceptJson()
                 ->get(env('API_URL') . '/api/booking', [
-                    'tanggal_gte' => $fromDate,
-                    'tanggal_lte' => $toDate,
+                    'tanggal_gte' => $fromDate->format('Y-m-d H:i:s'),
+                    'tanggal_lte' => $toDate->format('Y-m-d H:i:s'),
                 ]);
 
             if ($response->successful()) {
                 $bookings = collect($response->json()['data'] ?? []);
             }
-
         } catch (\Exception $e) {
             $bookings = collect();
         }
-        
+
+        // Filter ketat berdasarkan rentang tanggal
         $bookings = $bookings->filter(function ($item) use ($fromDate, $toDate) {
             $tanggal = Carbon::parse($item['tanggal'] ?? $item['created_at']);
-
-            return $tanggal->between(
-                Carbon::parse($fromDate),
-                Carbon::parse($toDate)
-            );
+            return $tanggal->between($fromDate, $toDate);
         });
 
-        // =========================
-        // TOTAL CALCULATION
-        // =========================
+        // Hitung statistik
         $totalBooking = $bookings->count();
 
-        $totalRevenue = $bookings->sum(function ($item) {
-            return $item['total_harga'] ?? 0;
-        });
+        // Hanya hitung revenue dari booking yang lunas/dikonfirmasi
+        $totalRevenue = $bookings->filter(function ($item) {
+            $st = strtolower($item['status_pembayaran'] ?? '');
+            return in_array($st, ['paid', 'confirmed', 'lunas', 'berhasil']);
+        })->sum('total_harga');
 
-        return view('admin.pages.laporan', compact(
-            'bookings',
-            'totalBooking',
-            'totalRevenue',
-            'fromDate',
-            'toDate'
-        ));
+        return [
+            'bookings' => $bookings,
+            'totalBooking' => $totalBooking,
+            'totalRevenue' => $totalRevenue,
+            'fromDate' => $fromDate->format('Y-m-d'),
+            'toDate' => $toDate->format('Y-m-d'),
+        ];
+    }
+
+    public function index(Request $request)
+    {
+        $data = $this->getFilteredBookings($request);
+
+        if ($data === null) {
+            return redirect('/login');
+        }
+
+        return view('admin.pages.laporan', $data);
     }
 
     public function exportPdf(Request $request)
     {
-        $token = session('token');
+        $data = $this->getFilteredBookings($request);
 
-        $fromDate = $request->get('from_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $toDate = $request->get('to_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
-
-        $bookings = collect();
-
-        try {
-            $response = Http::withToken($token)
-                ->acceptJson()
-                ->get(env('API_URL') . '/api/booking', [
-                    'tanggal_gte' => $fromDate,
-                    'tanggal_lte' => $toDate,
-                ]);
-
-            if ($response->successful()) {
-                $bookings = collect($response->json()['data'] ?? []);
-            }
-
-        } catch (\Exception $e) {
-            $bookings = collect();
+        if ($data === null) {
+            return redirect('/login');
         }
 
-        $totalRevenue = $bookings->sum('total_harga');
-
-        $pdf = Pdf::loadView('admin.reports.booking-pdf', compact(
-            'bookings',
-            'fromDate',
-            'toDate',
-            'totalRevenue'
-        ));
+        $pdf = Pdf::loadView('admin.reports.booking-pdf', $data)
+            ->setPaper('a4', 'landscape');
 
         return $pdf->download('laporan-booking-' . date('Y-m-d') . '.pdf');
     }

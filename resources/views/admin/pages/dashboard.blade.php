@@ -14,12 +14,12 @@
             </div>
         </div>
 
-        {{-- KPI --}}
+        {{-- KPI (TOTAL KESELURUHAN) --}}
         <div class="mb-3">
             @include('admin.components.kpi-cards', [
-                'totalRevenue' => $totalRevenue ?? 0,
-                'totalBooking' => $totalBooking ?? 0,
-                'totalUser' => $totalUser ?? 0,
+                'totalRevenue'  => $totalRevenue ?? 0,
+                'totalBooking'  => $totalBooking ?? 0,
+                'totalUser'     => $totalUser ?? 0,
                 'averagePerDay' => $averagePerDay ?? 0
             ])
         </div>
@@ -29,16 +29,17 @@
 
             <div class="col-md-8">
                 @include('admin.components.profit-overview', [
-                    'data' => $chartData,
-                    'id' => 'dashboard',
+                    'data'  => $chartData,
+                    'id'    => 'dashboard',
                     'title' => 'Grafik Pendapatan'
                 ])
             </div>
 
+            {{-- REVENUE SUMMARY (HARI INI) --}}
             <div class="col-md-4">
                 @include('admin.components.revenue-summary', [
                     'revenueToday' => $revenueToday ?? 0,
-                    'totalBooking' => $totalBooking ?? 0
+                    'totalBooking' => $totalBookingToday ?? 0 
                 ])
             </div>
 
@@ -58,10 +59,10 @@
         <div class="row mt-4">
             <div class="col-md-12">
                 @include('admin.components.latest-booking', [
-                    'data' => $latestBookings ?? [],
-                    'title' => 'Latest Bookings',
+                    'data'       => $latestBookings ?? [],
+                    'title'      => 'Latest Bookings',
                     'showButton' => true,
-                    'url' => route('admin.laporan')
+                    'url'        => route('admin.laporan')
                 ])
             </div>
         </div>

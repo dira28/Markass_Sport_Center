@@ -1,17 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\HistoryBookingController;
 use App\Http\Controllers\LapanganController;
-use App\Http\Controllers\LoginController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserBookingController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\LaporanController;
-use Illuminate\Support\Facades\Http;
 
 // =====================
 // HALAMAN USER
@@ -35,8 +35,7 @@ Route::patch('/booking/{id_booking}/confirm-payment', [BookingController::class,
 Route::patch('/booking/{id_booking}/reject-payment', [BookingController::class, 'rejectPayment'])->name('booking.reject-payment');
 Route::get('/booking/my-bookings', [BookingController::class, 'getMyBookings'])->name('booking.my-bookings');
 Route::get('/booking/status-jam', [BookingController::class, 'getStatusJam'])->name('booking.status-jam');
-Route::get('/booking/slots', [BookingController::class, 'getBookedSlots'])
-    ->name('booking.slots');
+Route::get('/booking/slots', [BookingController::class, 'getBookedSlots'])->name('booking.slots');
 
 Route::get('/tentang', function () {
     return view('user.pages.tentang');
@@ -57,13 +56,14 @@ Route::get('/check-expired', function () {
 });
 
 // =====================
-// AUTH
+// AUTH & GOOGLE LOGIN
 // =====================
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// Route untuk OTP
+Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('otp.view');
+Route::post('/verify-otp', [AuthController::class, 'processVerifyOtp'])->name('otp.verify');
 
-Route::post('/login', [LoginController::class, 'login']);
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'processLogin']);
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -71,8 +71,12 @@ Route::get('/register', function () {
 
 Route::post('/register', [RegisterController::class, 'register']);
 
+// ROUTE GOOGLE LOGIN
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
+
 Route::get('/profile', [ProfileController::class, 'profile'])->name('profile');
-Route::get('/logout', [ProfileController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // =====================
 // ADMIN
@@ -90,16 +94,16 @@ Route::prefix('admin')->group(function () {
     Route::get('/laporan', [LaporanController::class, 'index'])->name('admin.laporan');
     Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('admin.laporan.export');
 
-    Route::get('/admin/profile', function () {
+    Route::get('/profile', function () {
         return view('admin.pages.profile');
     })->name('admin.profile');
 
     Route::post('/logout', function () {
         session()->flush();
         return redirect('/login');
-    })->name('logout');
+    })->name('admin.logout');
 
-    //LAPANGAN CRUD
+    // LAPANGAN CRUD
     Route::get('/lapangan', [LapanganController::class, 'index'])->name('lapangan.index');
     Route::post('/lapangan', [LapanganController::class, 'store'])->name('lapangan.store');
     Route::post('/lapangan/update/{id}', [LapanganController::class, 'update'])->name('lapangan.update');

@@ -35,6 +35,21 @@ body {
     flex-direction: column;
 }
 
+/* smooth animation */
+.jam-btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.jam-text {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
 /* selected available slot */
 .jam-btn.active,
 .jam-btn.active-range {
@@ -43,43 +58,45 @@ body {
     border-color: #111827 !important;
 }
 
-/* Already booked slots (must be blocked immediately) */
+/* Already booked slots (perbaikan kunci interaksi & pointer) */
 .jam-btn.jam-booked {
-    background: rgba(220, 53, 69, 0.15) !important;
+    background: rgba(220, 53, 69, 0.12) !important;
     border: 1px solid rgba(220, 53, 69, 0.35) !important;
-    color: rgba(107, 114, 128, 1) !important;
-    pointer-events: none;
-    opacity: 0.55 !important;
+    color: #6c757d !important;
+    pointer-events: none !important;
+    /* Mencegah hover/click dari mouse sepenuhnya */
+    opacity: 0.65 !important;
     cursor: not-allowed !important;
 }
 
 .jam-btn.jam-booked .jam-booked-label {
     display: block;
-    font-size: 10px;
-    letter-spacing: 0.3px;
+    font-size: 9px;
+    letter-spacing: 0.5px;
     font-weight: 800;
     color: #dc3545 !important;
     margin-top: 2px;
+    line-height: 1;
 }
 
-/* hover booked */
+/* Hover booked (backup) */
 .jam-btn.jam-booked:hover {
-    background: rgba(220, 53, 69, 0.15) !important;
-    color: rgba(107, 114, 128, 1) !important;
+    background: rgba(220, 53, 69, 0.12) !important;
+    color: #6c757d !important;
 }
-
-
 
 /* Ensure disabled state stays disabled */
 .jam-btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
 }
 
-/* smooth animation */
-.jam-btn {
-    cursor: pointer;
-    transition: all 0.2s ease;
+.swal2-actions .swal2-confirm {
+    color: #ffffff !important;
+    font-weight: 600 !important;
 }
 
-
+.swal2-actions .swal2-cancel {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}

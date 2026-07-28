@@ -20,13 +20,13 @@
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> 
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 
     {{-- Navbar --}}
     @include('user.components.navbar')
 
     {{-- Content --}}
-    <main>
+    <main class="flex-grow-1">
         @yield('content')
     </main>
 

@@ -2,248 +2,296 @@
    CONTAINER
 ========================= */
 .report-page {
-  background: #f5f6fa;
-  padding: 25px;
+  background: #f4f6f9;
+  padding: 24px;
   border-radius: 16px;
 }
 
 /* =========================
-   PAGE HEADER
+   PAGE HEADER & FILTER
 ========================= */
 .report-page .page-title-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  background: #fff;
-  padding: 18px 22px;
+  background: #ffffff;
+  padding: 20px 24px;
   border-radius: 16px;
-
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
 .report-page .page-title {
   margin: 0;
-  font-weight: 600;
-  color: #111;
+  font-weight: 700;
+  color: #0f172a;
 }
 
-/* =========================
-   FILTER CARD
-========================= */
 .report-page .filter-card {
-  margin-top: 18px;
-  background: #fff;
-  padding: 20px;
+  margin-top: 20px;
+  background: #ffffff;
+  padding: 20px 24px;
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
 }
 
 .report-page .filter-label {
   font-size: 13px;
   font-weight: 600;
-  color: #777;
+  color: #64748b;
   margin-bottom: 6px;
   display: block;
 }
 
 .report-page .form-control {
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  padding: 10px 14px;
+  font-size: 14px;
 }
 
-/* =========================
-   BUTTON (UBAH DARI HIJAU)
-========================= */
-
-/* tombol filter (abu / dark clean) */
+/* BUTTONS */
 .report-page .btn-filter {
-  background: #2f3542;
-  color: #fff;
+  background: #1e293b;
+  color: #ffffff;
   border: none;
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: 10px;
   font-weight: 600;
   transition: 0.2s;
 }
 
 .report-page .btn-filter:hover {
-  background: #1e222a;
+  background: #0f172a;
 }
 
-/* tombol export PDF (kanan + margin) */
-.report-page .export {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 15px;
-  margin-bottom: 10px;
-}
-
-.report-page .btn-export {
-  background: #3742fa;
-  color: #fff;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 600;
-  text-decoration: none;
-
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  transition: 0.2s;
-}
-
-.report-page .btn-export:hover {
-  background: #1d3dbc;
-  transform: translateY(-2px);
-}
-
-/* =========================
-   FILTER BUTTON (NON HIJAU)
-========================= */
-.report-page .btn-filter {
-  background: #2f3542;
-  color: #fff;
-
-  border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.report-page .btn-filter:hover {
-  background: #1e222a;
-}
-
-/* =========================
-   RESET BUTTON
-========================= */
 .report-page .btn-reset {
-  background: #e9ecef;
-  color: #333;
-
+  background: #f1f5f9;
+  color: #475569;
   border: none;
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: 10px;
-
   font-weight: 600;
   text-decoration: none;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   transition: 0.2s;
 }
 
 .report-page .btn-reset:hover {
-  background: #d6d8db;
-  transform: translateY(-2px);
+  background: #e2e8f0;
+}
+
+.report-page .btn-export {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+}
+
+.report-page .btn-export:hover {
+  background: #1d4ed8;
+  color: #ffffff;
 }
 
 /* =========================
-   KPI GRID
+   KPI GRID (DIBESARKAN & LEBIH JELAS)
 ========================= */
 .report-page .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 18px;
   margin-top: 20px;
 }
 
 .report-page .kpi-card {
-  background: #fff;
-  padding: 18px;
+  background: #ffffff;
+  padding: 20px 24px;
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .report-page .kpi-label {
   font-size: 13px;
-  color: #888;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+/* Ukuran Angka Diperbesar Tegas */
 .report-page .kpi-number {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
+  margin-top: 6px;
+  line-height: 1.2;
+}
+
+/* Warna Spesifik KPI */
+.kpi-total {
+  color: #0f172a;
+}
+
+.kpi-revenue {
+  color: #2563eb;
+}
+
+.kpi-paid {
+  color: #16a34a;
+}
+
+.kpi-pending {
+  color: #d97706;
 }
 
 /* =========================
-   TABLE
+   TABLE & SCROLL SETTINGS
 ========================= */
 .report-page .table-card {
   margin-top: 20px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
 }
 
 .report-page .table-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid #f1f3f5;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-/* table */
+.report-page .table-responsive-container {
+  max-height: 520px;
+  width: 100%;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  display: block;
+}
+
+/* Kustomisasi Tampilan Scrollbar Horizontal & Vertikal */
+.report-page .table-responsive-container::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.report-page .table-responsive-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.report-page .table-responsive-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
 .report-page .laporan-table {
   width: 100%;
-  border-collapse: collapse;
+  min-width: 1380px !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
 }
 
 .report-page .laporan-table thead th {
-  background: #f8f9fa;
-  padding: 12px;
+  background: #f8fafc;
+  padding: 14px 18px;
   font-size: 12px;
-  color: #777;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
 }
 
 .report-page .laporan-table tbody td {
-  padding: 12px;
-  border-top: 1px solid #f1f3f5;
+  padding: 16px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #334155;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 /* =========================
-   STATUS
+   STATUS & BADGE STYLING
 ========================= */
-.report-page .status-badge {
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+  text-align: center;
 }
 
-.status-pending {
-  background: rgba(255, 193, 7, .2);
+.status-pending,
+.status-waiting_confirmation,
+.status-menunggu_verifikasi {
+  background: #fef3c7;
   color: #b45309;
 }
 
-.status-paid {
-  background: rgba(40, 167, 69, .15);
-  color: #1f7a36;
+.status-paid,
+.status-confirmed,
+.status-lunas {
+  background: #dcfce7;
+  color: #15803d;
 }
 
-.status-confirmed {
-  background: rgba(40, 167, 69, .15);
-  color: #1f7a36;
-}
-
-.status-expired {
-  background: rgba(220, 53, 69, .15);
-  color: #c82333;
-}
-
+.status-expired,
 .status-cancelled {
-  background: rgba(108, 117, 125, .15);
-  color: #495057;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge-durasi {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 /* =========================
-   RESPONSIVE
+   PAGINATION STYLING
+========================= */
+.table-footer-pagination .pagination {
+  margin: 0;
+  gap: 4px;
+}
+
+.table-footer-pagination .page-item .page-link {
+  border-radius: 8px;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.table-footer-pagination .page-item.active .page-link {
+  background-color: #1e293b;
+  border-color: #1e293b;
+  color: #ffffff;
+}
+
+/* =========================
+   RESPONSIF (TABLET & HP)
 ========================= */
 @media (max-width: 992px) {
   .report-page .kpi-grid {
@@ -253,10 +301,16 @@
 
 @media (max-width: 576px) {
   .report-page {
-    padding: 15px;
+    padding: 16px;
   }
 
   .report-page .kpi-grid {
     grid-template-columns: 1fr;
+  }
+
+  .report-page .page-title-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 }

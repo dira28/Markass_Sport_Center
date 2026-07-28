@@ -15,9 +15,11 @@ class ProfileController extends Controller
         }
 
         try {
+            $apiUrl = env('API_URL', 'http://127.0.0.1:5000');
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token
-            ])->get('http://localhost:5000/api/auth/profile');
+            ])->get($apiUrl . '/api/auth/profile');
 
             $result = $response->json();
 
@@ -26,7 +28,6 @@ class ProfileController extends Controller
                 return view('user.pages.profile');
             }
 
-            // If API fails, redirect to login or show error
             return redirect()->route('login')->with('error', $result['message'] ?? 'Failed to get profile');
 
         } catch (\Exception $e) {
@@ -35,9 +36,12 @@ class ProfileController extends Controller
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        session()->forget(['token', 'role']);
-        return redirect()->route('home');
+        session()->forget(['token', 'user', 'role']);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 }

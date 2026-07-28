@@ -95,7 +95,6 @@ class BookingController extends Controller
         $lapangan_id = $request->lapangan_id;
         $tanggal = $request->tanggal;
 
-        // HAPUS !$token dari sini agar guest tetap bisa cek jam!
         if (!$lapangan_id || !$tanggal) {
             return response()->json([]);
         }
@@ -161,10 +160,6 @@ class BookingController extends Controller
                         $paymentStatus = 'confirmed';
                     }
 
-
-
-
-                    // NORMALIZE STATUS VALUES
                     if ($paymentStatus === 'menunggu_verifikasi') {
                         $paymentStatus = 'waiting_confirmation';
                     }
@@ -173,13 +168,6 @@ class BookingController extends Controller
                         $paymentStatus = 'confirmed';
                     }
 
-
-                    // NORMALIZE STATUS
-
-                    // (already normalized above)
-
-
-                    // CLASS BADGE
                     $statusClass = match ($paymentStatus) {
                         'pending' => 'bg-warning',
                         'waiting_confirmation' => 'bg-primary',
@@ -200,7 +188,6 @@ class BookingController extends Controller
                     };
 
 
-                    // SIMPAN STATUS YANG SUDAH DINORMALISASI
                     $booking['status_pembayaran'] = $paymentStatus;
 
                     return view(
@@ -221,7 +208,6 @@ class BookingController extends Controller
     }
     public function uploadProof($id, Request $request)
     {
-        // Requirement: form-data key `bukti`, accept only .jpg/.jpeg/.png
         $request->validate([
             'bukti' => 'required|image|mimes:jpg,jpeg,png|max:2048'
         ]);
@@ -238,12 +224,7 @@ class BookingController extends Controller
         try {
             $file = $request->file('bukti');
 
-            // Store uploaded file (Laravel disk: public)
             $path = $file->store('bukti', 'public');
-
-            // IMPORTANT: API contract expects form-data key `bukti`.
-            // Our current backend persists file first, then sends expected payload.
-            // If your API expects the actual binary file instead of a path, adjust accordingly.
             $res = Http::withToken($token)
                 ->attach('bukti', file_get_contents($file->getRealPath()), basename($path), [
                     'Content-Type' => $file->getClientMimeType()
@@ -254,7 +235,6 @@ class BookingController extends Controller
                 $payload = $res->json();
                 $data = $payload['data'] ?? $payload;
 
-                // Forward backend contract so frontend/admin can render latest bukti_pembayaran
                 $latestBukti = $data['bukti_pembayaran'] ?? $data['bukti'] ?? null;
                 $statusPembayaran = $data['status_pembayaran'] ?? $data['status'] ?? 'waiting_confirmation';
 
@@ -320,7 +300,6 @@ class BookingController extends Controller
         }
     }
 
-    // reject/payment cancellation not supported by backend currently
     public function rejectPayment($id_booking)
     {
         return response()->json([
@@ -414,19 +393,15 @@ class BookingController extends Controller
         }
     }
 
-    // Tambahkan di bagian paling bawah BookingController.php
     public function getFullyBookedDates(Request $request)
     {
         $token = session('token');
         $lapangan_id = $request->lapangan_id;
-
-        // HAPUS !$token dari sini juga
         if (!$lapangan_id) {
             return response()->json([]);
         }
 
         try {
-            // Panggil API publik/guest untuk fetch list booking lapangan
             $res = Http::get(env('API_URL') . '/api/booking', [
                 'id_lapangan' => $lapangan_id,
             ]);
