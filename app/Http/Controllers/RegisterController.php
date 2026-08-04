@@ -12,26 +12,33 @@ class RegisterController extends Controller
         $request->validate([
             'nama' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:6'
+            'password' => 'required|min:6',
         ]);
 
+        $apiUrl = config('services.api.url', env('API_URL'));
+
         try {
-            $response = Http::post('http://localhost:5000/api/auth/register', [
+            $response = Http::acceptJson()->post($apiUrl . '/api/auth/register', [
                 'nama' => $request->nama,
                 'email' => $request->email,
-                'password' => $request->password
+                'password' => $request->password,
             ]);
 
             $result = $response->json();
 
-            if ($result['success']) {
-                return redirect('/login')->with('success', 'Register berhasil, silakan login');
+            if (!empty($result['success'])) {
+                return redirect('/login')->with(
+                    'success',
+                    'Registration successful. Please login.'
+                );
             }
 
-            return back()->with('error', $result['message'] ?? 'Register gagal');
-
+            return back()->with(
+                'error',
+                $result['message'] ?? 'Registration failed.'
+            );
         } catch (\Exception $e) {
-            return back()->with('error', 'Server error!');
+            return back()->with('error', 'Server error.');
         }
     }
 }

@@ -156,7 +156,7 @@
 }
 
 /* =========================
-   TABLE & SCROLL SETTINGS
+   TABLE & SCROLL SETTINGS (FIXED)
 ========================= */
 .report-page .table-card {
   margin-top: 20px;
@@ -164,6 +164,8 @@
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
   border: 1px solid #f1f5f9;
+  overflow: hidden;
+  /* Menjaga sudut border-radius tetap rapi */
 }
 
 .report-page .table-header {
@@ -175,14 +177,19 @@
   max-height: 520px;
   width: 100%;
   overflow-x: auto !important;
+  /* Wajib scroll horizontal */
   overflow-y: auto !important;
+  /* Scroll vertikal internal */
   display: block;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Kustomisasi Tampilan Scrollbar Horizontal & Vertikal */
+/* Custom Scrollbar */
 .report-page .table-responsive-container::-webkit-scrollbar {
   height: 8px;
+  /* Tinggi batang scroll horizontal */
   width: 8px;
+  /* Lebar batang scroll vertikal */
 }
 
 .report-page .table-responsive-container::-webkit-scrollbar-track {
@@ -194,12 +201,22 @@
   border-radius: 4px;
 }
 
+.report-page .table-responsive-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Pengaturan Lebar Tabel Utama */
 .report-page .laporan-table {
   width: 100%;
-  min-width: 1380px !important;
+  /* 
+     Min-width disesuaikan ke 1120px agar pas menampilkan ID s/d USER di layar,
+     dan memaksa STATUS & TOTAL bergeser ke kanan (memicu scroll horizontal)
+  */
+  min-width: 1120px !important;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
+  /* Kunci agar proporsi lebar th/td dipatuhi */
 }
 
 .report-page .laporan-table thead th {
@@ -226,6 +243,56 @@
   white-space: nowrap;
 }
 
+.report-page .laporan-table th:nth-child(1),
+.report-page .laporan-table td:nth-child(1) {
+  width: 90px;
+}
+
+/* ID */
+.report-page .laporan-table th:nth-child(2),
+.report-page .laporan-table td:nth-child(2) {
+  width: 200px;
+}
+
+/* LAPANGAN */
+.report-page .laporan-table th:nth-child(3),
+.report-page .laporan-table td:nth-child(3) {
+  width: 130px;
+}
+
+/* TGL DIBUAT */
+.report-page .laporan-table th:nth-child(4),
+.report-page .laporan-table td:nth-child(4) {
+  width: 150px;
+}
+
+/* JADWAL MAIN */
+.report-page .laporan-table th:nth-child(5),
+.report-page .laporan-table td:nth-child(5) {
+  width: 90px;
+}
+
+.report-page .laporan-table th:nth-child(6),
+.report-page .laporan-table td:nth-child(6) {
+  width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-page .laporan-table th:nth-child(7),
+.report-page .laporan-table td:nth-child(7) {
+  width: 110px;
+}
+
+/* STATUS */
+
+.report-page .laporan-table th:nth-child(8),
+.report-page .laporan-table td:nth-child(8) {
+  width: 130px;
+}
+
+/* TOTAL */
 /* =========================
    STATUS & BADGE STYLING
 ========================= */

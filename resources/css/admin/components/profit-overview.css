@@ -1,68 +1,71 @@
-/* card utama profit overview */
+/* Card Utama Profit Overview */
 .profit-card {
-    background: #fff;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-    transition: 0.3s ease;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
 }
 
-/* efek hover card */
-.profit-card:hover {
-    transform: translateY(-3px);
-}
-
-/* header chart (judul + filter) */
+/* Header Chart (Judul + Subtitle + Filter) */
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
-/* judul chart */
 .chart-header h5 {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
     margin: 0;
 }
 
-/* container tombol filter */
-.chart-filter {
-    display: flex;
-    gap: 6px;
-    background: #f1f3f5;
-    padding: 5px;
-    border-radius: 12px;
+.chart-header small {
+    font-size: 12px;
+    color: #64748b;
 }
 
-/* tombol filter default */
+/* Container Tombol Filter */
+.chart-filter {
+    display: flex;
+    gap: 4px;
+    background: #f8fafc;
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Tombol Filter Default */
 .chart-filter button {
     border: none;
     background: transparent;
-    padding: 6px 12px;
-    border-radius: 10px;
+    padding: 6px 14px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 13px;
-    color: #555;
-    transition: 0.2s;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
 }
 
-/* hover tombol filter */
 .chart-filter button:hover {
-    background: rgba(220,53,69,0.1);
-    color: #dc3545;
+    color: #0f172a;
+    background: #f1f5f9;
 }
 
-/* tombol aktif (yang dipilih) */
+/* Tombol Aktif */
 .chart-filter button.active {
     background: #dc3545;
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(220,53,69,0.25);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
 }
 
-/* ukuran chart */
-canvas {
-    width: 100% !important;
-    height: 300px !important;
-}
+/* Wrapper Chart agar Responsive & Tidak Overflow */
+.chart-container {
+    position: relative;
+    height: 320px;
+    width: 100%;
+} 
