@@ -3,6 +3,8 @@
 @section('title', 'Laporan Booking')
 
 @push('styles')
+    {{-- Menggunakan asset() fallback agar CSS tetap terbaca meski Vite tidak di-build di server --}}
+    <link rel="stylesheet" href="{{ asset('css/admin/pages/report.css') }}">
     @vite('resources/css/admin/pages/report.css')
 @endpush
 
@@ -134,11 +136,14 @@
 
                                 $createdAt = data_get($booking, 'created_at');
                                 $tanggal = data_get($booking, 'tanggal');
-                                $idBooking = data_get($booking, 'id_booking', data_get($booking, 'id', '-'));
+                                
+                                // ID Booking tanpa substr agar tidak kepotong acak
+                                $rawId = data_get($booking, 'id_booking', data_get($booking, 'id', '-'));
+                                $idBooking = (str_starts_with($rawId, '#')) ? $rawId : '#' . $rawId;
                             @endphp
 
                             <tr>
-                                <td><strong>#{{ strtoupper(substr((string) $idBooking, 0, 6)) }}</strong></td>
+                                <td><strong>{{ strtoupper($idBooking) }}</strong></td>
                                 <td><strong>{{ data_get($booking, 'lapangan.nama_lapangan', '-') }}</strong></td>
                                 <td>{{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d M Y') : '-' }}</td>
                                 <td>
@@ -167,7 +172,7 @@
                                     Tidak ada data booking pada periode ini.
                                 </td>
                             </tr>
-                        @endforelse
+                        @forelse
                     </tbody>
                 </table>
             </div>

@@ -13,26 +13,16 @@
     {{-- BOOTSTRAP --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    
+
     {{-- ICON (WAJIB BUAT KPI) --}}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    {{-- FLATPICKR CSS --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    {{-- PUSH STYLES DARI HALAMAN ANAK --}}
+    @stack('styles')
 </head>
-
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-<script>
-    const fp = flatpickr("#dateRange", {
-        mode: "range",
-        dateFormat: "d M Y",
-        onChange: function (selectedDates, dateStr) {
-            document.getElementById("dateText").innerText = dateStr || "Pilih tanggal";
-        }
-    });
-
-    document.getElementById("dateRangeBox").addEventListener("click", function () {
-        fp.open();
-    });
-</script>
 
 <body>
 
@@ -56,13 +46,36 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <script>
-    setInterval(() => {
-        fetch('/check-expired')
-            .then(res => res.json())
-            .then(data => console.log('Expired checked'))
-            .catch(err => console.error(err));
-    }, 60000); // every 1 minute
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateInput = document.getElementById("dateRange");
+            if (dateInput) {
+                const fp = flatpickr("#dateRange", {
+                    mode: "range",
+                    dateFormat: "d M Y",
+                    onChange: function (selectedDates, dateStr) {
+                        const dateText = document.getElementById("dateText");
+                        if (dateText) dateText.innerText = dateStr || "Pilih tanggal";
+                    }
+                });
+
+                const dateBox = document.getElementById("dateRangeBox");
+                if (dateBox) {
+                    dateBox.addEventListener("click", function () {
+                        fp.open();
+                    });
+                }
+            }
+        });
+
+        setInterval(() => {
+            fetch('/check-expired')
+                .then(res => res.json())
+                .then(data => console.log('Expired checked'))
+                .catch(err => console.error(err));
+        }, 60000); // every 1 minute
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

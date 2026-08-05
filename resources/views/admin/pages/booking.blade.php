@@ -15,17 +15,18 @@
 
         {{-- FORM FILTER & SEARCH --}}
         <form method="GET" action="{{ url()->current() }}" class="row g-2 mb-4">
-            {{-- Input Search Text (ID / Nama User / Nama Lapangan) --}}
+            {{-- Input Search Text (ID / User / Lapangan) --}}
             <div class="col-md-4">
                 <input type="text" name="search" class="form-control" 
                        placeholder="Cari ID, User, atau Lapangan..." 
                        value="{{ request('search') }}">
             </div>
 
-            {{-- Input Tanggal --}}
+            {{-- Input Tanggal Booking (created_at) --}}
             <div class="col-md-3">
                 <input type="date" name="tanggal" class="form-control" 
-                       value="{{ request('tanggal') }}">
+                       value="{{ request('tanggal') }}"
+                       title="Filter berdasarkan tanggal transaksi/booking dibuat">
             </div>
 
             {{-- Input Status Pembayaran --}}
@@ -67,7 +68,7 @@
             <table class="table align-middle admin-booking-table payment-admin-table">
                 <thead>
                     <tr>
-                        <th>Tanggal</th>
+                        <th>Tanggal Booking</th>
                         <th>ID</th>
                         <th>Pengguna</th>
                         <th>Lapangan</th>
@@ -83,7 +84,10 @@
                     @forelse ($bookings as $item)
 
                         @php
-                            $tanggal = \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
+                            // Menampilkan tanggal dibuatnya booking (created_at)
+                            $tglBooking = isset($item['created_at']) 
+                                ? \Carbon\Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')
+                                : \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
 
                             // Normalisasi status pembayaran
                             $paymentStatus = strtolower(trim((string)($item['status_pembayaran'] ?? 'pending')));
@@ -112,14 +116,14 @@
 
                         <tr>
                             <td>
-                                {{ $tanggal->translatedFormat('d M Y') }}
+                                {{ $tglBooking->translatedFormat('d M Y') }}
                             </td>
 
                             <td>
                                 #{{ strtoupper(substr($item['id_booking'], 0, 6)) }}
                             </td>
 
-                            <td>{{ $item['user']['nama'] ?? '-' }}</td>
+                            <td>{{ $item['user']['nama'] ?? $item['user']['name'] ?? '-' }}</td>
 
                             <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
 
@@ -168,8 +172,7 @@
                                         type="submit"
                                         class="btn btn-success btn-sm"
                                         {{ (!$isWaiting || $isConfirmed) ? 'disabled' : '' }}
-                                        onclick="return confirm('Approve Payment?')"
-                                    >
+                                        onclick="return confirm('Approve Payment?')">
                                         @if($isConfirmed)
                                             <i class="fas fa-check-double"></i> Approved
                                         @else
@@ -190,27 +193,10 @@
             </table>
         </div>
 
-        {{-- LINK PAGINASI (Dengan .appends agar filter tidak hilang saat ganti halaman) --}}
+        {{-- LINK PAGINASI --}}
         @if(method_exists($bookings, 'links'))
             <div class="d-flex justify-content-end mt-3">
-                {{ $bookings->appends(request()->query())->links() }}
-            </div>
-        @elseif(isset($pagination) && is_array($pagination))
-            {{-- Menggunakan Custom Links jika data dipagination secara manual dari API --}}
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <small class="text-muted">
-                    Menampilkan {{ $pagination['from'] ?? 1 }} - {{ $pagination['to'] ?? count($bookings) }} dari {{ $pagination['total'] ?? count($bookings) }} data
-                </small>
-                <nav>
-                    <ul class="pagination mb-0">
-                        <li class="page-item {{ ($pagination['current_page'] ?? 1) <= 1 ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ request()->fullUrlWithQuery(['page' => ($pagination['current_page'] ?? 1) - 1]) }}">Previous</a>
-                        </li>
-                        <li class="page-item {{ ($pagination['current_page'] ?? 1) >= ($pagination['last_page'] ?? 1) ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ request()->fullUrlWithQuery(['page' => ($pagination['current_page'] ?? 1) + 1]) }}">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                {{ $bookings->links() }}
             </div>
         @endif
 

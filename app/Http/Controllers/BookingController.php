@@ -12,6 +12,9 @@ class BookingController extends Controller
     // ==========================================
     // METHOD ADMIN BOOKING (DENGAN FILTER & PAGINATION)
     // ==========================================
+    // ==========================================
+// METHOD ADMIN BOOKING (DENGAN FILTER & PAGINATION)
+// ==========================================
     public function adminIndex(Request $request)
     {
         $token = session('token');
@@ -28,40 +31,49 @@ class BookingController extends Controller
                 $collection = collect($allBookings)->filter(function ($item) use ($request) {
                     $match = true;
 
-                    // Filter Search Text (Cari ID Booking, Nama User, atau Nama Lapangan)
+                    // Filter Search Text (ID Booking, ID User, Nama User, Nama Lapangan)
                     if ($request->filled('search')) {
-                        $search = strtolower($request->search);
-                        $idBooking = strtolower($item['id_booking'] ?? '');
-                        $userName = strtolower($item['user']['nama'] ?? '');
-                        $lapanganName = strtolower($item['lapangan']['nama_lapangan'] ?? '');
+                        $search = strtolower(trim($request->search));
+
+                        $idBooking = strtolower((string) ($item['id_booking'] ?? ''));
+                        $userId = strtolower((string) ($item['user']['id'] ?? $item['id_user'] ?? ''));
+                        $userName = strtolower((string) ($item['user']['nama'] ?? $item['user']['name'] ?? ''));
+                        $lapName = strtolower((string) ($item['lapangan']['nama_lapangan'] ?? ''));
 
                         $searchMatch = str_contains($idBooking, $search) ||
+                            str_contains($userId, $search) ||
                             str_contains($userName, $search) ||
-                            str_contains($lapanganName, $search);
+                            str_contains($lapName, $search);
 
                         if (!$searchMatch) {
                             $match = false;
                         }
                     }
 
-                    // Filter Tanggal
+                    // Filter Tanggal Booking / Transaksi dibuat (created_at)
                     if ($request->filled('tanggal')) {
-                        if (($item['tanggal'] ?? '') !== $request->tanggal) {
+                        $createdDate = isset($item['created_at'])
+                            ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
+                            : null;
+
+                        if ($createdDate !== $request->tanggal) {
                             $match = false;
                         }
                     }
 
                     // Filter Status Pembayaran
                     if ($request->filled('status')) {
-                        $status = strtolower($item['status_pembayaran'] ?? 'pending');
+                        $status = strtolower(trim((string) ($item['status_pembayaran'] ?? 'pending')));
 
                         // Normalisasi status internal
-                        if ($status === 'menunggu_verifikasi')
+                        if ($status === 'menunggu_verifikasi') {
                             $status = 'waiting_confirmation';
-                        if (in_array($status, ['approve', 'paid'], true))
+                        }
+                        if (in_array($status, ['approve', 'paid'], true)) {
                             $status = 'confirmed';
+                        }
 
-                        if ($status !== strtolower($request->status)) {
+                        if ($status !== strtolower(trim($request->status))) {
                             $match = false;
                         }
                     }
@@ -76,13 +88,16 @@ class BookingController extends Controller
                 // Potong data hasil filter sesuai halaman aktif
                 $currentPageItems = $collection->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
-                // Buat paginator objek agar Blade bisa render tombol geser/page links
+                // Buat paginator objek dengan penanganan query string halaman
                 $bookings = new LengthAwarePaginator(
                     $currentPageItems,
                     $collection->count(),
                     $perPage,
                     $currentPage,
-                    ['path' => LengthAwarePaginator::resolveCurrentPath()]
+                    [
+                        'path' => LengthAwarePaginator::resolveCurrentPath(),
+                        'query' => $request->query(),
+                    ]
                 );
             } else {
                 $error = 'Gagal mengambil data dari API';
@@ -91,13 +106,8 @@ class BookingController extends Controller
             $error = 'Server error: ' . $e->getMessage();
         }
 
-        // Return ke view admin kamu
         return view('admin.pages.booking', compact('bookings', 'error'));
     }
-
-    // ==========================================
-    // FUNGSI LAIN DI BAWAH INI SAMA SEKALI TIDAK DIUBAH
-    // ==========================================
 
     public function index()
     {
