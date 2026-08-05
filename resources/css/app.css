@@ -7,16 +7,12 @@
 @import './admin/pages/profile.css';
 @import './user/pages/profile.css';
 @import "flowbite";
-/* ===================== */
-/* TAILWIND */
-/* ===================== */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ===================== */
-/* 🎨 COLOR SYSTEM */
-/* ===================== */
+/* Color variables */
 :root {
     --primary: #e53935;
     --primary-dark: #c62828;
@@ -27,25 +23,19 @@
     --text-muted: #777777;
 }
 
+/* Global layout */
+body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--bg-page);
+    color: var(--text-dark);
+}
+
 .admin-main {
     margin-left: 250px;
     min-height: 100vh;
     background: #f5f6fa;
 }
 
-/* ===================== */
-/* GLOBAL */
-/* ===================== */
-body {
-    font-family: 'Instrument Sans', sans-serif;
-    background: var(--bg-page);
-    /* abu-abu terang */
-    color: var(--text-dark);
-}
-
-/* ===================== */
-/* MAIN CONTENT */
-/* ===================== */
 .main-content {
     background: var(--bg-light);
     padding: 30px;
@@ -54,18 +44,13 @@ body {
     max-width: 1200px;
 }
 
-/* ===================== */
-/* HARGA WRAPPER */
-/* ===================== */
 .harga-wrapper {
     background: var(--bg-light);
     padding: 20px;
     border-radius: 15px;
 }
 
-/* ===================== */
-/* HERO */
-/* ===================== */
+/* Hero section */
 .hero-booking {
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
         url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d');
@@ -85,9 +70,7 @@ body {
     opacity: 0.9;
 }
 
-/* ===================== */
-/* CARD LAPANGAN */
-/* ===================== */
+/* Court card */
 .card-lapangan {
     display: flex;
     align-items: center;
@@ -119,9 +102,6 @@ body {
     border-radius: 10px;
 }
 
-/* ===================== */
-/* TEXT */
-/* ===================== */
 .card-lapangan h6 {
     font-size: 17px;
     font-weight: 600;
@@ -133,30 +113,22 @@ body {
     color: var(--text-muted);
 }
 
-/* ===================== */
-/* HARGA */
-/* ===================== */
 .harga {
     color: var(--primary);
     font-weight: bold;
     font-size: 16px;
 }
 
-/* ===================== */
-/* BOOKING SUMMARY (PUTIH) */
-/* ===================== */
+/* Summary component */
 .booking-summary {
     background: var(--bg-light);
-    /* PUTIH */
     color: var(--text-dark);
     padding: 22px;
     border-radius: 14px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* ===================== */
-/* BUTTON */
-/* ===================== */
+/* Custom buttons */
 .btn-red-custom,
 .btn-red {
     background: var(--primary);
@@ -179,18 +151,13 @@ body {
     margin-right: auto;
 }
 
-/* ===================== */
-/* SPORT BUTTON */
-/* ===================== */
 .sport.active {
     background: var(--primary) !important;
     color: white !important;
     border-color: var(--primary) !important;
 }
 
-/* ===================== */
-/* JADWAL */
-/* ===================== */
+/* Schedule selection */
 .jadwal button {
     margin: 3px;
 }
@@ -200,9 +167,7 @@ body {
     color: white;
 }
 
-/* ===================== */
-/* RESPONSIVE */
-/* ===================== */
+/* Mobile view */
 @media (max-width: 768px) {
     .hero-booking {
         height: 220px;
@@ -219,7 +184,6 @@ body {
         height: 150px;
     }
 
-    /* profile */
     .profile-img-lg {
         width: 80px;
         height: 80px;

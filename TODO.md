@@ -1,12 +1,7 @@
-# TODO
+# Booking JS - SweetAlert2 Button Visibility Fix
 
-## Booking time-slot UI (Traveloka/Ticket style)
-- [x] Inspect existing booking UI components (booking-summary, booking.js, booking.css)
-- [ ] Update slot locking logic to match exact core rules (pending/ waiting_confirmation/ confirmed + current time < end_time; expired/completed/ current time > end_time => available)
-- [ ] Implement auto expire (pending + created_at > 30 minutes => expired, unlock immediately)
-- [ ] Implement auto completed (current time > end_time => completed, unlock immediately)
-- [ ] Ensure disabled slots are truly unclickable (disabled attribute + guard in click handler)
-- [ ] Add clear visual states: AVAILABLE vs BOOKED (opacity, cursor, label “BOOKED”)
-- [ ] Ensure only one selection at a time and selected range highlighted
-- [ ] Run quick manual test: select lapangan/date, verify booked slots disabled, verify unlocking after time passes
-
+## Steps
+- [x] 1. Analyze the SweetAlert2 confirmation popup in `resources/js/booking.js`
+- [x] 2. Review related SweetAlert2 CSS to identify the transparent button cause
+- [x] 3. Add `didOpen` callback to the "Konfirmasi Pesanan" popup to force visible button styles
+- [x] 4. Verify the final code and indentation

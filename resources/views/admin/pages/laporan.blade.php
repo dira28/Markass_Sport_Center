@@ -2,18 +2,26 @@
 
 @section('title', 'Laporan Booking')
 
-@vite(['resources/css/laporan.css', 'resources/js/app.js'])
+@push('styles')
+    @vite('resources/css/admin/pages/report.css')
+@endpush
 
 @section('content')
 
     @php
-        $paidBooking = collect($bookings)
-            ->filter(fn($b) => in_array(strtolower($b['status_pembayaran'] ?? ''), ['paid', 'confirmed', 'lunas']))
+        // Ambil koleksi data booking dengan fallback array kosong jika null
+        $bookingCollection = collect($bookings ?? []);
+
+        $paidBooking = $bookingCollection
+            ->filter(fn($b) => in_array(strtolower(data_get($b, 'status_pembayaran', '')), ['paid', 'confirmed', 'lunas']))
             ->count();
 
-        $pendingBooking = collect($bookings)
-            ->filter(fn($b) => in_array(strtolower($b['status_pembayaran'] ?? ''), ['pending', 'waiting_confirmation', 'menunggu_verifikasi']))
+        $pendingBooking = $bookingCollection
+            ->filter(fn($b) => in_array(strtolower(data_get($b, 'status_pembayaran', '')), ['pending', 'waiting_confirmation', 'menunggu_verifikasi']))
             ->count();
+
+        $fromDateVal = $fromDate ?? request('from_date');
+        $toDateVal = $toDate ?? request('to_date');
     @endphp
 
     <div class="report-page">
@@ -25,7 +33,7 @@
                 <small class="text-muted">Kelola dan tinjau seluruh riwayat transaksi booking fasilitas.</small>
             </div>
             <div>
-                <a href="{{ route('admin.laporan.export', ['from_date' => $fromDate, 'to_date' => $toDate]) }}"
+                <a href="{{ route('admin.laporan.export', ['from_date' => $fromDateVal, 'to_date' => $toDateVal]) }}"
                     class="btn-export">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path
@@ -45,13 +53,13 @@
 
                     <div class="col-md-4">
                         <label class="filter-label">Dari Tanggal</label>
-                        <input type="date" name="from_date" value="{{ request('from_date', $fromDate) }}"
+                        <input type="date" name="from_date" value="{{ request('from_date', $fromDateVal) }}"
                             class="form-control">
                     </div>
 
                     <div class="col-md-4">
                         <label class="filter-label">Sampai Tanggal</label>
-                        <input type="date" name="to_date" value="{{ request('to_date', $toDate) }}" class="form-control">
+                        <input type="date" name="to_date" value="{{ request('to_date', $toDateVal) }}" class="form-control">
                     </div>
 
                     <div class="col-md-4 d-flex gap-2">
@@ -67,11 +75,11 @@
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-label">Total Booking</div>
-                <div class="kpi-number kpi-total">{{ $totalBooking }}</div>
+                <div class="kpi-number kpi-total">{{ $totalBooking ?? 0 }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Total Revenue</div>
-                <div class="kpi-number kpi-revenue">Rp{{ number_format($totalRevenue, 0, ',', '.') }}</div>
+                <div class="kpi-number kpi-revenue">Rp{{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Status Paid</div>
@@ -87,9 +95,12 @@
         <div class="table-card">
 
             <div class="table-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0 fw-bold">{{ $totalBooking }} Data Bookings</h5>
-                <small class="text-muted">Periode: {{ \Carbon\Carbon::parse($fromDate)->format('d M Y') }} s/d
-                    {{ \Carbon\Carbon::parse($toDate)->format('d M Y') }}</small>
+                <h5 class="m-0 fw-bold">{{ $totalBooking ?? 0 }} Data Bookings</h5>
+                <small class="text-muted">
+                    Periode:
+                    {{ $fromDateVal ? \Carbon\Carbon::parse($fromDateVal)->format('d M Y') : '-' }} s/d
+                    {{ $toDateVal ? \Carbon\Carbon::parse($toDateVal)->format('d M Y') : '-' }}
+                </small>
             </div>
 
             <div class="table-responsive-container">
@@ -109,32 +120,45 @@
                     <tbody>
                         @forelse($bookings as $booking)
                             @php
-                                $st = strtolower($booking['status_pembayaran'] ?? 'pending');
-                                $start = \Carbon\Carbon::parse($booking['jam_mulai']);
-                                $end = \Carbon\Carbon::parse($booking['jam_selesai']);
-                                $durasi = $start->diffInHours($end);
+                                $st = strtolower(data_get($booking, 'status_pembayaran', 'pending'));
+
+                                $jamMulai = data_get($booking, 'jam_mulai');
+                                $jamSelesai = data_get($booking, 'jam_selesai');
+
+                                $durasi = 0;
+                                if ($jamMulai && $jamSelesai) {
+                                    $start = \Carbon\Carbon::parse($jamMulai);
+                                    $end = \Carbon\Carbon::parse($jamSelesai);
+                                    $durasi = $start->diffInHours($end);
+                                }
+
+                                $createdAt = data_get($booking, 'created_at');
+                                $tanggal = data_get($booking, 'tanggal');
+                                $idBooking = data_get($booking, 'id_booking', data_get($booking, 'id', '-'));
                             @endphp
 
                             <tr>
-                                <td><strong>#{{ strtoupper(substr($booking['id_booking'] ?? $booking['id'] ?? '-', 0, 6)) }}</strong>
-                                </td>
-                                <td><strong>{{ $booking['lapangan']['nama_lapangan'] ?? '-' }}</strong></td>
-                                <td>{{ \Carbon\Carbon::parse($booking['created_at'])->format('d M Y') }}</td>
+                                <td><strong>#{{ strtoupper(substr((string) $idBooking, 0, 6)) }}</strong></td>
+                                <td><strong>{{ data_get($booking, 'lapangan.nama_lapangan', '-') }}</strong></td>
+                                <td>{{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d M Y') : '-' }}</td>
                                 <td>
-                                    <div><strong>{{ \Carbon\Carbon::parse($booking['tanggal'])->format('d M Y') }}</strong>
+                                    <div>
+                                        <strong>{{ $tanggal ? \Carbon\Carbon::parse($tanggal)->format('d M Y') : '-' }}</strong>
                                     </div>
-                                    <small class="text-muted">{{ substr($booking['jam_mulai'], 0, 5) }} -
-                                        {{ substr($booking['jam_selesai'], 0, 5) }}</small>
+                                    <small class="text-muted">
+                                        {{ $jamMulai ? substr($jamMulai, 0, 5) : '00:00' }} -
+                                        {{ $jamSelesai ? substr($jamSelesai, 0, 5) : '00:00' }}
+                                    </small>
                                 </td>
                                 <td><span class="badge-durasi">{{ $durasi }} Jam</span></td>
-                                <td>{{ $booking['nama_user'] ?? $booking['user']['nama'] ?? 'User' }}</td>
+                                <td>{{ data_get($booking, 'nama_user', data_get($booking, 'user.nama', 'User')) }}</td>
                                 <td>
                                     <span class="status-badge status-{{ $st }}">
                                         {{ ucfirst($st) }}
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <strong>Rp{{ number_format($booking['total_harga'] ?? 0, 0, ',', '.') }}</strong>
+                                    <strong>Rp{{ number_format(data_get($booking, 'total_harga', 0), 0, ',', '.') }}</strong>
                                 </td>
                             </tr>
                         @empty
@@ -149,7 +173,7 @@
             </div>
 
             {{-- FOOTER / PAGINATION LINK --}}
-            @if(method_exists($bookings, 'hasPages') && $bookings->hasPages())
+            @if(is_object($bookings) && method_exists($bookings, 'hasPages') && $bookings->hasPages())
                 <div class="table-footer-pagination p-3 border-top d-flex justify-content-between align-items-center">
                     <div class="text-muted small">
                         Menampilkan {{ $bookings->firstItem() }} - {{ $bookings->lastItem() }} dari {{ $bookings->total() }}

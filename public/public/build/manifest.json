@@ -1,6 +1,6 @@
 {
   "resources/css/admin/pages/report.css": {
-    "file": "assets/report-CDHFCRSG.css",
+    "file": "assets/report-hOcJeiu4.css",
     "src": "resources/css/admin/pages/report.css",
     "isEntry": true,
     "name": "report",
@@ -9,7 +9,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-DT20PqOC.css",
+    "file": "assets/app-BVsCbUA3.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -18,12 +18,12 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DVcgFVbn.js",
+    "file": "assets/app-CtmZijM5.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/report-CDHFCRSG.css"
+      "assets/report-hOcJeiu4.css"
     ]
   }
 }

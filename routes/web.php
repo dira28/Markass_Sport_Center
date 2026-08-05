@@ -93,6 +93,7 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('admin.laporan');
     Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('admin.laporan.export');
+    Route::get('/admin/booking', [BookingController::class, 'adminIndex']);
 
     Route::get('/profile', function () {
         return view('admin.pages.profile');

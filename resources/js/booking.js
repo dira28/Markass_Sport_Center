@@ -1,10 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    // ===== STATE MANAGEMENT =====
     let lapanganAktif = null;
     let hargaPagi = 0;
     let hargaMalam = 0;
-    let hargaPerJam = 0;
 
     let jamAktif = null;
     let durasi = 1;
@@ -13,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let blockedSlots = [];
     let fpInstance = null;
 
-    // ===== ELEMENT SELECTION =====
     const summaryNama = document.getElementById("summary-nama");
     const summaryTanggal = document.getElementById("summary-tanggal");
     const summaryJam = document.getElementById("summary-jam");
@@ -23,18 +20,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const summaryDurasi = document.getElementById("summary-durasi");
     const tanggalInput = document.getElementById("tanggal");
 
-    // ===== FORMAT TANGGAL INDONESIA =====
     function formatDateIndo(str) {
         if (!str) return "-";
         const d = new Date(str);
+        if (isNaN(d.getTime())) return str; // Fallback jika string format kustom
         return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // ===== INISIALISASI FLATPICKR =====
     function initDatePicker(disabledDates = []) {
         if (fpInstance) fpInstance.destroy();
 
-        if (document.getElementById("tanggal")) {
+        if (tanggalInput) {
             fpInstance = flatpickr("#tanggal", {
                 dateFormat: "Y-m-d",
                 minDate: "today",
@@ -51,12 +47,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
             });
+
+            // Set initial value jika input tanggal sudah berisi data saat load
+            if (tanggalInput.value && summaryTanggal) {
+                summaryTanggal.textContent = formatDateIndo(tanggalInput.value);
+            }
         }
     }
 
     initDatePicker();
 
-    // ===== FORMAT JAM RANGE =====
     function formatJamRange(start, durasi) {
         if (!start) return "-";
         let s = parseInt(start.split(":")[0]);
@@ -64,10 +64,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${String(s).padStart(2, "0")}:00 - ${String(e).padStart(2, "0")}:00`;
     }
 
-    // ===== VALIDASI BENTROK JAM =====
     function isRangeValid(start, durasi) {
         let s = parseInt(start.split(":")[0]);
         let e = s + durasi;
+
+        // Misal batas maksimum jam operasional 24:00
+        if (e > 24) return false;
 
         for (let i = s; i < e; i++) {
             let jamStr = String(i).padStart(2, "0") + ":00";
@@ -78,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return true;
     }
 
-    // ===== HIGHLIGHT JAM DISOROT =====
     function highlightRange() {
         document.querySelectorAll(".jam-btn").forEach(btn => btn.classList.remove("active-range"));
 
@@ -91,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
             Swal.fire({
                 icon: 'warning',
                 title: 'Durasi Melebihi Slot Kosong',
-                text: 'Durasi yang kamu pilih melewati jam yang sudah dibooking orang lain.',
+                text: 'Durasi yang kamu pilih melewati jam yang sudah dibooking atau melebihi batas waktu.',
                 confirmButtonColor: '#dc3545'
             });
             return;
@@ -108,33 +109,49 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ===== UPDATE TOTAL DAN RINGKASAN UI =====
+    // HITUNG AKURAT HARGA LINTAS WAKTU (PAGI & MALAM)
+    function hitungTotalHarga(start, durasi) {
+        if (!start || (!hargaPagi && !hargaMalam)) return 0;
+
+        let total = 0;
+        let startHour = parseInt(start.split(":")[0]);
+
+        for (let i = 0; i < durasi; i++) {
+            let currentHour = startHour + i;
+            // Pagi: 06:00 - 15:59, Malam: Sisanya
+            if (currentHour >= 6 && currentHour < 16) {
+                total += hargaPagi;
+            } else {
+                total += hargaMalam;
+            }
+        }
+        return total;
+    }
+
     function updateUI() {
         if (!totalHarga || !summaryJam) return;
 
-        if (!jamAktif || !hargaPerJam) {
+        if (!jamAktif) {
             totalHarga.textContent = "Rp0";
             summaryJam.textContent = "-";
             return;
         }
 
-        let total = hargaPerJam * durasi;
+        let total = hitungTotalHarga(jamAktif, durasi);
         totalHarga.textContent = "Rp" + total.toLocaleString("id-ID");
         summaryJam.textContent = formatJamRange(jamAktif, durasi);
     }
 
-    // ===== RESET PILIHAN JAM =====
     function resetSelection() {
         document.querySelectorAll(".jam-btn").forEach(btn => {
             btn.classList.remove("active", "active-range");
         });
 
         jamAktif = null;
-        hargaPerJam = 0;
         updateUI();
     }
 
-    // ===== FETCH AVAILABILITY JAM DARI SERVER (FIXED & ENHANCED) =====
+    // Fetch slot availability from server
     async function loadAvailability(tanggal) {
         if (!lapanganAktif) return;
 
@@ -148,43 +165,40 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             let statusData = await res.json();
-
-            // Saring dan kumpulkan semua jam yang sudah terisi
             let bookedArray = [];
 
-            statusData.forEach(item => {
-                const s = String(item.status_pembayaran ?? item.status ?? '').toLowerCase();
+            let dataJam = Array.isArray(statusData) ? statusData : (statusData.data || []);
 
-                // Abaikan jika status batal/expired/ditolak
-                if (s.includes('expired') || s.includes('cancelled') || s.includes('batal') || s.includes('failed') || s.includes('reject')) {
-                    return;
-                }
+            if (Array.isArray(dataJam)) {
+                dataJam.forEach(item => {
+                    const s = String(item.status_pembayaran ?? item.status ?? '').toLowerCase();
 
-                // Ambil jam mulai & jam selesai
-                let jamMulai = item.jam_mulai ?? item.jam ?? item.waktu_mulai;
-                let jamSelesai = item.jam_selesai ?? item.waktu_selesai;
+                    if (s.includes('expired') || s.includes('cancelled') || s.includes('batal') || s.includes('failed') || s.includes('reject')) {
+                        return;
+                    }
 
-                if (jamMulai) {
-                    let startHour = parseInt(String(jamMulai).split(":")[0]);
-                    let endHour = jamSelesai ? parseInt(String(jamSelesai).split(":")[0]) : startHour + 1;
+                    let jamMulai = item.jam_mulai ?? item.jam ?? item.waktu_mulai;
+                    let jamSelesai = item.jam_selesai ?? item.waktu_selesai;
 
-                    // Expand semua slot jam (misal 07:00 s/d 09:00 -> masukan 07:00 dan 08:00)
-                    for (let h = startHour; h < endHour; h++) {
-                        let formattedSlot = String(h).padStart(2, "0") + ":00";
-                        if (!bookedArray.includes(formattedSlot)) {
-                            bookedArray.push(formattedSlot);
+                    if (jamMulai) {
+                        let startHour = parseInt(String(jamMulai).split(":")[0]);
+                        let endHour = jamSelesai ? parseInt(String(jamSelesai).split(":")[0]) : startHour + 1;
+
+                        for (let h = startHour; h < endHour; h++) {
+                            let formattedSlot = String(h).padStart(2, "0") + ":00";
+                            if (!bookedArray.includes(formattedSlot)) {
+                                bookedArray.push(formattedSlot);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
 
             blockedSlots = bookedArray;
-
             resetSelection();
 
-            // Terapkan perubahan pada setiap tombol jam di UI
             document.querySelectorAll(".jam-btn").forEach(btn => {
-                const jam = btn.dataset.jam; // Format di HTML contoh: "07:00"
+                const jam = btn.dataset.jam;
                 const blocked = blockedSlots.includes(jam);
 
                 if (blocked) {
@@ -206,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ===== EVENT LISTENERS: PILIH LAPANGAN =====
+    // Court select events
     document.querySelectorAll(".card-lapangan").forEach(el => {
         el.addEventListener("click", async function () {
             const isAlreadyActive = this.classList.contains("active");
@@ -230,7 +244,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (summaryNama) summaryNama.textContent = this.dataset.nama;
 
                 jamAktif = null;
-                hargaPerJam = 0;
                 blockedSlots = [];
 
                 document.querySelectorAll(".jam-btn").forEach(btn => {
@@ -239,7 +252,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 updateUI();
 
-                // Load ketersediaan jam untuk tanggal yang terpilih saat ini
                 if (tanggalInput && tanggalInput.value) {
                     loadAvailability(tanggalInput.value);
                 }
@@ -247,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 try {
                     let res = await fetch(`/booking/fully-booked-dates?lapangan_id=${lapanganAktif}`);
                     let fullyBookedDates = await res.json();
-                    initDatePicker(fullyBookedDates);
+                    initDatePicker(Array.isArray(fullyBookedDates) ? fullyBookedDates : []);
                 } catch (err) {
                     console.error("Gagal load fully booked dates:", err);
                 }
@@ -259,10 +271,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (summaryNama) summaryNama.textContent = "-";
 
                 jamAktif = null;
-                hargaPerJam = 0;
                 updateUI();
 
-                // Reset status tombol jam jika lapangan dibatalkan pilihannya
                 document.querySelectorAll(".jam-btn").forEach(btn => {
                     btn.disabled = false;
                     btn.classList.remove("jam-booked", "active", "active-range");
@@ -276,7 +286,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // ===== EVENT LISTENERS: PILIH JAM =====
+    // Time slot select events
     document.querySelectorAll(".jam-btn").forEach(btn => {
         btn.addEventListener("click", function () {
             if (this.disabled || this.classList.contains("jam-booked")) return;
@@ -299,15 +309,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             jamAktif = start;
 
-            let jam = parseInt(jamAktif.split(":")[0]);
-            hargaPerJam = (jam >= 6 && jam < 16) ? hargaPagi : hargaMalam;
-
             updateUI();
             highlightRange();
         });
     });
 
-    // ===== DURASI KONTROL =====
+    // Duration controls
     const plusBtn = document.getElementById("plus");
     const minusBtn = document.getElementById("minus");
 
@@ -332,12 +339,11 @@ document.addEventListener("DOMContentLoaded", function () {
         highlightRange();
     }
 
-    // ===== SUBMIT BOOKING =====
+    // Submit booking action
     const btnBooking = document.getElementById("btnBooking");
     if (btnBooking) {
         btnBooking.addEventListener("click", async function () {
 
-            // 1. Validasi Login
             if (!window.isLoggedIn) {
                 Swal.fire({
                     icon: 'warning',
@@ -355,7 +361,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let tanggal = tanggalInput ? tanggalInput.value : null;
 
-            // 2. Validasi Form
             if (!lapanganAktif) {
                 return Swal.fire({
                     icon: 'info',
@@ -396,29 +401,29 @@ document.addEventListener("DOMContentLoaded", function () {
             let namaLap = summaryNama ? summaryNama.textContent : "Lapangan";
             let totalBayar = totalHarga ? totalHarga.textContent : "Rp0";
 
-            // 3. Pop-up Konfirmasi
+            // Confirmation popup
             const confirmResult = await Swal.fire({
                 title: 'Konfirmasi Pesanan',
                 html: `
-                    <div style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; color: #212529;">
-                        <p class="mb-1"><strong>Lapangan:</strong> ${namaLap}</p>
-                        <p class="mb-1"><strong>Tanggal:</strong> ${formatDateIndo(tanggal)}</p>
-                        <p class="mb-1"><strong>Waktu:</strong> ${jamAktif} - ${jamSelesai} (${durasi} Jam)</p>
-                        <hr class="my-2">
-                        <p class="mb-0 text-danger fw-bold" style="font-size: 16px;">Total Bayar: ${totalBayar}</p>
-                    </div>
-                `,
+        <div style="text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 14px; color: #212529;">
+            <p class="mb-1"><strong>Lapangan:</strong> ${namaLap}</p>
+            <p class="mb-1"><strong>Tanggal:</strong> ${formatDateIndo(tanggal)}</p>
+            <p class="mb-1"><strong>Waktu:</strong> ${jamAktif} - ${jamSelesai} (${durasi} Jam)</p>
+            <hr class="my-2">
+            <p class="mb-0 text-danger fw-bold" style="font-size: 16px;">Total Bayar: ${totalBayar}</p>
+        </div>
+`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: '<span style="color: #ffffff; font-weight: bold;">Ya, Lanjut Pembayaran</span>',
-                cancelButtonText: '<span style="color: #ffffff; font-weight: bold;">Cek Kembali</span>'
+                confirmButtonText: 'Ya, Lanjut Pembayaran',
+                cancelButtonText: 'Cek Kembali'
             });
 
             if (!confirmResult.isConfirmed) return;
 
-            // 4. Loading State
+            // Loading popup
             Swal.fire({
                 title: 'Memproses Pesanan...',
                 text: 'Mohon tunggu sebentar',
@@ -428,14 +433,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
-            // 5. Kirim Request
+            // Safe CSRF token retrieval
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.content : '';
+
             try {
                 let res = await fetch("/booking", {
                     method: "POST",
                     credentials: "same-origin",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                        "X-CSRF-TOKEN": csrfToken
                     },
                     body: JSON.stringify({
                         id_lapangan: lapanganAktif,
@@ -447,7 +455,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 let result = await res.json();
 
-                if (result.status === "success") {
+                if (res.ok && result.status === "success") {
                     const bookingId = result?.data?.data?.id_booking || result?.data?.id_booking;
                     if (!bookingId) {
                         Swal.fire({
@@ -470,12 +478,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
 
                 } else {
+                    let errorMessage = result.message || "Gagal membuat pesanan.";
+
+                    if (errorMessage.toLowerCase().includes("database") || res.status === 409) {
+                        errorMessage = "Jadwal pada jam ini sudah di-booking oleh orang lain. Silakan pilih jam lain.";
+                    }
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal Booking',
-                        text: result.message || "Gagal membuat pesanan.",
+                        text: errorMessage,
                         confirmButtonColor: '#dc3545'
                     });
+
+                    if (tanggal) loadAvailability(tanggal);
                 }
 
             } catch (err) {
