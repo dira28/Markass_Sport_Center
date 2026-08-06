@@ -15,10 +15,9 @@ class BookingController extends Controller
     // ==========================================
 // METHOD ADMIN BOOKING (DENGAN FILTER & PAGINATION)
 // ==========================================
-    public function adminIndex(Request $request)
+    public function laporanIndex(Request $request)
     {
         $token = session('token');
-        $bookings = [];
         $error = null;
 
         try {
@@ -27,53 +26,17 @@ class BookingController extends Controller
             if ($res->successful()) {
                 $allBookings = $res->json()['data'] ?? [];
 
-                // 1. LOGIKA FILTER & SEARCH
-                $collection = collect($allBookings)->filter(function ($item) use ($request) {
+                // 1. FILTER SEMUA DATA DULU
+                $filteredCollection = collect($allBookings)->filter(function ($item) use ($request) {
                     $match = true;
 
-                    // Filter Search Text (ID Booking, ID User, Nama User, Nama Lapangan)
-                    if ($request->filled('search')) {
-                        $search = strtolower(trim($request->search));
-
-                        $idBooking = strtolower((string) ($item['id_booking'] ?? ''));
-                        $userId = strtolower((string) ($item['user']['id'] ?? $item['id_user'] ?? ''));
-                        $userName = strtolower((string) ($item['user']['nama'] ?? $item['user']['name'] ?? ''));
-                        $lapName = strtolower((string) ($item['lapangan']['nama_lapangan'] ?? ''));
-
-                        $searchMatch = str_contains($idBooking, $search) ||
-                            str_contains($userId, $search) ||
-                            str_contains($userName, $search) ||
-                            str_contains($lapName, $search);
-
-                        if (!$searchMatch) {
-                            $match = false;
-                        }
-                    }
-
-                    // Filter Tanggal Booking / Transaksi dibuat (created_at)
-                    if ($request->filled('tanggal')) {
+                    // Filter Rentang Tanggal (dari_tanggal & sampai_tanggal)
+                    if ($request->filled('dari_tanggal') && $request->filled('sampai_tanggal')) {
                         $createdDate = isset($item['created_at'])
                             ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
                             : null;
 
-                        if ($createdDate !== $request->tanggal) {
-                            $match = false;
-                        }
-                    }
-
-                    // Filter Status Pembayaran
-                    if ($request->filled('status')) {
-                        $status = strtolower(trim((string) ($item['status_pembayaran'] ?? 'pending')));
-
-                        // Normalisasi status internal
-                        if ($status === 'menunggu_verifikasi') {
-                            $status = 'waiting_confirmation';
-                        }
-                        if (in_array($status, ['approve', 'paid'], true)) {
-                            $status = 'confirmed';
-                        }
-
-                        if ($status !== strtolower(trim($request->status))) {
+                        if ($createdDate < $request->dari_tanggal || $createdDate > $request->sampai_tanggal) {
                             $match = false;
                         }
                     }
@@ -81,17 +44,26 @@ class BookingController extends Controller
                     return $match;
                 });
 
-                // 2. SETTING PAGINATION: 10 Data Per Halaman
+                // 2. HITUNG STATISTIK DARI SELURUH DATA HASIL FILTER (SEBELUM PAGINASI)
+                $totalBookingCount = $filteredCollection->count();
+
+                $totalRevenue = $filteredCollection->whereIn('status_pembayaran', ['confirmed', 'paid', 'approve'])
+                    ->sum('total_harga');
+
+                $statusPaidCount = $filteredCollection->whereIn('status_pembayaran', ['confirmed', 'paid', 'approve'])
+                    ->count();
+
+                $statusPendingCount = $filteredCollection->whereIn('status_pembayaran', ['pending', 'waiting_confirmation', 'menunggu_verifikasi'])
+                    ->count();
+
+                // 3. BARU POTONG DATA KHUSUS UNTUK TABEL (PAGINASI)
                 $perPage = 10;
                 $currentPage = LengthAwarePaginator::resolveCurrentPage();
+                $currentPageItems = $filteredCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
-                // Potong data hasil filter sesuai halaman aktif
-                $currentPageItems = $collection->slice(($currentPage - 1) * $perPage, $perPage)->values();
-
-                // Buat paginator objek dengan penanganan query string halaman
                 $bookings = new LengthAwarePaginator(
                     $currentPageItems,
-                    $collection->count(),
+                    $totalBookingCount,
                     $perPage,
                     $currentPage,
                     [
@@ -99,16 +71,22 @@ class BookingController extends Controller
                         'query' => $request->query(),
                     ]
                 );
-            } else {
-                $error = 'Gagal mengambil data dari API';
+
+                return view('admin.pages.laporan', compact(
+                    'bookings',
+                    'totalBookingCount',
+                    'totalRevenue',
+                    'statusPaidCount',
+                    'statusPendingCount',
+                    'error'
+                ));
             }
         } catch (\Exception $e) {
             $error = 'Server error: ' . $e->getMessage();
         }
 
-        return view('admin.pages.booking', compact('bookings', 'error'));
+        return view('admin.pages.laporan', compact('error'));
     }
-
     public function index()
     {
         $lapangan = [];

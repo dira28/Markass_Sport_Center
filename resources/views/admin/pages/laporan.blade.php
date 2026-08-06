@@ -3,7 +3,6 @@
 @section('title', 'Laporan Booking')
 
 @push('styles')
-    {{-- Menggunakan asset() fallback agar CSS tetap terbaca meski Vite tidak di-build di server --}}
     <link rel="stylesheet" href="{{ asset('css/admin/pages/report.css') }}">
     @vite('resources/css/admin/pages/report.css')
 @endpush
@@ -11,7 +10,6 @@
 @section('content')
 
     @php
-        // Ambil koleksi data booking dengan fallback array kosong jika null
         $bookingCollection = collect($bookings ?? []);
 
         $paidBooking = $bookingCollection
@@ -28,7 +26,7 @@
 
     <div class="report-page">
 
-        {{-- PAGE HEADER --}}
+        {{-- Header --}}
         <div class="page-title-box">
             <div>
                 <h3 class="page-title">Laporan Booking</h3>
@@ -48,7 +46,7 @@
             </div>
         </div>
 
-        {{-- FILTER CARD --}}
+        {{-- Date Filter Form --}}
         <div class="filter-card">
             <form method="GET" action="{{ route('admin.laporan') }}">
                 <div class="row g-3 align-items-end">
@@ -73,7 +71,7 @@
             </form>
         </div>
 
-        {{-- KPI GRID --}}
+        {{-- Metrics Summary --}}
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-label">Total Booking</div>
@@ -93,7 +91,7 @@
             </div>
         </div>
 
-        {{-- TABLE CARD --}}
+        {{-- Bookings Table --}}
         <div class="table-card">
 
             <div class="table-header d-flex justify-content-between align-items-center">
@@ -136,8 +134,7 @@
 
                                 $createdAt = data_get($booking, 'created_at');
                                 $tanggal = data_get($booking, 'tanggal');
-                                
-                                // ID Booking tanpa substr agar tidak kepotong acak
+
                                 $rawId = data_get($booking, 'id_booking', data_get($booking, 'id', '-'));
                                 $idBooking = (str_starts_with($rawId, '#')) ? $rawId : '#' . $rawId;
                             @endphp
@@ -172,12 +169,12 @@
                                     Tidak ada data booking pada periode ini.
                                 </td>
                             </tr>
-                        @forelse
+                        @endforelse
                     </tbody>
                 </table>
             </div>
 
-            {{-- FOOTER / PAGINATION LINK --}}
+            {{-- Pagination --}}
             @if(is_object($bookings) && method_exists($bookings, 'hasPages') && $bookings->hasPages())
                 <div class="table-footer-pagination p-3 border-top d-flex justify-content-between align-items-center">
                     <div class="text-muted small">

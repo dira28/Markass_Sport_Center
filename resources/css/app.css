@@ -24,6 +24,12 @@
 }
 
 /* Global layout */
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
 body {
     font-family: 'Instrument Sans', sans-serif;
     background: var(--bg-page);
@@ -34,6 +40,13 @@ body {
     margin-left: 250px;
     min-height: 100vh;
     background: #f5f6fa;
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+.content-wrapper {
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 .main-content {

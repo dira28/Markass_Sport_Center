@@ -5,6 +5,8 @@
   background: #f4f6f9;
   padding: 24px;
   border-radius: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* =========================
@@ -176,6 +178,7 @@
 .report-page .table-responsive-container {
   max-height: 520px;
   width: 100%;
+  max-width: 100%;
   overflow-x: auto !important;
   /* Wajib scroll horizontal */
   overflow-y: auto !important;

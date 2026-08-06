@@ -1,7 +1,9 @@
-# Booking JS - SweetAlert2 Button Visibility Fix
+# TODO - Fix CSS Horizontal Scroll Issue (Admin Layout)
 
 ## Steps
-- [x] 1. Analyze the SweetAlert2 confirmation popup in `resources/js/booking.js`
-- [x] 2. Review related SweetAlert2 CSS to identify the transparent button cause
-- [x] 3. Add `didOpen` callback to the "Konfirmasi Pesanan" popup to force visible button styles
-- [x] 4. Verify the final code and indentation
+- [ ] 1. app.css: tambah `overflow-x: hidden; max-width: 100%;` pada `html, body`.
+- [ ] 2. app.css: tambah `overflow-x: hidden; max-width: 100%;` pada `.admin-main` dan `.content-wrapper`.
+- [ ] 3. report.css: tambah `max-width: 100%; overflow-x: hidden;` pada `.report-page`.
+- [ ] 4. report.css: pastikan `.table-responsive-container` `width: 100%; max-width: 100%;`.
+- [ ] 5. booking.css: perkuat `.table-responsive` dengan `max-width: 100%;`.
+
