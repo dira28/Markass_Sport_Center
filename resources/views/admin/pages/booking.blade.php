@@ -15,21 +15,18 @@
 
         {{-- FORM FILTER & SEARCH --}}
         <form method="GET" action="{{ url()->current() }}" class="row g-2 mb-4">
-            {{-- Input Search Text (ID / User / Lapangan) --}}
             <div class="col-md-4">
                 <input type="text" name="search" class="form-control" 
                        placeholder="Cari ID, User, atau Lapangan..." 
                        value="{{ request('search') }}">
             </div>
 
-            {{-- Input Tanggal Booking (created_at) --}}
             <div class="col-md-3">
                 <input type="date" name="tanggal" class="form-control" 
                        value="{{ request('tanggal') }}"
                        title="Filter berdasarkan tanggal transaksi/booking dibuat">
             </div>
 
-            {{-- Input Status Pembayaran --}}
             <div class="col-md-3">
                 <select name="status" class="form-select">
                     <option value="">-- Semua Status --</option>
@@ -41,7 +38,6 @@
                 </select>
             </div>
 
-            {{-- Tombol Submit & Reset --}}
             <div class="col-md-2 d-flex gap-1">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="fas fa-search"></i> Filter
@@ -54,10 +50,18 @@
             </div>
         </form>
 
-        {{-- ERROR ALERT --}}
-        @if(isset($error))
-            <div class="alert alert-danger">
-                {{ $error }}
+        {{-- ALERTS --}}
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('error') || isset($error))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-1"></i> {{ session('error') ?? $error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
@@ -84,12 +88,10 @@
                     @forelse ($bookings as $item)
 
                         @php
-                            // Menampilkan tanggal dibuatnya booking (created_at)
                             $tglBooking = isset($item['created_at']) 
                                 ? \Carbon\Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')
                                 : \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
 
-                            // Normalisasi status pembayaran
                             $paymentStatus = strtolower(trim((string)($item['status_pembayaran'] ?? 'pending')));
 
                             if ($paymentStatus === 'menunggu_verifikasi') {
@@ -127,7 +129,6 @@
 
                             <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
 
-                            {{-- JAM --}}
                             <td>
                                 {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}
                             </td>
@@ -138,12 +139,10 @@
                                 </span>
                             </td>
 
-                            {{-- HARGA --}}
                             <td>
                                 Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
                             </td>
 
-                            {{-- BUKTI --}}
                             <td>
                                 @if(isset($item['bukti_pembayaran']) && trim((string) ($item['bukti_pembayaran'] ?? '')) !== '')
                                     <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none"
@@ -157,9 +156,8 @@
                                 @endif
                             </td>
 
-                            {{-- AKSI --}}
                             <td>
-                                <form method="POST" action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
+                                <form id="approve-form-{{ $item['id_booking'] }}" method="POST" action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
                                     @csrf
                                     @method('PATCH')
 
@@ -169,10 +167,10 @@
                                     @endphp
 
                                     <button
-                                        type="submit"
-                                        class="btn btn-success btn-sm"
-                                        {{ (!$isWaiting || $isConfirmed) ? 'disabled' : '' }}
-                                        onclick="return confirm('Approve Payment?')">
+                                        type="button"
+                                        class="btn btn-success btn-sm btn-approve"
+                                        data-id="{{ $item['id_booking'] }}"
+                                        {{ (!$isWaiting || $isConfirmed) ? 'disabled' : '' }}>
                                         @if($isConfirmed)
                                             <i class="fas fa-check-double"></i> Approved
                                         @else
@@ -193,13 +191,41 @@
             </table>
         </div>
 
-        {{-- LINK PAGINASI --}}
-        @if(method_exists($bookings, 'links'))
+        @if(is_object($bookings) && method_exists($bookings, 'links'))
             <div class="d-flex justify-content-end mt-3">
                 {{ $bookings->links() }}
             </div>
         @endif
 
     </div>
+
+    {{-- SweetAlert2 Script Integration --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-approve').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const bookingId = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: 'Konfirmasi Pembayaran?',
+                        text: "Apakah Anda yakin ingin menyetujui pembayaran untuk transaksi ini?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#198754',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, Approve!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById(`approve-form-${bookingId}`).submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 
 @endsection

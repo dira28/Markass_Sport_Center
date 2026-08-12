@@ -12,18 +12,23 @@ class LapanganController extends Controller
         return Http::withToken(session('token'))->acceptJson();
     }
 
-    // GET LIST
-    public function index()
+    private function getLapanganList()
     {
         try {
             $res = $this->api()->get(env('API_URL') . '/api/lapangan');
-            $data = $res->json();
-
-            $lapangan = $data['data'] ?? [];
-
+            if ($res->successful()) {
+                return $res->json()['data'] ?? [];
+            }
         } catch (\Exception $e) {
-            $lapangan = [];
         }
+
+        return [];
+    }
+
+    // GET LIST
+    public function index()
+    {
+        $lapangan = $this->getLapanganList();
 
         return view('admin.pages.lapangan', compact('lapangan'));
     }
@@ -31,34 +36,98 @@ class LapanganController extends Controller
     // CREATE
     public function store(Request $req)
     {
-        $this->api()->post(env('API_URL') . '/api/lapangan', [
-            'nama_lapangan' => $req->nama_lapangan,
-            'harga_per_jam' => $req->harga_per_jam,
-            'diskon_persen' => $req->diskon_persen,
-            'deskripsi' => $req->deskripsi,
+        $req->validate([
+            'nama_lapangan' => 'required|string',
         ]);
 
-        return back()->with('success', 'Lapangan berhasil ditambah');
+        $inputNama = strtolower(trim($req->nama_lapangan));
+        $existingLapangan = $this->getLapanganList();
+
+        $isDuplicate = collect($existingLapangan)->contains(function ($item) use ($inputNama) {
+            return strtolower(trim($item['nama_lapangan'] ?? '')) === $inputNama;
+        });
+
+        if ($isDuplicate) {
+            return back()->with('error', 'Nama lapangan "' . $req->nama_lapangan . '" sudah ada! Gunakan nama lain.')->withInput();
+        }
+
+        try {
+            $res = $this->api()->post(env('API_URL') . '/api/lapangan', [
+                'nama_lapangan' => $req->nama_lapangan,
+                'harga_pagi' => $req->harga_pagi,
+                'harga_malam' => $req->harga_malam,
+                'harga_per_jam' => $req->harga_pagi ?? $req->harga_per_jam, // fallback kompatibilitas
+                'diskon_persen' => $req->diskon_persen ?? 0,
+                'deskripsi' => $req->deskripsi,
+            ]);
+
+            if ($res->successful()) {
+                return back()->with('success', 'Lapangan berhasil ditambah');
+            }
+
+            $errorMessage = $res->json()['message'] ?? 'Gagal menambah lapangan dari API.';
+            return back()->with('error', $errorMessage)->withInput();
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan server saat menambah lapangan.')->withInput();
+        }
     }
 
     // UPDATE
     public function update(Request $req, $id)
     {
-        $this->api()->patch(env('API_URL') . "/api/lapangan/$id", [
-            'nama_lapangan' => $req->nama_lapangan,
-            'harga_per_jam' => $req->harga_per_jam,
-            'diskon_persen' => $req->diskon_persen,
-            'deskripsi' => $req->deskripsi,
+        $req->validate([
+            'nama_lapangan' => 'required|string',
         ]);
 
-        return back()->with('success', 'Lapangan berhasil diupdate');
+        $inputNama = strtolower(trim($req->nama_lapangan));
+        $existingLapangan = $this->getLapanganList();
+
+        $isDuplicate = collect($existingLapangan)->contains(function ($item) use ($inputNama, $id) {
+            $itemId = $item['id_lapangan'] ?? $item['id'] ?? null;
+            return strtolower(trim($item['nama_lapangan'] ?? '')) === $inputNama && (string) $itemId !== (string) $id;
+        });
+
+        if ($isDuplicate) {
+            return back()->with('error', 'Nama lapangan "' . $req->nama_lapangan . '" sudah digunakan oleh lapangan lain!')->withInput();
+        }
+
+        try {
+            $res = $this->api()->patch(env('API_URL') . "/api/lapangan/$id", [
+                'nama_lapangan' => $req->nama_lapangan,
+                'harga_pagi' => $req->harga_pagi,
+                'harga_malam' => $req->harga_malam,
+                'harga_per_jam' => $req->harga_pagi ?? $req->harga_per_jam,
+                'diskon_persen' => $req->diskon_persen ?? 0,
+                'deskripsi' => $req->deskripsi,
+            ]);
+
+            if ($res->successful()) {
+                return back()->with('success', 'Lapangan berhasil diupdate');
+            }
+
+            $errorMessage = $res->json()['message'] ?? 'Gagal memperbarui lapangan.';
+            return back()->with('error', $errorMessage);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan server saat memperbarui lapangan.');
+        }
     }
 
     // DELETE
     public function destroy($id)
     {
-        $this->api()->delete(env('API_URL') . "/api/lapangan/$id");
+        try {
+            $res = $this->api()->delete(env('API_URL') . "/api/lapangan/$id");
 
-        return back()->with('success', 'Lapangan berhasil dihapus');
+            if ($res->successful()) {
+                return back()->with('success', 'Lapangan berhasil dihapus');
+            }
+
+            return back()->with('error', 'Gagal menghapus lapangan dari server.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan server saat menghapus lapangan.');
+        }
     }
 }

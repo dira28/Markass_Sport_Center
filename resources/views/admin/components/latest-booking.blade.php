@@ -38,22 +38,40 @@
             <tbody>
                 @forelse($data as $item)
                     @php
-                        $start = \Carbon\Carbon::parse($item['jam_mulai']);
-                        $end = \Carbon\Carbon::parse($item['jam_selesai']);
-                        $durasi = $start->diffInHours($end);
+                        // 1. Hitung Durasi
+                        $jamMulai = data_get($item, 'jam_mulai');
+                        $jamSelesai = data_get($item, 'jam_selesai');
+                        $durasi = 0;
+                        if ($jamMulai && $jamSelesai) {
+                            $start = \Carbon\Carbon::parse($jamMulai);
+                            $end = \Carbon\Carbon::parse($jamSelesai);
+                            $durasi = $start->diffInHours($end);
+                        }
 
-                        $status = strtolower($item['status_pembayaran'] ?? 'pending');
+                        // 2. Format ID Booking (Cegah Double #)
+                        $rawId = data_get($item, 'id_booking', data_get($item, 'id', '-'));
+                        $idBooking = str_starts_with($rawId, '#') ? $rawId : '#' . $rawId;
 
-                        if ($status == 'confirmed') {
+                        // 3. Normalisasi Status
+                        $rawStatus = data_get($item, 'status_pembayaran', data_get($item, 'status', data_get($item, 'payment_status', 'pending')));
+                        $st = str_replace([' ', '-'], '_', strtolower(trim((string) $rawStatus)));
+
+                        // Kategori Status
+                        $paidStatuses = ['paid', 'confirmed', 'approve', 'approved', 'lunas', 'berhasil', 'success', 'settlement'];
+                        $waitingStatuses = ['waiting_confirmation', 'waiting', 'menunggu_verifikasi', 'menunggu_konfirmasi'];
+                        $pendingStatuses = ['pending', 'unpaid', 'menunggu'];
+                        $expiredStatuses = ['expired', 'expire'];
+
+                        if (in_array($st, $paidStatuses, true)) {
                             $badgeClass = 'success-status';
-                            $statusText = 'Sudah Dibayar';
-                        } elseif ($status == 'waiting_confirmation') {
+                            $statusText = 'Paid';
+                        } elseif (in_array($st, $waitingStatuses, true)) {
                             $badgeClass = 'verify-status';
                             $statusText = 'Verifikasi';
-                        } elseif ($status == 'pending') {
+                        } elseif (in_array($st, $pendingStatuses, true)) {
                             $badgeClass = 'pending-status';
                             $statusText = 'Pending';
-                        } elseif ($status == 'expired') {
+                        } elseif (in_array($st, $expiredStatuses, true)) {
                             $badgeClass = 'expired-status';
                             $statusText = 'Expired';
                         } else {
@@ -67,14 +85,14 @@
                         <td>
                             <div class="user-info">
                                 <div class="user-avatar">
-                                    {{ strtoupper(substr($item['user']['nama'] ?? 'U', 0, 1)) }}
+                                    {{ strtoupper(substr(data_get($item, 'user.nama', data_get($item, 'user.name', 'U')), 0, 1)) }}
                                 </div>
                                 <div>
                                     <div class="user-name">
-                                        {{ $item['user']['nama'] ?? '-' }}
+                                        {{ data_get($item, 'user.nama', data_get($item, 'user.name', data_get($item, 'nama_user', '-'))) }}
                                     </div>
                                     <span class="user-id">
-                                        Booking #{{ $item['id_booking'] }}
+                                        Booking {{ strtoupper($idBooking) }}
                                     </span>
                                 </div>
                             </div>
@@ -87,7 +105,7 @@
                                     <i class="fas fa-futbol"></i>
                                 </div>
                                 <div class="lapangan-name">
-                                    {{ $item['lapangan']['nama_lapangan'] ?? '-' }}
+                                    {{ data_get($item, 'lapangan.nama_lapangan', data_get($item, 'nama_lapangan', '-')) }}
                                 </div>
                             </div>
                         </td>
@@ -97,11 +115,12 @@
                             <div class="schedule-box">
                                 <div class="schedule-date">
                                     <i class="fas fa-calendar-alt"></i>
-                                    {{ \Carbon\Carbon::parse($item['tanggal'])->translatedFormat('d M Y') }}
+                                    {{ data_get($item, 'tanggal') ? \Carbon\Carbon::parse(data_get($item, 'tanggal'))->translatedFormat('d M Y') : '-' }}
                                 </div>
                                 <div class="schedule-time">
                                     <i class="fas fa-clock"></i>
-                                    {{ substr($item['jam_mulai'], 0, 5) }} - {{ substr($item['jam_selesai'], 0, 5) }}
+                                    {{ $jamMulai ? substr($jamMulai, 0, 5) : '00:00' }} -
+                                    {{ $jamSelesai ? substr($jamSelesai, 0, 5) : '00:00' }}
                                 </div>
                             </div>
                         </td>

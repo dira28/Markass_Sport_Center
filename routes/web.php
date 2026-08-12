@@ -29,6 +29,8 @@ Route::post('/booking', [BookingController::class, 'store'])->name('booking.stor
 Route::get('/booking/payment/{id}', [BookingController::class, 'payment'])->name('booking.payment');
 Route::post('/booking/payment/{id}/upload-bukti', [BookingController::class, 'uploadProof'])
     ->name('booking.upload-bukti');
+Route::post('/booking/{id}/expire', [BookingController::class, 'expire'])->name('booking.expire');
+Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 
 Route::get('/booking/fully-booked-dates', [BookingController::class, 'getFullyBookedDates']);
 Route::patch('/booking/{id_booking}/confirm-payment', [BookingController::class, 'confirmPayment'])->name('booking.confirm-payment');
@@ -58,7 +60,6 @@ Route::get('/check-expired', function () {
 // =====================
 // AUTH & GOOGLE LOGIN
 // =====================
-// Route untuk OTP
 Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('otp.view');
 Route::post('/verify-otp', [AuthController::class, 'processVerifyOtp'])->name('otp.verify');
 
@@ -71,7 +72,6 @@ Route::get('/register', function () {
 
 Route::post('/register', [RegisterController::class, 'register']);
 
-// ROUTE GOOGLE LOGIN
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
@@ -83,11 +83,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // =====================
 Route::prefix('admin')->group(function () {
 
-    // DASHBOARD
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
 
-    // BOOKING
     Route::get('/booking', [HistoryBookingController::class, 'index'])
         ->name('admin.booking');
 
@@ -104,7 +102,6 @@ Route::prefix('admin')->group(function () {
         return redirect('/login');
     })->name('admin.logout');
 
-    // LAPANGAN CRUD
     Route::get('/lapangan', [LapanganController::class, 'index'])->name('lapangan.index');
     Route::post('/lapangan', [LapanganController::class, 'store'])->name('lapangan.store');
     Route::post('/lapangan/update/{id}', [LapanganController::class, 'update'])->name('lapangan.update');

@@ -12,9 +12,6 @@ class BookingController extends Controller
     // ==========================================
     // METHOD ADMIN BOOKING (DENGAN FILTER & PAGINATION)
     // ==========================================
-    // ==========================================
-// METHOD ADMIN BOOKING (DENGAN FILTER & PAGINATION)
-// ==========================================
     public function laporanIndex(Request $request)
     {
         $token = session('token');
@@ -30,7 +27,34 @@ class BookingController extends Controller
                 $filteredCollection = collect($allBookings)->filter(function ($item) use ($request) {
                     $match = true;
 
-                    // Filter Rentang Tanggal (dari_tanggal & sampai_tanggal)
+                    // A. Filter Search (ID Booking, Nama User, Nama Lapangan)
+                    if ($request->filled('search')) {
+                        $search = strtolower($request->search);
+                        $idBooking = strtolower((string) ($item['id_booking'] ?? $item['id'] ?? ''));
+                        $userName = strtolower((string) ($item['user']['name'] ?? $item['user']['nama'] ?? $item['nama_user'] ?? ''));
+                        $lapangan = strtolower((string) ($item['lapangan']['nama_lapangan'] ?? $item['nama_lapangan'] ?? ''));
+
+                        if (
+                            strpos($idBooking, $search) === false &&
+                            strpos($userName, $search) === false &&
+                            strpos($lapangan, $search) === false
+                        ) {
+                            $match = false;
+                        }
+                    }
+
+                    // B. Filter Single Tanggal (pencarian dari input type date tunggal)
+                    if ($request->filled('tanggal')) {
+                        $bookingDate = isset($item['created_at'])
+                            ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
+                            : ($item['tanggal'] ?? null);
+
+                        if ($bookingDate !== $request->tanggal) {
+                            $match = false;
+                        }
+                    }
+
+                    // C. Filter Rentang Tanggal (dari_tanggal & sampai_tanggal)
                     if ($request->filled('dari_tanggal') && $request->filled('sampai_tanggal')) {
                         $createdDate = isset($item['created_at'])
                             ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
@@ -38,6 +62,27 @@ class BookingController extends Controller
 
                         if ($createdDate < $request->dari_tanggal || $createdDate > $request->sampai_tanggal) {
                             $match = false;
+                        }
+                    }
+
+                    // D. Filter Status Pembayaran
+                    if ($request->filled('status')) {
+                        $itemStatus = strtolower((string) ($item['status_pembayaran'] ?? $item['status'] ?? ''));
+                        $reqStatus = strtolower($request->status);
+
+                        // Normalisasi aliasing status agar kompatibel
+                        if ($reqStatus === 'waiting_confirmation' || $reqStatus === 'menunggu_verifikasi') {
+                            if (!in_array($itemStatus, ['waiting_confirmation', 'menunggu_verifikasi'], true)) {
+                                $match = false;
+                            }
+                        } elseif ($reqStatus === 'confirmed' || $reqStatus === 'paid' || $reqStatus === 'approve') {
+                            if (!in_array($itemStatus, ['confirmed', 'paid', 'approve'], true)) {
+                                $match = false;
+                            }
+                        } else {
+                            if ($itemStatus !== $reqStatus) {
+                                $match = false;
+                            }
                         }
                     }
 
@@ -87,6 +132,7 @@ class BookingController extends Controller
 
         return view('admin.pages.laporan', compact('error'));
     }
+
     public function index()
     {
         $lapangan = [];
@@ -441,6 +487,41 @@ class BookingController extends Controller
             return response()->json(array_values($fullyBookedDates));
         } catch (\Exception $e) {
             return response()->json([]);
+        }
+    }
+
+    // ==========================================
+    // METHOD CANCEL BOOKING (USER)
+    // ==========================================
+    public function cancel($id)
+    {
+        $token = session('token');
+
+        if (!$token) {
+            return response()->json(['message' => 'Silakan login terlebih dahulu.'], 401);
+        }
+
+        try {
+            $response = Http::withToken($token)
+                ->post(env('API_URL') . "/api/booking/{$id}/cancel");
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Booking berhasil dibatalkan.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $response->json()['message'] ?? 'Gagal membatalkan booking.'
+            ], $response->status());
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

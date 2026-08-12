@@ -10,15 +10,11 @@
 @section('content')
 
     @php
-        $bookingCollection = collect($bookings ?? []);
-
-        $paidBooking = $bookingCollection
-            ->filter(fn($b) => in_array(strtolower(data_get($b, 'status_pembayaran', '')), ['paid', 'confirmed', 'lunas']))
-            ->count();
-
-        $pendingBooking = $bookingCollection
-            ->filter(fn($b) => in_array(strtolower(data_get($b, 'status_pembayaran', '')), ['pending', 'waiting_confirmation', 'menunggu_verifikasi']))
-            ->count();
+        // Menggunakan variabel global hasil perhitungan Controller (BUKAN per-paginate)
+        $totalCount = $totalBooking ?? 0;
+        $revenueVal = $totalRevenue ?? 0;
+        $paidCount = $paidBooking ?? 0;
+        $pendingCount = $pendingBooking ?? 0;
 
         $fromDateVal = $fromDate ?? request('from_date');
         $toDateVal = $toDate ?? request('to_date');
@@ -33,7 +29,8 @@
                 <small class="text-muted">Kelola dan tinjau seluruh riwayat transaksi booking fasilitas.</small>
             </div>
             <div>
-                <a href="{{ route('admin.laporan.export', ['from_date' => $fromDateVal, 'to_date' => $toDateVal]) }}"
+                {{-- Sertakan juga parameter status saat Export PDF --}}
+                <a href="{{ route('admin.laporan.export', ['from_date' => $fromDateVal, 'to_date' => $toDateVal, 'status' => request('status', 'all')]) }}"
                     class="btn-export">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path
@@ -46,48 +43,64 @@
             </div>
         </div>
 
-        {{-- Date Filter Form --}}
+        {{-- Date & Status Filter Form --}}
         <div class="filter-card">
             <form method="GET" action="{{ route('admin.laporan') }}">
                 <div class="row g-3 align-items-end">
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="filter-label">Dari Tanggal</label>
                         <input type="date" name="from_date" value="{{ request('from_date', $fromDateVal) }}"
                             class="form-control">
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="filter-label">Sampai Tanggal</label>
                         <input type="date" name="to_date" value="{{ request('to_date', $toDateVal) }}" class="form-control">
                     </div>
 
-                    <div class="col-md-4 d-flex gap-2">
+                    <div class="col-md-3">
+                        <label class="filter-label">Status Pembayaran</label>
+                        <select name="status" class="form-select">
+                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>Semua Status</option>
+                            <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid / Lunas</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending / Menunggu
+                            </option>
+                            <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired / Batal
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 d-flex gap-2">
                         <button type="submit" class="btn-filter w-50">Filter</button>
-                        <a href="{{ route('admin.laporan') }}" class="btn-reset w-50">Reset</a>
+                        <a href="{{ route('admin.laporan') }}" class="btn-reset w-50 text-center">Reset</a>
                     </div>
 
                 </div>
             </form>
         </div>
 
-        {{-- Metrics Summary --}}
+        {{-- Metrics Summary (Menampilkan Total Murni dari Controller) --}}
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-label">Total Booking</div>
-                <div class="kpi-number kpi-total">{{ $totalBooking ?? 0 }}</div>
+                <div class="kpi-number kpi-total">{{ number_format($totalCount) }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Total Revenue</div>
-                <div class="kpi-number kpi-revenue">Rp{{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</div>
+                <div class="kpi-number kpi-revenue">Rp{{ number_format($revenueVal, 0, ',', '.') }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Status Paid</div>
-                <div class="kpi-number kpi-paid">{{ $paidBooking }}</div>
+                <div class="kpi-number kpi-paid">{{ number_format($paidCount) }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Status Pending</div>
-                <div class="kpi-number kpi-pending">{{ $pendingBooking }}</div>
+                <div class="kpi-number kpi-pending">{{ number_format($pendingCount) }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">EXPIRED / BATAL</div>
+                <div class="kpi-number text-danger">{{ number_format($expiredBooking ?? 0) }}</div>
             </div>
         </div>
 
@@ -95,7 +108,7 @@
         <div class="table-card">
 
             <div class="table-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0 fw-bold">{{ $totalBooking ?? 0 }} Data Bookings</h5>
+                <h5 class="m-0 fw-bold">{{ number_format($totalCount) }} Data Bookings</h5>
                 <small class="text-muted">
                     Periode:
                     {{ $fromDateVal ? \Carbon\Carbon::parse($fromDateVal)->format('d M Y') : '-' }} s/d
@@ -120,7 +133,8 @@
                     <tbody>
                         @forelse($bookings as $booking)
                             @php
-                                $st = strtolower(data_get($booking, 'status_pembayaran', 'pending'));
+                                $rawStatus = data_get($booking, 'status_pembayaran', data_get($booking, 'status', data_get($booking, 'payment_status', 'pending')));
+                                $st = str_replace([' ', '-'], '_', strtolower(trim((string) $rawStatus)));
 
                                 $jamMulai = data_get($booking, 'jam_mulai');
                                 $jamSelesai = data_get($booking, 'jam_selesai');
@@ -137,11 +151,15 @@
 
                                 $rawId = data_get($booking, 'id_booking', data_get($booking, 'id', '-'));
                                 $idBooking = (str_starts_with($rawId, '#')) ? $rawId : '#' . $rawId;
+
+                                // Format label status
+                                $displayStatus = ucwords(str_replace('_', ' ', $st));
                             @endphp
 
                             <tr>
                                 <td><strong>{{ strtoupper($idBooking) }}</strong></td>
-                                <td><strong>{{ data_get($booking, 'lapangan.nama_lapangan', '-') }}</strong></td>
+                                <td><strong>{{ data_get($booking, 'lapangan.nama_lapangan', data_get($booking, 'nama_lapangan', '-')) }}</strong>
+                                </td>
                                 <td>{{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d M Y') : '-' }}</td>
                                 <td>
                                     <div>
@@ -153,10 +171,11 @@
                                     </small>
                                 </td>
                                 <td><span class="badge-durasi">{{ $durasi }} Jam</span></td>
-                                <td>{{ data_get($booking, 'nama_user', data_get($booking, 'user.nama', 'User')) }}</td>
+                                <td>{{ data_get($booking, 'nama_user', data_get($booking, 'user.nama', data_get($booking, 'user.name', 'User'))) }}
+                                </td>
                                 <td>
                                     <span class="status-badge status-{{ $st }}">
-                                        {{ ucfirst($st) }}
+                                        {{ $displayStatus }}
                                     </span>
                                 </td>
                                 <td class="text-end">
@@ -174,7 +193,7 @@
                 </table>
             </div>
 
-            {{-- Pagination --}}
+            {{-- Pagination Links --}}
             @if(is_object($bookings) && method_exists($bookings, 'hasPages') && $bookings->hasPages())
                 <div class="table-footer-pagination p-3 border-top d-flex justify-content-between align-items-center">
                     <div class="text-muted small">

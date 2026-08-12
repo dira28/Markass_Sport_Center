@@ -4,6 +4,7 @@
 
 @push('styles')
     @vite('resources/css/user/pages/payment.css')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @endpush
 
 @section('content')
@@ -13,7 +14,7 @@
                 <div class="col-lg-10">
                     <div class="payment-card">
 
-                        <!-- HEADER: TITLE & DIGITAL TIMER -->
+                        <!-- Header -->
                         <div
                             class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary-subtle">
                             <div class="brand-title d-flex align-items-center">
@@ -35,10 +36,10 @@
                             </div>
                         </div>
 
-                        <!-- LAYOUT 2 KOLOM -->
+                        <!-- Row Utama -->
                         <div class="row g-4">
 
-                            <!-- KOLOM KIRI: QRIS DANA & UPLOAD BUKTI -->
+                            <!-- KIRI: QR & Upload -->
                             <div class="col-lg-7">
                                 <div class="qr-section">
                                     <h6 class="text-center fw-bold mb-3 text-uppercase tracking-wider">Scan QR DANA</h6>
@@ -58,7 +59,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Upload Area -->
                                 <div id="paymentForm" class="upload-section mt-4">
                                     <h6 class="upload-title fw-bold">Upload Bukti Pembayaran</h6>
                                     <div class="upload-box" id="uploadBox" role="button" tabindex="0">
@@ -70,27 +70,27 @@
                                                 transfer</strong>
                                             <p class="text-muted small mb-0">Format JPG, PNG (maksimal 2MB)</p>
                                         </div>
-
                                         <input type="file" id="proofFile" accept="image/jpeg,image/png,.jpg,.jpeg,.png"
                                             class="d-none">
-
                                         <button class="btn btn-select-file mt-3" id="pickBtn" type="button">
                                             <i class="fas fa-image me-1"></i> Pilih File Gambar
                                         </button>
                                     </div>
 
-                                    <!-- Image Preview Area -->
                                     <div id="uploadPreview" style="display: none;" class="mt-3 text-center">
                                         <img id="previewImg" class="upload-preview mb-2">
                                         <p class="text-success small fw-bold mb-0"><i class="fas fa-check-circle"></i> File
                                             siap dikirim</p>
                                     </div>
 
-                                    <!-- Submit Button -->
                                     <button class="btn payment-btn mt-3 w-100" id="submitPaymentBtn" type="button" disabled>
                                         <i class="fas fa-paper-plane me-1"></i> Kirim Bukti Pembayaran
                                     </button>
                                 </div>
+
+                                <button class="btn btn-outline-danger mt-2 w-100" id="cancelBookingBtn" type="button">
+                                    <i class="fas fa-times-circle me-1"></i> Batalkan Booking
+                                </button>
 
                                 <div id="statusMessage" style="display: none;" class="mt-4 text-center">
                                     <h5 id="messageTitle"></h5>
@@ -98,16 +98,17 @@
                                 </div>
                             </div>
 
-                            <!-- KOLOM KANAN: RINGKASAN BOOKING & PRICE -->
+                            <!-- KANAN: Ringkasan -->
                             <div class="col-lg-5">
                                 <div class="info-card">
                                     <h6 class="info-card-title">RINGKASAN BOOKING</h6>
-
                                     <div class="info-list">
+                                        <!-- ... (Isi ringkasan kamu tetap sama) ... -->
                                         <p><strong>ID Booking</strong> <span id="bookingId"
-                                                class="text-break">{{ $booking['id_booking'] ?? 'N/A' }}</span></p>
+                                                class="text-break">{{ $booking['id_booking'] ?? $booking['id'] ?? 'N/A' }}</span>
+                                        </p>
                                         <p><strong>Lapangan</strong> <span
-                                                id="lapanganNama">{{ $booking['lapangan']['nama_lapangan'] ?? 'N/A' }}</span>
+                                                id="lapanganNama">{{ $booking['lapangan']['nama_lapangan'] ?? $booking['nama_lapangan'] ?? 'N/A' }}</span>
                                         </p>
                                         <p><strong>Tanggal</strong> <span
                                                 id="bookingDate">{{ isset($booking['tanggal']) ? \Carbon\Carbon::parse($booking['tanggal'])->format('d M Y') : 'N/A' }}</span>
@@ -134,10 +135,8 @@
                                                 }
                                             }
                                         @endphp
-
                                         <p><strong>Durasi Main</strong> <span><span
                                                     id="bookingDuration">{{ $durasiValue }}</span> Jam</span></p>
-
                                         <p><strong>Status</strong>
                                             <span class="badge status-badge {{ $statusClass ?? 'bg-warning' }}"
                                                 id="statusBadge"
@@ -146,32 +145,23 @@
                                             </span>
                                         </p>
                                     </div>
-
-                                    @php
-                                        $deadline = $booking['payment_deadline'] ?? null;
-                                    @endphp
-                                    <input type="hidden" id="paymentDeadline" value="{{ $deadline }}">
-
-                                    <!-- Total Tagihan Box -->
+                                    <input type="hidden" id="paymentDeadline" value="{{ $deadlineIso ?? '' }}">
                                     <div class="total-display text-center mt-4">
                                         <div class="text-uppercase tracking-wider small fw-bold text-muted">Total Tagihan
                                         </div>
-                                        <div class="amount" id="paymentTotal">
-                                            Rp {{ number_format($booking['total_harga'] ?? 40000, 0, ',', '.') }}
+                                        <div class="amount" id="paymentTotal">Rp
+                                            {{ number_format($booking['total_harga'] ?? 40000, 0, ',', '.') }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                        </div> <!-- End Row -->
-
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL ZOOM QR -->
     <div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content rounded-4 border-0 shadow-lg">
@@ -189,9 +179,10 @@
     </div>
 
     <script>
-        window.paymentStatus = "{{ $booking['status_pembayaran'] ?? 'pending' }}";
+        window.paymentStatus = "{{ $booking['status_pembayaran'] ?? $booking['status'] ?? 'pending' }}";
         window.authToken = "{{ session('token') }}";
     </script>
 
     @vite('resources/js/payment.js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

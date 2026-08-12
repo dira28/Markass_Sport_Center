@@ -2,10 +2,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const bookingId =
         document.getElementById('bookingId')?.textContent?.trim() ||
+        window.bookingData?.id ||
         new URLSearchParams(window.location.search).get('id');
 
     const statusBadge = document.getElementById('statusBadge');
-    const paymentForm = document.getElementById('paymentForm');
     const statusMessage = document.getElementById('statusMessage');
     const messageTitle = document.getElementById('messageTitle');
     const messageText = document.getElementById('messageText');
@@ -20,10 +20,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const timerEl = document.getElementById('timer');
 
     let countdownInterval;
+    let isExpiredHandled = false;
 
-    // =========================
-    // ZOOM QR MODAL TRIGGER
-    // =========================
+    // Helper Toast / Alert
+    const showToast = (title, icon = 'success') => {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        } else {
+            alert(title);
+        }
+    };
+
     const qrCardTrigger = document.getElementById('qrCardTrigger');
     if (qrCardTrigger) {
         qrCardTrigger.addEventListener('click', function () {
@@ -31,26 +46,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 const qrModal = new window.bootstrap.Modal(document.getElementById('qrModal'));
                 qrModal.show();
             } else {
-                // Fallback jika bootstrap JS belum terload
                 const imgUrl = document.getElementById('qrImage')?.src;
                 if (imgUrl) window.open(imgUrl, '_blank');
             }
         });
     }
 
-    // =========================
-    // PAYMENT DEADLINE & TIMER FIX
-    // =========================
     const deadlineValue = document.getElementById('paymentDeadline')?.value;
 
-    // Parser tanggal fleksibel untuk ISO String / MySQL Datetime
     function parseDeadline(val) {
-        if (!val || val === 'null' || val === 'undefined') {
-            // Default fallback 15 menit dari sekarang jika deadline dari backend kosong
-            return Date.now() + 15 * 60 * 1000;
+        const storageKey = `booking_deadline_${bookingId}`;
+
+        if (val && val !== 'null' && val !== 'undefined' && val !== '') {
+            const parsed = new Date(val).getTime();
+            if (!Number.isNaN(parsed)) {
+                localStorage.setItem(storageKey, parsed);
+                return parsed;
+            }
         }
-        const parsed = new Date(val).getTime();
-        return Number.isNaN(parsed) ? Date.now() + 15 * 60 * 1000 : parsed;
+
+        const savedDeadline = localStorage.getItem(storageKey);
+        if (savedDeadline) {
+            return parseInt(savedDeadline, 10);
+        }
+
+        const newDeadline = Date.now() + 15 * 60 * 1000;
+        if (bookingId) {
+            localStorage.setItem(storageKey, newDeadline);
+        }
+        return newDeadline;
     }
 
     const deadlineMs = parseDeadline(deadlineValue);
@@ -64,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function applyExpiredUI() {
+    async function applyExpiredUI() {
         clearInterval(countdownInterval);
 
         if (timerEl) {
@@ -81,6 +105,26 @@ document.addEventListener('DOMContentLoaded', function () {
         if (uploadBox) uploadBox.style.opacity = '0.5';
 
         showStatus('Waktu Habis', 'Batas waktu pembayaran telah berakhir.', 'danger');
+
+        if (!isExpiredHandled && bookingId) {
+            isExpiredHandled = true;
+            try {
+                const token = window.authToken;
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                await fetch(`/booking/${bookingId}/expire`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+            } catch (err) {
+                console.error("Failed to sync expired status:", err);
+            }
+        }
     }
 
     function updateCountdown() {
@@ -103,9 +147,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCountdown();
     countdownInterval = setInterval(updateCountdown, 1000);
 
-    // =========================
-    // STATUS NORMALIZER
-    // =========================
     function normalizePaymentStatus(status) {
         if (!status) return 'pending';
         const s = String(status).trim().toLowerCase();
@@ -117,7 +158,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'pending';
     }
 
-    // INITIAL STATUS CHECK
     if (statusBadge) {
         const normalized = normalizePaymentStatus(
             window.paymentStatus || statusBadge.dataset.paymentStatus || statusBadge.textContent
@@ -140,22 +180,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // =========================
-    // UPLOAD & FILE PICKER
-    // =========================
     proofFile?.addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (!file) return;
 
         const ext = (file.name.split('.').pop() || '').toLowerCase();
         if (!['jpg', 'jpeg', 'png'].includes(ext)) {
-            alert('Hanya menerima file JPG / JPEG / PNG');
+            showToast('Hanya menerima file JPG / JPEG / PNG', 'warning');
             proofFile.value = '';
             return;
         }
 
         if (file.size > 2 * 1024 * 1024) {
-            alert('Ukuran file maksimal 2MB');
+            showToast('Ukuran file maksimal 2MB', 'warning');
             proofFile.value = '';
             return;
         }
@@ -179,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function () {
         proofFile?.click();
     });
 
-    // DRAG & DROP
     uploadBox?.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadBox.classList.add('dragover');
@@ -199,17 +235,16 @@ document.addEventListener('DOMContentLoaded', function () {
         proofFile.dispatchEvent(new Event('change'));
     });
 
-    // SUBMIT PAYMENT
     submitPaymentBtn?.addEventListener('click', async () => {
         try {
             if (!proofFile.files || !proofFile.files[0]) {
-                alert('Silakan upload bukti pembayaran terlebih dahulu.');
+                showToast('Silakan upload bukti pembayaran terlebih dahulu.', 'warning');
                 return;
             }
 
             const token = window.authToken;
             if (!token) {
-                alert('Login required. Token tidak ditemukan.');
+                showToast('Login required. Token tidak ditemukan.', 'error');
                 return;
             }
 
@@ -236,28 +271,129 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 result = JSON.parse(rawText);
             } catch (err) {
-                alert('Server tidak mengembalikan response JSON valid.');
+                showToast('Server tidak mengembalikan response JSON valid.', 'error');
                 submitPaymentBtn.disabled = false;
                 submitPaymentBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Kirim Bukti Pembayaran';
                 return;
             }
 
             if (!response.ok) {
-                alert(result.message || 'Upload gagal.');
+                showToast(result.message || 'Upload gagal.', 'error');
                 submitPaymentBtn.disabled = false;
                 submitPaymentBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Kirim Bukti Pembayaran';
                 return;
             }
 
-            // SUCCESS
             submitPaymentBtn.disabled = true;
             showStatus('Berhasil!', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.', 'success');
 
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Bukti pembayaran berhasil terkirim.',
+                confirmButtonColor: '#0d6efd'
+            });
+
         } catch (err) {
             console.error(err);
-            alert('Terjadi kesalahan: ' + err.message);
+            showToast('Terjadi kesalahan: ' + err.message, 'error');
             submitPaymentBtn.disabled = false;
             submitPaymentBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Kirim Bukti Pembayaran';
+        }
+    });
+
+    // ==========================================
+    // LOGIKA MODAL CANCEL BOOKING DENGAN SWEETALERT2
+    // ==========================================
+    const cancelBookingBtn = document.getElementById('cancelBookingBtn');
+
+    cancelBookingBtn?.addEventListener('click', async () => {
+        // Tampilkan Modal Konfirmasi SweetAlert2
+        const confirmResult = await Swal.fire({
+            title: 'Batalkan Booking?',
+            text: "Apakah Anda yakin ingin membatalkan booking ini? Tindakan ini tidak dapat dibatalkan.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Batalkan!',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'rounded-4 shadow',
+                confirmButton: 'btn btn-danger px-4 me-2',
+                cancelButton: 'btn btn-secondary px-4'
+            },
+            buttonsStyling: false
+        });
+
+        // Jika user tidak menekan tombol konfirmasi "Ya, Batalkan!"
+        if (!confirmResult.isConfirmed) {
+            return;
+        }
+
+        const token = window.authToken;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        try {
+            cancelBookingBtn.disabled = true;
+            cancelBookingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Membatalkan...';
+
+            const response = await fetch(`/booking/${bookingId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                clearInterval(countdownInterval);
+                if (timerEl) timerEl.textContent = '00:00';
+                if (statusBadge) {
+                    statusBadge.textContent = 'Cancelled';
+                    statusBadge.className = 'badge bg-secondary status-badge';
+                }
+                if (submitPaymentBtn) submitPaymentBtn.disabled = true;
+                cancelBookingBtn.disabled = true;
+                if (uploadBox) uploadBox.style.opacity = '0.5';
+
+                showStatus('Dibatalkan', 'Booking berhasil dibatalkan.', 'secondary');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Dibatalkan!',
+                    text: 'Booking Anda telah berhasil dibatalkan.',
+                    confirmButtonColor: '#0d6efd',
+                    customClass: {
+                        popup: 'rounded-4 shadow',
+                        confirmButton: 'btn btn-primary px-4'
+                    },
+                    buttonsStyling: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: result.message || 'Gagal membatalkan booking.',
+                    confirmButtonColor: '#0d6efd'
+                });
+                cancelBookingBtn.disabled = false;
+                cancelBookingBtn.innerHTML = '<i class="fas fa-times-circle me-1"></i> Batalkan Booking';
+            }
+        } catch (err) {
+            console.error("Error cancelling booking:", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan sistem saat membatalkan booking.',
+                confirmButtonColor: '#0d6efd'
+            });
+            cancelBookingBtn.disabled = false;
+            cancelBookingBtn.innerHTML = '<i class="fas fa-times-circle me-1"></i> Batalkan Booking';
         }
     });
 
