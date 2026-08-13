@@ -191,9 +191,15 @@
             </table>
         </div>
 
-        @if(is_object($bookings) && method_exists($bookings, 'links'))
-            <div class="d-flex justify-content-end mt-3">
-                {{ $bookings->links() }}
+        {{-- PAGINATION --}}
+        @if(is_object($bookings) && method_exists($bookings, 'links') && $bookings->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <small class="text-muted">
+                    Menampilkan <b>{{ $bookings->firstItem() }}</b> - <b>{{ $bookings->lastItem() }}</b> dari <b>{{ $bookings->total() }}</b> data
+                </small>
+                <div>
+                    {{ $bookings->links('pagination::bootstrap-5') }}
+                </div>
             </div>
         @endif
 

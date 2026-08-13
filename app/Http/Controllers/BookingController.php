@@ -10,7 +10,48 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class BookingController extends Controller
 {
     // ==========================================
-    // METHOD ADMIN BOOKING (DENGAN FILTER & PAGINATION)
+    // METHOD ADMIN BOOKING HASIL FIX (Halaman /admin/booking)
+    // ==========================================
+    public function bookingIndex(Request $request)
+    {
+        $token = session('token');
+        $error = null;
+        $allBookings = [];
+
+        try {
+            $res = Http::withToken($token)->get(env('API_URL') . '/api/booking');
+
+            if ($res->successful()) {
+                $allBookings = $res->json()['data'] ?? [];
+            } else {
+                $error = $res->json()['message'] ?? 'Gagal mengambil data booking.';
+            }
+        } catch (\Exception $e) {
+            $error = 'Server error: ' . $e->getMessage();
+        }
+
+        // Paginasi Data Booking
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $collection = collect($allBookings);
+        $currentPageItems = $collection->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $bookings = new LengthAwarePaginator(
+            $currentPageItems,
+            $collection->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return view('admin.pages.booking', compact('bookings', 'error'));
+    }
+
+    // ==========================================
+    // METHOD ADMIN LAPORAN (DENGAN FILTER & PAGINATION)
     // ==========================================
     public function laporanIndex(Request $request)
     {
@@ -43,7 +84,7 @@ class BookingController extends Controller
                         }
                     }
 
-                    // B. Filter Single Tanggal (pencarian dari input type date tunggal)
+                    // B. Filter Single Tanggal
                     if ($request->filled('tanggal')) {
                         $bookingDate = isset($item['created_at'])
                             ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
@@ -54,7 +95,7 @@ class BookingController extends Controller
                         }
                     }
 
-                    // C. Filter Rentang Tanggal (dari_tanggal & sampai_tanggal)
+                    // C. Filter Rentang Tanggal
                     if ($request->filled('dari_tanggal') && $request->filled('sampai_tanggal')) {
                         $createdDate = isset($item['created_at'])
                             ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
@@ -70,7 +111,6 @@ class BookingController extends Controller
                         $itemStatus = strtolower((string) ($item['status_pembayaran'] ?? $item['status'] ?? ''));
                         $reqStatus = strtolower($request->status);
 
-                        // Normalisasi aliasing status agar kompatibel
                         if ($reqStatus === 'waiting_confirmation' || $reqStatus === 'menunggu_verifikasi') {
                             if (!in_array($itemStatus, ['waiting_confirmation', 'menunggu_verifikasi'], true)) {
                                 $match = false;
@@ -89,7 +129,7 @@ class BookingController extends Controller
                     return $match;
                 });
 
-                // 2. HITUNG STATISTIK DARI SELURUH DATA HASIL FILTER (SEBELUM PAGINASI)
+                // 2. HITUNG STATISTIK DARI SELURUH DATA HASIL FILTER
                 $totalBookingCount = $filteredCollection->count();
 
                 $totalRevenue = $filteredCollection->whereIn('status_pembayaran', ['confirmed', 'paid', 'approve'])
@@ -117,6 +157,8 @@ class BookingController extends Controller
                     ]
                 );
 
+                $bookings->withQueryString();
+
                 return view('admin.pages.laporan', compact(
                     'bookings',
                     'totalBookingCount',
@@ -130,7 +172,26 @@ class BookingController extends Controller
             $error = 'Server error: ' . $e->getMessage();
         }
 
-        return view('admin.pages.laporan', compact('error'));
+        // Fallback jika API Error / Try Catch kena Exception:
+        // Tetap balikkan $bookings Kosong berupa LengthAwarePaginator agar Blade TIDAK CRASH!
+        $bookings = new LengthAwarePaginator([], 0, 10, 1, [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+            'query' => $request->query(),
+        ]);
+
+        $totalBookingCount = 0;
+        $totalRevenue = 0;
+        $statusPaidCount = 0;
+        $statusPendingCount = 0;
+
+        return view('admin.pages.laporan', compact(
+            'bookings',
+            'totalBookingCount',
+            'totalRevenue',
+            'statusPaidCount',
+            'statusPendingCount',
+            'error'
+        ));
     }
 
     public function index()

@@ -75,21 +75,50 @@ class AdminDashboardController extends Controller
                 $revenueToday = $todayBookings->sum('total_harga');
                 $totalBookingToday = $todayBookings->count();
 
-                // --- Grouping Data Category (Futsal, Badminton, Basket, dll) ---
+                // --- Grouping Data Category (PERBAIKAN LOGIKA DI SINI) ---
                 $categoryGroup = $filteredBookings->groupBy(function ($b) {
-                    // Pengecekan multi-key agar dapat membaca struktur JSON dari API secara fleksibel
+                    // 1. Pengecekan multi-key dari struktur API
                     $cat = $b['kategori']
                         ?? $b['kategori_lapangan']
                         ?? $b['nama_kategori']
                         ?? $b['jenis_lapangan']
                         ?? $b['jenis']
+                        ?? $b['lapangan']['kategori']['nama']
                         ?? $b['lapangan']['kategori']
                         ?? $b['lapangan']['kategori_lapangan']
                         ?? $b['lapangan']['nama_kategori']
+                        ?? $b['lapangan']['jenis_lapangan']
                         ?? $b['lapangan']['jenis']
                         ?? null;
 
-                    return !empty($cat) ? ucfirst(strtolower($cat)) : 'Lainnya';
+                    // 2. Jika field kategori berupa Array/Object dari API
+                    if (is_array($cat)) {
+                        $cat = $cat['nama'] ?? $cat['nama_kategori'] ?? null;
+                    }
+
+                    // 3. FALLBACK: Tebak dari nama_lapangan jika key kategori masih null
+                    if (empty($cat)) {
+                        $namaLapangan = strtolower(
+                            $b['lapangan']['nama_lapangan']
+                            ?? $b['nama_lapangan']
+                            ?? $b['lapangan']['nama']
+                            ?? ''
+                        );
+
+                        if (str_contains($namaLapangan, 'futsal')) {
+                            $cat = 'Futsal';
+                        } elseif (str_contains($namaLapangan, 'badminton') || str_contains($namaLapangan, 'bulutangkis')) {
+                            $cat = 'Badminton';
+                        } elseif (str_contains($namaLapangan, 'basket') || str_contains($namaLapangan, 'basketball')) {
+                            $cat = 'Basketball';
+                        } elseif (str_contains($namaLapangan, 'voli') || str_contains($namaLapangan, 'volleyball')) {
+                            $cat = 'Voli';
+                        } elseif (str_contains($namaLapangan, 'tenis') || str_contains($namaLapangan, 'tennis')) {
+                            $cat = 'Tenis';
+                        }
+                    }
+
+                    return !empty($cat) ? ucfirst(strtolower(trim($cat))) : 'Lainnya';
                 });
 
                 $categoryData = [
