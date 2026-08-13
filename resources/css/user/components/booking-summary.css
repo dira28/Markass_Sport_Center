@@ -1,3 +1,6 @@
+/* ==========================================
+   BOOKING SUMMARY CARD CONTAINER
+   ========================================== */
 .booking-summary-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -25,6 +28,7 @@
     text-transform: uppercase;
 }
 
+/* FORM CONTROLS */
 .form-label-custom {
     font-size: 12.5px;
     font-weight: 700;
@@ -51,7 +55,9 @@
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
-/* JADWAL GRID JAM */
+/* ==========================================
+   JADWAL GRID JAM & STATUS TOMBOL
+   ========================================== */
 .jadwal-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -61,6 +67,17 @@
     padding-right: 4px;
 }
 
+/* Custom Scrollbar Mini untuk Grid Jam */
+.jadwal-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.jadwal-grid::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* Base Style Tombol Jam */
 .jam-btn {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -70,6 +87,10 @@
     font-weight: 700;
     color: #475569;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .jam-btn:hover:not(:disabled) {
@@ -78,6 +99,7 @@
     background: #fff5f5;
 }
 
+/* 1. STATE SELECTED / ACTIVE RANGE */
 .jam-btn.active,
 .jam-btn.active-range {
     background: #dc2626 !important;
@@ -86,22 +108,44 @@
     box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
 
+/* 2. STATE BOOKED / TERISI (Abu-abu Disabled) */
 .jam-btn.jam-booked {
-    background: #f1f5f9 !important;
-    border-color: #e2e8f0 !important;
-    color: #cbd5e1 !important;
-    cursor: not-allowed;
+    background: #e2e8f0 !important;
+    border-color: #cbd5e1 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    opacity: 0.8;
+}
+
+.jam-btn.jam-booked .jam-text {
     text-decoration: line-through;
 }
 
+/* 3. STATE PENDING / PROSES BAYAR (Kuning Soft) */
+.jam-btn.jam-pending {
+    background: #fef9c3 !important;
+    /* Yellow-100 */
+    border-color: #fde047 !important;
+    /* Yellow-300 */
+    color: #a16207 !important;
+    /* Yellow-700 */
+    cursor: not-allowed !important;
+}
+
+/* Badge Text Kecil (BOOKED / PENDING) */
+.jam-status-badge,
 .jam-booked-label {
     display: block;
     font-size: 8px;
     font-weight: 800;
     line-height: 1;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
 }
 
-/* COUNTER DURASI */
+/* ==========================================
+   COUNTER DURASI
+   ========================================== */
 .counter-box {
     display: flex;
     align-items: center;
@@ -121,6 +165,9 @@
     font-weight: 800;
     color: #0f172a;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-counter:hover {
@@ -135,7 +182,9 @@
     color: #1e293b;
 }
 
-/* SUMMARY BOX DETAIL */
+/* ==========================================
+   SUMMARY BOX DETAIL
+   ========================================== */
 .summary-details-box {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -168,7 +217,9 @@
     margin-bottom: 0;
 }
 
-/* TOMBOL SUBMIT */
+/* ==========================================
+   TOMBOL SUBMIT
+   ========================================== */
 .btn-booking-submit {
     background: #dc2626;
     color: #ffffff;

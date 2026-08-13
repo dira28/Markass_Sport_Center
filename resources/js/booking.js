@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let durasi = 1;
 
     let controller = null;
-    let blockedSlots = [];
+    let blockedSlots = []; // Jam yang TERBOOKING / PENDING
     let fpInstance = null;
 
     const summaryNama = document.getElementById("summary-nama");
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function formatDateIndo(str) {
         if (!str) return "-";
         const d = new Date(str);
-        if (isNaN(d.getTime())) return str; // Fallback jika string format kustom
+        if (isNaN(d.getTime())) return str;
         return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
@@ -48,7 +48,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
-            // Set initial value jika input tanggal sudah berisi data saat load
             if (tanggalInput.value && summaryTanggal) {
                 summaryTanggal.textContent = formatDateIndo(tanggalInput.value);
             }
@@ -68,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let s = parseInt(start.split(":")[0]);
         let e = s + durasi;
 
-        // Misal batas maksimum jam operasional 24:00
         if (e > 24) return false;
 
         for (let i = s; i < e; i++) {
@@ -92,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
             Swal.fire({
                 icon: 'warning',
                 title: 'Durasi Melebihi Slot Kosong',
-                text: 'Durasi yang kamu pilih melewati jam yang sudah dibooking atau melebihi batas waktu.',
+                text: 'Durasi pilihanmu menabrak jam yang sudah terbooking/pending.',
                 confirmButtonColor: '#dc3545'
             });
             return;
@@ -103,13 +101,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.querySelectorAll(".jam-btn").forEach(btn => {
             let jam = parseInt(btn.dataset.jam.split(":")[0]);
-            if (jam >= s && jam < e && !btn.classList.contains("jam-booked")) {
+            if (jam >= s && jam < e && !btn.disabled) {
                 btn.classList.add("active-range");
             }
         });
     }
 
-    // HITUNG AKURAT HARGA LINTAS WAKTU (PAGI & MALAM)
     function hitungTotalHarga(start, durasi) {
         if (!start || (!hargaPagi && !hargaMalam)) return 0;
 
@@ -118,7 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         for (let i = 0; i < durasi; i++) {
             let currentHour = startHour + i;
-            // Pagi: 06:00 - 15:59, Malam: Sisanya
             if (currentHour >= 6 && currentHour < 16) {
                 total += hargaPagi;
             } else {
@@ -151,86 +147,101 @@ document.addEventListener("DOMContentLoaded", function () {
         updateUI();
     }
 
-    // Fetch slot availability from server
+    // FUNGSI LOAD AVAILABILITY
     async function loadAvailability(tanggal) {
-        if (!lapanganAktif) return;
+        if (!lapanganAktif || !tanggal) return;
 
         if (controller) controller.abort();
         controller = new AbortController();
 
         try {
+            console.log(`[DEBUG] Fetching status jam untuk Lapangan ID: ${lapanganAktif}, Tanggal: ${tanggal}`);
+
             let res = await fetch(`/booking/status-jam?tanggal=${tanggal}&lapangan_id=${lapanganAktif}`, {
                 credentials: "same-origin",
                 signal: controller.signal
             });
 
-            let statusData = await res.json();
-            let bookedArray = [];
+            if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
 
-            let dataJam = Array.isArray(statusData) ? statusData : (statusData.data || []);
+            let responseData = await res.json();
+            console.log("[DEBUG] Response Backend:", responseData);
 
-            if (Array.isArray(dataJam)) {
-                dataJam.forEach(item => {
-                    const s = String(item.status_pembayaran ?? item.status ?? '').toLowerCase();
-
-                    if (s.includes('expired') || s.includes('cancelled') || s.includes('batal') || s.includes('failed') || s.includes('reject')) {
-                        return;
-                    }
-
-                    let jamMulai = item.jam_mulai ?? item.jam ?? item.waktu_mulai;
-                    let jamSelesai = item.jam_selesai ?? item.waktu_selesai;
-
-                    if (jamMulai) {
-                        let startHour = parseInt(String(jamMulai).split(":")[0]);
-                        let endHour = jamSelesai ? parseInt(String(jamSelesai).split(":")[0]) : startHour + 1;
-
-                        for (let h = startHour; h < endHour; h++) {
-                            let formattedSlot = String(h).padStart(2, "0") + ":00";
-                            if (!bookedArray.includes(formattedSlot)) {
-                                bookedArray.push(formattedSlot);
-                            }
-                        }
-                    }
-                });
+            let statusJamList = [];
+            if (responseData.data && Array.isArray(responseData.data.status_jam)) {
+                statusJamList = responseData.data.status_jam;
+            } else if (responseData.status_jam && Array.isArray(responseData.status_jam)) {
+                statusJamList = responseData.status_jam;
+            } else if (responseData.data && Array.isArray(responseData.data)) {
+                statusJamList = responseData.data;
+            } else if (Array.isArray(responseData)) {
+                statusJamList = responseData;
             }
 
-            blockedSlots = bookedArray;
-            resetSelection();
+            let blockedArray = [];
 
             document.querySelectorAll(".jam-btn").forEach(btn => {
-                const jam = btn.dataset.jam;
-                const blocked = blockedSlots.includes(jam);
+                const jamBtn = btn.dataset.jam;
+                if (!jamBtn) return;
 
-                if (blocked) {
+                const matched = statusJamList.find(item => {
+                    if (!item) return false;
+                    let jamVal = item.jam || item.jam_mulai || item.waktu;
+                    if (jamVal && jamVal.length > 5) jamVal = jamVal.substring(0, 5);
+                    return jamVal === jamBtn;
+                });
+
+                const status = matched ? String(matched.status).toUpperCase() : 'FREE';
+
+                // Reset status tombol dasar
+                btn.disabled = false;
+                btn.classList.remove("jam-booked", "jam-pending", "active", "active-range");
+                btn.removeAttribute("title");
+
+                // WARNA ABU-ABU (TERBOOKING / LUNAS)
+                if (['TERBOOKING', 'BOOKED', 'CONFIRMED', 'PAID', 'LUNAS', 'SUCCESS'].includes(status)) {
                     btn.disabled = true;
                     btn.classList.add("jam-booked");
-                    btn.classList.remove("active", "active-range");
-                    btn.innerHTML = `<span class="jam-text">${jam}</span><span class="jam-booked-label">BOOKED</span>`;
+                    btn.title = `Jam ${jamBtn} - Sudah Terbooking`;
+                    btn.innerHTML = `<span class="jam-text">${jamBtn}</span><span class="jam-status-badge">BOOKED</span>`;
+                    blockedArray.push(jamBtn);
+
+                    // WARNA KUNING (PENDING / MENUNGGU BAYAR)
+                } else if (['PENDING', 'WAITING', 'WAITING_PAYMENT', 'MENUNGGU'].includes(status)) {
+                    btn.disabled = true;
+                    btn.classList.add("jam-pending");
+                    btn.title = `Jam ${jamBtn} - Menunggu Pembayaran`;
+                    btn.innerHTML = `<span class="jam-text">${jamBtn}</span><span class="jam-status-badge">PENDING</span>`;
+                    blockedArray.push(jamBtn);
+
+                    // NORMAL / TERSEDIA
                 } else {
-                    btn.disabled = false;
-                    btn.classList.remove("jam-booked");
-                    btn.innerHTML = `<span class="jam-text">${jam}</span>`;
+                    btn.title = `Jam ${jamBtn} - Tersedia`;
+                    btn.innerHTML = `<span class="jam-text">${jamBtn}</span>`;
                 }
             });
 
+            blockedSlots = blockedArray;
+
         } catch (err) {
             if (err.name === "AbortError") return;
-            console.error("ERROR STATUS JAM:", err);
-            blockedSlots = [];
+            console.error("Gagal memuat status jam:", err);
         }
     }
 
-    // Court select events
+    // EVENT KLIK KARTU LAPANGAN (Cukup 1 Listener Saja)
     document.querySelectorAll(".card-lapangan").forEach(el => {
         el.addEventListener("click", async function () {
             const isAlreadyActive = this.classList.contains("active");
 
+            // Reset semua pilihan kartu terlebih dahulu
             document.querySelectorAll(".card-lapangan").forEach(c => {
                 c.classList.remove("active");
                 const detail = c.querySelector(".lapangan-detail");
                 if (detail) detail.style.maxHeight = null;
             });
 
+            // Jika kartu belum aktif, aktifkan kartu yang diklik
             if (!isAlreadyActive) {
                 this.classList.add("active");
 
@@ -243,17 +254,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (summaryNama) summaryNama.textContent = this.dataset.nama;
 
-                jamAktif = null;
-                blockedSlots = [];
+                resetSelection();
 
-                document.querySelectorAll(".jam-btn").forEach(btn => {
-                    btn.classList.remove("active", "active-range");
-                });
-
-                updateUI();
-
-                if (tanggalInput && tanggalInput.value) {
-                    loadAvailability(tanggalInput.value);
+                // Cek ketersediaan jam jika tanggal sudah dipilih sebelumnya
+                const tanggalTerpilih = tanggalInput ? tanggalInput.value : null;
+                if (tanggalTerpilih) {
+                    loadAvailability(tanggalTerpilih);
                 }
 
                 try {
@@ -264,18 +270,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.error("Gagal load fully booked dates:", err);
                 }
 
+                // Jika kartu diklik lagi (unselect / batalkan pilihan)
             } else {
                 lapanganAktif = null;
                 hargaPagi = 0;
                 hargaMalam = 0;
                 if (summaryNama) summaryNama.textContent = "-";
 
-                jamAktif = null;
-                updateUI();
+                resetSelection();
 
                 document.querySelectorAll(".jam-btn").forEach(btn => {
                     btn.disabled = false;
-                    btn.classList.remove("jam-booked", "active", "active-range");
+                    btn.classList.remove("jam-booked", "jam-pending", "active", "active-range");
+                    btn.removeAttribute("title");
                     if (btn.dataset.jam) {
                         btn.innerHTML = `<span class="jam-text">${btn.dataset.jam}</span>`;
                     }
@@ -286,10 +293,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Time slot select events
+    // Klik Slot Jam
     document.querySelectorAll(".jam-btn").forEach(btn => {
         btn.addEventListener("click", function () {
-            if (this.disabled || this.classList.contains("jam-booked")) return;
+            if (this.disabled) return;
 
             const start = this.dataset.jam;
             if (!start) return;
@@ -298,7 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Jadwal Bentrok',
-                    text: `Durasi ${durasi} jam pilihanmu menabrak jadwal lain yang sudah di-booking.`,
+                    text: `Durasi ${durasi} jam pilihanmu menabrak jadwal lain yang terbooking/pending.`,
                     confirmButtonColor: '#dc3545'
                 });
                 return;
@@ -314,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Duration controls
+    // Tombol Durasi
     const plusBtn = document.getElementById("plus");
     const minusBtn = document.getElementById("minus");
 
@@ -339,7 +346,7 @@ document.addEventListener("DOMContentLoaded", function () {
         highlightRange();
     }
 
-    // Submit booking action
+    // Submit Booking
     const btnBooking = document.getElementById("btnBooking");
     if (btnBooking) {
         btnBooking.addEventListener("click", async function () {
@@ -390,7 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return Swal.fire({
                     icon: 'error',
                     title: 'Jadwal Bentrok',
-                    text: 'Waktu yang dipilih sudah di-booking oleh orang lain.',
+                    text: 'Waktu yang dipilih sudah di-booking atau pending oleh orang lain.',
                     confirmButtonColor: '#dc3545'
                 });
             }
@@ -401,7 +408,6 @@ document.addEventListener("DOMContentLoaded", function () {
             let namaLap = summaryNama ? summaryNama.textContent : "Lapangan";
             let totalBayar = totalHarga ? totalHarga.textContent : "Rp0";
 
-            // Confirmation popup
             const confirmResult = await Swal.fire({
                 title: 'Konfirmasi Pesanan',
                 html: `
@@ -423,7 +429,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!confirmResult.isConfirmed) return;
 
-            // Loading popup
             Swal.fire({
                 title: 'Memproses Pesanan...',
                 text: 'Mohon tunggu sebentar',
@@ -433,7 +438,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
 
-            // Safe CSRF token retrieval
             const csrfMeta = document.querySelector('meta[name="csrf-token"]');
             const csrfToken = csrfMeta ? csrfMeta.content : '';
 
