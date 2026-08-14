@@ -15,9 +15,7 @@ class AuthController extends Controller
         ]);
     }
 
-    // ==========================================
-    // PROSES LOGIN MANUAL (PROSES MINTA OTP)
-    // ==========================================
+    // Process manual login and request OTP
     public function processLogin(Request $request)
     {
         $request->validate([
@@ -26,9 +24,9 @@ class AuthController extends Controller
         ]);
 
         try {
-            $apiUrl = env('API_URL', 'http://127.0.0.1:5000');
+            $apiUrl = env('API_URL');
 
-            // Tembak ke API Backend Node.js
+            // Send request to Backend API
             $response = Http::post($apiUrl . '/api/auth/login', [
                 'email' => $request->email,
                 'password' => $request->password
@@ -37,27 +35,27 @@ class AuthController extends Controller
             $result = $response->json();
 
             if ($response->successful()) {
-                // 1. Jika Backend minta verifikasi OTP
+                // 1. Check if backend requires OTP verification
                 if (isset($result['require_otp']) && $result['require_otp']) {
                     session(['otp_email' => $result['email']]);
                     return redirect()->route('otp.view');
                 }
 
-                // 2. Jika tanpa OTP (Langsung dapet token)
+                // 2. Direct login without OTP
                 $token = $result['data']['token'] ?? $result['token'] ?? null;
                 $user = $result['data'] ?? $result['user'] ?? null;
 
                 if ($token) {
                     $role = $user['role'] ?? 'user';
 
-                    // SIMPAN TOKEN, USER, & ROLE KE SESSION
+                    // Save token, user, and role to session
                     session([
                         'token' => $token,
                         'role' => $role,
                         'user' => $user
                     ]);
 
-                    // REDIRECT SESUAI ROLE
+                    // Redirect based on role
                     if ($role === 'admin') {
                         return redirect()->route('admin.dashboard');
                     }
@@ -72,11 +70,7 @@ class AuthController extends Controller
         }
     }
 
-    // ==========================================
-    // HALAMAN & PROSES VERIFIKASI OTP
-    // ==========================================
-
-    // Tampilkan View Form Input OTP
+    // Show OTP verification form
     public function showOtpForm()
     {
         if (!session('otp_email')) {
@@ -88,7 +82,7 @@ class AuthController extends Controller
         ]);
     }
 
-    // Process Kirim Kode OTP ke Backend
+    // Process OTP verification
     public function processVerifyOtp(Request $request)
     {
         $request->validate([
@@ -97,7 +91,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            $apiUrl = env('API_URL', 'http://127.0.0.1:5000');
+            $apiUrl = env('API_URL');
 
             $response = Http::post($apiUrl . '/api/auth/verify-otp', [
                 'email' => $request->email,
@@ -107,19 +101,17 @@ class AuthController extends Controller
             $result = $response->json();
 
             if ($response->successful() && isset($result['token'])) {
-                session()->forget('otp_email'); // Hapus session temp email
+                session()->forget('otp_email');
 
                 $user = $result['user'] ?? null;
-                $role = $user['role'] ?? 'user'; // Ambil role dari response backend
+                $role = $user['role'] ?? 'user';
 
-                // 🔴 KUNCI PERBAIKAN: Simpan 'role' juga ke Session Laravel!
                 session([
                     'token' => $result['token'],
                     'role' => $role,
                     'user' => $user
                 ]);
 
-                // 🔴 KUNCI PERBAIKAN: Cek role untuk menentukan dashboard
                 if ($role === 'admin') {
                     return redirect()->route('admin.dashboard');
                 }
@@ -143,10 +135,7 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    // ==========================================
-    // GOOGLE OAUTH METHODS
-    // ==========================================
-
+    // Google OAuth methods
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
@@ -156,9 +145,9 @@ class AuthController extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->user();
-            $apiUrl = env('API_URL', 'http://127.0.0.1:5000');
+            $apiUrl = env('API_URL');
 
-            // Kirim data Google ke API Node.js Backend
+            // Send Google user data to Backend API
             $response = Http::post($apiUrl . '/api/auth/google', [
                 'nama' => $googleUser->getName(),
                 'email' => $googleUser->getEmail(),

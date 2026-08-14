@@ -9,9 +9,13 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class BookingController extends Controller
 {
-    // ==========================================
-    // METHOD ADMIN BOOKING HASIL FIX (Halaman /admin/booking)
-    // ==========================================
+    // API Helper
+    private function api()
+    {
+        return Http::withToken(session('token'))->acceptJson();
+    }
+
+    // Admin booking list
     public function bookingIndex(Request $request)
     {
         $token = session('token');
@@ -30,7 +34,7 @@ class BookingController extends Controller
             $error = 'Server error: ' . $e->getMessage();
         }
 
-        // Paginasi Data Booking
+        // Pagination
         $perPage = 10;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $collection = collect($allBookings);
@@ -50,9 +54,7 @@ class BookingController extends Controller
         return view('admin.pages.booking', compact('bookings', 'error'));
     }
 
-    // ==========================================
-    // METHOD ADMIN LAPORAN (DENGAN FILTER & PAGINATION)
-    // ==========================================
+    // Admin report
     public function laporanIndex(Request $request)
     {
         $token = session('token');
@@ -64,11 +66,11 @@ class BookingController extends Controller
             if ($res->successful()) {
                 $allBookings = $res->json()['data'] ?? [];
 
-                // 1. FILTER SEMUA DATA DULU
+                // 1. Filter data
                 $filteredCollection = collect($allBookings)->filter(function ($item) use ($request) {
                     $match = true;
 
-                    // A. Filter Search (ID Booking, Nama User, Nama Lapangan)
+                    // Search filter
                     if ($request->filled('search')) {
                         $search = strtolower($request->search);
                         $idBooking = strtolower((string) ($item['id_booking'] ?? $item['id'] ?? ''));
@@ -84,7 +86,7 @@ class BookingController extends Controller
                         }
                     }
 
-                    // B. Filter Single Tanggal
+                    // Single date filter
                     if ($request->filled('tanggal')) {
                         $bookingDate = isset($item['created_at'])
                             ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
@@ -95,7 +97,7 @@ class BookingController extends Controller
                         }
                     }
 
-                    // C. Filter Rentang Tanggal
+                    // Date range filter
                     if ($request->filled('dari_tanggal') && $request->filled('sampai_tanggal')) {
                         $createdDate = isset($item['created_at'])
                             ? Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')->format('Y-m-d')
@@ -106,7 +108,7 @@ class BookingController extends Controller
                         }
                     }
 
-                    // D. Filter Status Pembayaran
+                    // Status filter
                     if ($request->filled('status')) {
                         $itemStatus = strtolower((string) ($item['status_pembayaran'] ?? $item['status'] ?? ''));
                         $reqStatus = strtolower($request->status);
@@ -129,7 +131,7 @@ class BookingController extends Controller
                     return $match;
                 });
 
-                // 2. HITUNG STATISTIK DARI SELURUH DATA HASIL FILTER
+                // 2. Calculate statistics
                 $totalBookingCount = $filteredCollection->count();
 
                 $totalRevenue = $filteredCollection->whereIn('status_pembayaran', ['confirmed', 'paid', 'approve'])
@@ -141,7 +143,7 @@ class BookingController extends Controller
                 $statusPendingCount = $filteredCollection->whereIn('status_pembayaran', ['pending', 'waiting_confirmation', 'menunggu_verifikasi'])
                     ->count();
 
-                // 3. BARU POTONG DATA KHUSUS UNTUK TABEL (PAGINASI)
+                // 3. Paginate filtered data
                 $perPage = 10;
                 $currentPage = LengthAwarePaginator::resolveCurrentPage();
                 $currentPageItems = $filteredCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
@@ -172,8 +174,7 @@ class BookingController extends Controller
             $error = 'Server error: ' . $e->getMessage();
         }
 
-        // Fallback jika API Error / Try Catch kena Exception:
-        // Tetap balikkan $bookings Kosong berupa LengthAwarePaginator agar Blade TIDAK CRASH!
+        // Fallback on API error
         $bookings = new LengthAwarePaginator([], 0, 10, 1, [
             'path' => LengthAwarePaginator::resolveCurrentPath(),
             'query' => $request->query(),
@@ -551,37 +552,28 @@ class BookingController extends Controller
         }
     }
 
-    // ==========================================
-    // METHOD CANCEL BOOKING (USER)
-    // ==========================================
-    public function cancel($id)
+    // Cancel booking
+    public function cancel(Request $req, $id)
     {
-        $token = session('token');
-
-        if (!$token) {
-            return response()->json(['message' => 'Silakan login terlebih dahulu.'], 401);
-        }
-
         try {
-            $response = Http::withToken($token)
-                ->post(env('API_URL') . "/api/booking/{$id}/cancel");
+            $res = $this->api()->post(env('API_URL') . "/api/booking/{$id}/cancel");
 
-            if ($response->successful()) {
+            if ($res->successful()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Booking berhasil dibatalkan.'
-                ]);
+                    'message' => $res->json()['message'] ?? 'Booking berhasil dibatalkan.'
+                ], 200);
             }
 
             return response()->json([
                 'success' => false,
-                'message' => $response->json()['message'] ?? 'Gagal membatalkan booking.'
-            ], $response->status());
+                'message' => $res->json()['message'] ?? 'Gagal membatalkan booking.'
+            ], $res->status());
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan server saat membatalkan booking.'
             ], 500);
         }
     }

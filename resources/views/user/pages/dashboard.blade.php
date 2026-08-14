@@ -155,32 +155,39 @@
             </div>
 
             <div class="row g-4">
+                <!-- STEP 1 -->
                 <div class="col-md-3">
                     <div class="step-card-modern">
                         <div class="step-num">01</div>
-                        <h5 class="fw-bold mt-3">Pilih Lapangan</h5>
-                        <p class="text-white-50 small mb-0">Cari jenis olahraga & lapangan yang ingin kamu sewa.</p>
+                        <h5 class="fw-bold mt-3">Tentukan Tanggal</h5>
+                        <p class="text-white-50 small mb-0">Pilih tanggal main yang kamu inginkan terlebih dahulu.</p>
                     </div>
                 </div>
+
+                <!-- STEP 2 -->
                 <div class="col-md-3">
                     <div class="step-card-modern">
                         <div class="step-num">02</div>
-                        <h5 class="fw-bold mt-3">Atur Jadwal</h5>
-                        <p class="text-white-50 small mb-0">Pilih tanggal dan slot jam kosong yang sesuai jam kamu.</p>
+                        <h5 class="fw-bold mt-3">Pilih Lapangan</h5>
+                        <p class="text-white-50 small mb-0">Cari & klik jenis lapangan favorit yang ingin kamu sewa.</p>
                     </div>
                 </div>
+
+                <!-- STEP 3 -->
                 <div class="col-md-3">
                     <div class="step-card-modern">
                         <div class="step-num">03</div>
-                        <h5 class="fw-bold mt-3">Isi Data</h5>
-                        <p class="text-white-50 small mb-0">Lengkapi identitas serta kontak penerima pesanan.</p>
+                        <h5 class="fw-bold mt-3">Pilih Jam Kosong</h5>
+                        <p class="text-white-50 small mb-0">Cek ketersediaan jadwal lalu pilih slot jam yang tersedia.</p>
                     </div>
                 </div>
+
+                <!-- STEP 4 -->
                 <div class="col-md-3">
                     <div class="step-card-modern">
                         <div class="step-num">04</div>
                         <h5 class="fw-bold mt-3">Pembayaran</h5>
-                        <p class="text-white-50 small mb-0">Selesaikan transaksi instan melalui e-wallet / transfer.</p>
+                        <p class="text-white-50 small mb-0">Selesaikan pembayaran & upload bukti transfer.</p>
                     </div>
                 </div>
             </div>
@@ -245,7 +252,7 @@
 
             {{-- LOGIKA TOMBOL KOMENTAR SESUAI SESSION --}}
             <div class="text-center mt-5">
-                @if(session('token'))
+                @if(session('token') || session('user') || auth()->check())
                     @if($hasBooked ?? false)
                         {{-- KONDISI 1: User Login & Sudah Pernah Booking --}}
                         <button class="btn btn-outline-danger rounded-pill px-4 fw-bold" onclick="openCommentModal()">
@@ -267,6 +274,34 @@
                 @endif
             </div>
         </div>
+    </section>
+
+    {{-- MODAL KOMENTAR (AKTIF JIKA LOGIN & SUDAH BOOKING) --}}
+    @if((session('token') || session('user') || auth()->check()) && ($hasBooked ?? false))
+        <div class="comment-modal-backdrop" id="commentModal" style="display: none;">
+            <div class="comment-box-card">
+                <h5 class="fw-bold mb-3 text-dark">Tambah Komentar Kamu</h5>
+                <form onsubmit="addComment(event)">
+                    <div class="mb-3">
+                        {{-- Nama diambil dari session / auth user --}}
+                        <input type="text" id="namaKomentar" class="form-control rounded-3"
+                            value="{{ session('user.name') ?? session('user_name') ?? auth()->user()->name ?? 'Pengguna' }}"
+                            readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea id="isiKomentar" class="form-control rounded-3" rows="4"
+                            placeholder="Tuliskan pengalaman kamu..." required></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold">Kirim</button>
+                        <button type="button" class="btn btn-light w-100 rounded-pill fw-bold"
+                            onclick="closeCommentModal()">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+    </div>
     </section>
 
     {{-- MODAL KOMENTAR (AKTIF JIKA ADA TOKEN & SUDAH BOOKING) --}}

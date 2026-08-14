@@ -31,6 +31,7 @@ Route::post('/booking/payment/{id}/upload-bukti', [BookingController::class, 'up
     ->name('booking.upload-bukti');
 Route::post('/booking/{id}/expire', [BookingController::class, 'expire'])->name('booking.expire');
 Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
+Route::post('/api/booking/{id}/cancel', [BookingController::class, 'cancel']);
 
 Route::get('/booking/fully-booked-dates', [BookingController::class, 'getFullyBookedDates']);
 Route::patch('/booking/{id_booking}/confirm-payment', [BookingController::class, 'confirmPayment'])->name('booking.confirm-payment');

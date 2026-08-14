@@ -302,43 +302,37 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ==========================================
     // LOGIKA MODAL CANCEL BOOKING DENGAN SWEETALERT2
-    // ==========================================
     const cancelBookingBtn = document.getElementById('cancelBookingBtn');
 
     cancelBookingBtn?.addEventListener('click', async () => {
-        // Tampilkan Modal Konfirmasi SweetAlert2
-        const confirmResult = await Swal.fire({
+        // 1. Tampilkan Modal Konfirmasi SweetAlert2
+        const result = await Swal.fire({
             title: 'Batalkan Booking?',
             text: "Apakah Anda yakin ingin membatalkan booking ini? Tindakan ini tidak dapat dibatalkan.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
             confirmButtonText: 'Ya, Batalkan!',
             cancelButtonText: 'Batal',
-            customClass: {
-                popup: 'rounded-4 shadow',
-                confirmButton: 'btn btn-danger px-4 me-2',
-                cancelButton: 'btn btn-secondary px-4'
-            },
-            buttonsStyling: false
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            buttonsStyling: true
         });
 
-        // Jika user tidak menekan tombol konfirmasi "Ya, Batalkan!"
-        if (!confirmResult.isConfirmed) {
+        if (!result.isConfirmed) {
             return;
         }
 
-        const token = window.authToken;
+        const token = window.authToken || localStorage.getItem('token');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
         try {
+            // Ubah status tombol saat loading
             cancelBookingBtn.disabled = true;
             cancelBookingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Membatalkan...';
 
-            const response = await fetch(`/booking/${bookingId}/cancel`, {
+            // 3. Panggil API Cancel Booking
+            const response = await fetch(`/api/booking/${bookingId}/cancel`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -348,20 +342,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            const result = await response.json();
+            const data = await response.json();
 
-            if (response.ok) {
-                clearInterval(countdownInterval);
-                if (timerEl) timerEl.textContent = '00:00';
-                if (statusBadge) {
+            if (response.ok && data.success) {
+                // Update UI jika berhasil
+                if (typeof countdownInterval !== 'undefined') clearInterval(countdownInterval);
+                if (typeof timerEl !== 'undefined' && timerEl) timerEl.textContent = '00:00';
+
+                if (typeof statusBadge !== 'undefined' && statusBadge) {
                     statusBadge.textContent = 'Cancelled';
                     statusBadge.className = 'badge bg-secondary status-badge';
                 }
-                if (submitPaymentBtn) submitPaymentBtn.disabled = true;
-                cancelBookingBtn.disabled = true;
-                if (uploadBox) uploadBox.style.opacity = '0.5';
+                if (typeof submitPaymentBtn !== 'undefined' && submitPaymentBtn) submitPaymentBtn.disabled = true;
+                if (typeof uploadBox !== 'undefined' && uploadBox) uploadBox.style.opacity = '0.5';
 
-                showStatus('Dibatalkan', 'Booking berhasil dibatalkan.', 'secondary');
+                if (typeof showStatus === 'function') {
+                    showStatus('Dibatalkan', 'Booking berhasil dibatalkan.', 'secondary');
+                }
 
                 Swal.fire({
                     icon: 'success',
@@ -378,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal',
-                    text: result.message || 'Gagal membatalkan booking.',
+                    text: data.message || 'Gagal membatalkan booking.',
                     confirmButtonColor: '#0d6efd'
                 });
                 cancelBookingBtn.disabled = false;
