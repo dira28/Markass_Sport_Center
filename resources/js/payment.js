@@ -235,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
         proofFile.dispatchEvent(new Event('change'));
     });
 
+    // 1. UPLOAD BUKTI PEMBAYARAN + REDIRECT
     submitPaymentBtn?.addEventListener('click', async () => {
         try {
             if (!proofFile.files || !proofFile.files[0]) {
@@ -287,11 +288,14 @@ document.addEventListener('DOMContentLoaded', function () {
             submitPaymentBtn.disabled = true;
             showStatus('Berhasil!', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.', 'success');
 
+            // --- PERBAIKAN: REDIRECT SETELAH KLIK OK ---
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
                 text: 'Bukti pembayaran berhasil terkirim.',
                 confirmButtonColor: '#0d6efd'
+            }).then(() => {
+                window.location.href = '/my-bookings'; // Sesuaikan URL riwayat
             });
 
         } catch (err) {
@@ -302,11 +306,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // LOGIKA MODAL CANCEL BOOKING DENGAN SWEETALERT2
+    // 2. CANCEL BOOKING + REDIRECT
     const cancelBookingBtn = document.getElementById('cancelBookingBtn');
 
     cancelBookingBtn?.addEventListener('click', async () => {
-        // 1. Tampilkan Modal Konfirmasi SweetAlert2
         const result = await Swal.fire({
             title: 'Batalkan Booking?',
             text: "Apakah Anda yakin ingin membatalkan booking ini? Tindakan ini tidak dapat dibatalkan.",
@@ -327,11 +330,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
         try {
-            // Ubah status tombol saat loading
             cancelBookingBtn.disabled = true;
             cancelBookingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Membatalkan...';
 
-            // 3. Panggil API Cancel Booking
             const response = await fetch(`/api/booking/${bookingId}/cancel`, {
                 method: 'POST',
                 headers: {
@@ -345,7 +346,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Update UI jika berhasil
                 if (typeof countdownInterval !== 'undefined') clearInterval(countdownInterval);
                 if (typeof timerEl !== 'undefined' && timerEl) timerEl.textContent = '00:00';
 
@@ -360,6 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     showStatus('Dibatalkan', 'Booking berhasil dibatalkan.', 'secondary');
                 }
 
+                // --- PERBAIKAN: REDIRECT SETELAH KLIK OK ---
                 Swal.fire({
                     icon: 'success',
                     title: 'Dibatalkan!',
@@ -370,6 +371,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         confirmButton: 'btn btn-primary px-4'
                     },
                     buttonsStyling: false
+                }).then(() => {
+                    window.location.href = '/my-bookings';
                 });
             } else {
                 Swal.fire({
