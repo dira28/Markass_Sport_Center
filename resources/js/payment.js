@@ -307,8 +307,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // 2. CANCEL BOOKING + REDIRECT
-    const cancelBookingBtn = document.getElementById('cancelBookingBtn');
-
     cancelBookingBtn?.addEventListener('click', async () => {
         const result = await Swal.fire({
             title: 'Batalkan Booking?',
@@ -318,8 +316,7 @@ document.addEventListener('DOMContentLoaded', function () {
             confirmButtonText: 'Ya, Batalkan!',
             cancelButtonText: 'Batal',
             confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            buttonsStyling: true
+            cancelButtonColor: '#6c757d'
         });
 
         if (!result.isConfirmed) {
@@ -360,19 +357,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     showStatus('Dibatalkan', 'Booking berhasil dibatalkan.', 'secondary');
                 }
 
-                // --- PERBAIKAN: REDIRECT SETELAH KLIK OK ---
+                // Notice otomatis hilang dalam 1.5 detik tanpa tombol OK/Cancel
                 Swal.fire({
                     icon: 'success',
                     title: 'Dibatalkan!',
-                    text: 'Booking Anda telah berhasil dibatalkan.',
-                    confirmButtonColor: '#0d6efd',
+                    text: 'Booking berhasil dibatalkan.',
+                    showConfirmButton: false,
+                    timer: 1500,
                     customClass: {
-                        popup: 'rounded-4 shadow',
-                        confirmButton: 'btn btn-primary px-4'
-                    },
-                    buttonsStyling: false
+                        popup: 'rounded-4 shadow'
+                    }
                 }).then(() => {
-                    window.location.href = '/my-bookings';
+                    // Redirect otomatis ke halaman booking
+                    window.location.href = '/booking'; // Sesuaikan '/admin/booking' jika di panel admin
                 });
             } else {
                 Swal.fire({
