@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return parseInt(savedDeadline, 10);
         }
 
-        const newDeadline = Date.now() + 15 * 60 * 1000;
+        const newDeadline = Date.now() + 30 * 60 * 1000;
         if (bookingId) {
             localStorage.setItem(storageKey, newDeadline);
         }

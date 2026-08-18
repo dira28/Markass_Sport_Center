@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class HistoryBookingController extends Controller
 {
@@ -11,7 +12,6 @@ class HistoryBookingController extends Controller
     {
         $token = session('token');
 
-        // Cek token login
         if (!$token) {
             return redirect()->route('login')->with('error', 'Silakan login dulu!');
         }
@@ -26,24 +26,37 @@ class HistoryBookingController extends Controller
                 ]);
 
             if ($response->failed()) {
-                return view('admin.pages.booking', [
-                    'bookings' => [],
+                return view('user.pages.booking-history', [
+                    'bookings' => new LengthAwarePaginator([], 0, 10),
                     'error' => 'Gagal ambil data dari API'
                 ]);
             }
 
             $result = $response->json();
+            $data = $result['data'] ?? [];
 
-            // Ambil data aman
-            $bookings = $result['data'] ?? [];
+            // Wrap array into LengthAwarePaginator instance
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $itemCollection = collect($data);
+            $perPage = 10;
+
+            $currentPageItems = $itemCollection->slice(($currentPage * $perPage) - $perPage, $perPage)->values();
+
+            $bookings = new LengthAwarePaginator(
+                $currentPageItems,
+                $itemCollection->count(),
+                $perPage,
+                $currentPage,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
 
         } catch (\Exception $e) {
-            return view('admin.pages.booking', [
-                'bookings' => [],
+            return view('user.pages.booking-history', [
+                'bookings' => new LengthAwarePaginator([], 0, 10),
                 'error' => $e->getMessage()
             ]);
         }
 
-        return view('admin.pages.booking', compact('bookings'));
+        return view('user.pages.booking-history', compact('bookings'));
     }
 }

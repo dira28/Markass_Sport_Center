@@ -5,71 +5,30 @@
     <div class="booking-header">
         <div>
             <h4>Manajemen Booking</h4>
-            <small>Admin / Booking</small>
+            <small class="text-muted">Admin / Booking</small>
         </div>
     </div>
 
-    <div class="card-box mt-4">
+    <div class="card-box">
 
-        <h5 class="mb-3">Data Booking</h5>
+        <h5 class="fw-bold mb-4 text-dark">Data Booking</h5>
 
-        {{-- FORM FILTER & SEARCH --}}
-        <form method="GET" action="{{ url()->current() }}" class="row g-2 mb-4">
-            <div class="col-md-4">
-                <input type="text" name="search" class="form-control" 
-                       placeholder="Cari ID, User, atau Lapangan..." 
-                       value="{{ request('search') }}">
-            </div>
-
-            <div class="col-md-3">
-                <input type="date" name="tanggal" class="form-control" 
-                       value="{{ request('tanggal') }}"
-                       title="Filter berdasarkan tanggal transaksi/booking dibuat">
-            </div>
-
-            <div class="col-md-3">
-                <select name="status" class="form-select">
-                    <option value="">-- Semua Status --</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="waiting_confirmation" {{ request('status') == 'waiting_confirmation' ? 'selected' : '' }}>Waiting Confirmation</option>
-                    <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                    <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired</option>
-                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                </select>
-            </div>
-
-            <div class="col-md-2 d-flex gap-1">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-search"></i> Filter
-                </button>
-                @if(request()->hasAny(['search', 'tanggal', 'status']))
-                    <a href="{{ url()->current() }}" class="btn btn-outline-secondary" title="Reset Filter">
-                        <i class="fas fa-undo"></i>
-                    </a>
-                @endif
-            </div>
-        </form>
-
-        {{-- ALERTS --}}
         @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success border-0 rounded-3 fade show mb-4" role="alert">
                 <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
         @if(session('error') || isset($error))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger border-0 rounded-3 fade show mb-4" role="alert">
                 <i class="fas fa-exclamation-circle me-1"></i> {{ session('error') ?? $error }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
-        {{-- Proof modal (View Proof) --}}
         @include('admin.components.proof-modal')
 
         <div class="table-responsive">
-            <table class="table align-middle admin-booking-table payment-admin-table">
+            <table class="table align-middle admin-booking-table">
                 <thead>
                     <tr>
                         <th>Tanggal Booking</th>
@@ -88,9 +47,9 @@
                     @forelse ($bookings as $item)
 
                         @php
-                            $tglBooking = isset($item['created_at']) 
-                                ? \Carbon\Carbon::parse($item['created_at'])->timezone('Asia/Jakarta')
-                                : \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
+                            // PERBAIKAN DI SINI: Prioritaskan $item['tanggal'] (tanggal main yang dipilih user)
+                            $dateString = $item['tanggal'] ?? $item['created_at'] ?? now();
+                            $tglBooking = \Carbon\Carbon::parse($dateString)->timezone('Asia/Jakarta');
 
                             $paymentStatus = strtolower(trim((string)($item['status_pembayaran'] ?? 'pending')));
 
@@ -105,23 +64,23 @@
                             }
 
                             $statusMap = [
-                                'pending'              => ['Pending', 'warning'],
-                                'waiting_confirmation' => ['Waiting confirmation', 'primary'],
-                                'confirmed'            => ['Confirmed', 'success'],
-                                'expired'              => ['Expired', 'secondary'],
-                                'cancelled'            => ['Cancelled', 'dark'],
+                                'pending'              => ['Pending', 'status-bg-warning'],
+                                'waiting_confirmation' => ['Waiting confirmation', 'status-bg-primary'],
+                                'confirmed'            => ['Confirmed', 'status-bg-success'],
+                                'expired'              => ['Expired', 'status-bg-secondary'],
+                                'cancelled'            => ['Cancelled', 'status-bg-dark'],
                             ];
 
                             $statusText = $statusMap[$paymentStatus][0] ?? ucfirst(str_replace('_', ' ', $paymentStatus));
-                            $badge      = $statusMap[$paymentStatus][1] ?? 'secondary';
+                            $badgeClass = $statusMap[$paymentStatus][1] ?? 'status-bg-dark';
                         @endphp
 
                         <tr>
-                            <td>
+                            <td class="fw-semibold">
                                 {{ $tglBooking->translatedFormat('d M Y') }}
                             </td>
 
-                            <td>
+                            <td class="fw-bold text-muted">
                                 #{{ strtoupper(substr($item['id_booking'], 0, 6)) }}
                             </td>
 
@@ -134,12 +93,12 @@
                             </td>
 
                             <td>
-                                <span class="badge bg-{{ $badge }}">
+                                <span class="badge-status-modern {{ $badgeClass }}">
                                     {{ $statusText }}
                                 </span>
                             </td>
 
-                            <td>
+                            <td class="fw-bold text-dark">
                                 Rp {{ number_format($item['total_harga'], 0, ',', '.') }}
                             </td>
 
@@ -147,12 +106,12 @@
                                 @if(isset($item['bukti_pembayaran']) && trim((string) ($item['bukti_pembayaran'] ?? '')) !== '')
                                     <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none"
                                         data-proof-url="{{ $item['bukti_pembayaran'] }}" alt="Proof" />
-                                    <button type="button" class="btn btn-outline-primary btn-sm"
+                                    <button type="button" class="btn btn-outline-primary btn-sm-action"
                                         onclick="openProofModal('{{ $item['id_booking'] }}')">
-                                        <i class="fas fa-eye"></i> View Proof
+                                        <i class="fas fa-eye me-1"></i> View Proof
                                     </button>
                                 @else
-                                    <span class="text-muted">-</span>
+                                    <span class="text-muted fw-bold">-</span>
                                 @endif
                             </td>
 
@@ -168,13 +127,13 @@
 
                                     <button
                                         type="button"
-                                        class="btn btn-success btn-sm btn-approve"
+                                        class="btn btn-success btn-sm-action btn-approve shadow-sm"
                                         data-id="{{ $item['id_booking'] }}"
                                         {{ (!$isWaiting || $isConfirmed) ? 'disabled' : '' }}>
                                         @if($isConfirmed)
-                                            <i class="fas fa-check-double"></i> Approved
+                                            <i class="fas fa-check-double me-1"></i> Approved
                                         @else
-                                            <i class="fas fa-check"></i> Approve
+                                            <i class="fas fa-check me-1"></i> Approve
                                         @endif
                                     </button>
                                 </form>
@@ -182,7 +141,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 Tidak ada data booking
                             </td>
                         </tr>
@@ -191,9 +150,8 @@
             </table>
         </div>
 
-        {{-- PAGINATION --}}
         @if(is_object($bookings) && method_exists($bookings, 'links') && $bookings->hasPages())
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                 <small class="text-muted">
                     Menampilkan <b>{{ $bookings->firstItem() }}</b> - <b>{{ $bookings->lastItem() }}</b> dari <b>{{ $bookings->total() }}</b> data
                 </small>
@@ -205,7 +163,6 @@
 
     </div>
 
-    {{-- SweetAlert2 Script Integration --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

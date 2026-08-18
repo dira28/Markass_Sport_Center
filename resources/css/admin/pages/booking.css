@@ -1,185 +1,132 @@
 .booking-header {
-    background: #f5f6fa;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.content-wrapper {
     background: #ffffff;
-    padding: 25px;
+    padding: 24px;
     border-radius: 16px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f0f0f0;
 }
 
-.filter-wrapper {
-    width: 100%;
-    background: #f9fafb;
-    padding: 15px;
-    border-radius: 14px;
-    margin-top: 15px;
-}
-
-.filter-top {
-    width: 100%;
-    margin-bottom: 12px;
-}
-
-.date-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 10px 15px;
-    width: 100%;
-    max-width: 350px;
-    cursor: pointer;
-}
-
-.filter-bottom {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.select-box {
-    position: relative;
-    min-width: 200px;
-}
-
-.select-box select {
-    width: 100%;
-    padding: 10px 35px 10px 15px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    appearance: none;
-    background: #fff;
-}
-
-.select-box i {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-.search-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 10px 15px;
-}
-
-.search-box input {
-    border: none;
-    outline: none;
-    background: transparent;
-}
-
-.btn-filter {
-    background: #800020;
-    color: white;
-    border: none;
-    padding: 10px 22px;
-    border-radius: 10px;
-    font-weight: 500;
-    transition: 0.3s;
-}
-
-.btn-filter:hover {
-    background: #66001a;
+.booking-header h4 {
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
 }
 
 .card-box {
     background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 28px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f0f0f0;
 }
 
-.card-box p {
-    margin: 0;
-    color: #888;
+.admin-booking-table {
+    vertical-align: middle;
+    margin-bottom: 0;
+    border-collapse: separate !important;
+    border-spacing: 0 8px !important;
 }
 
-.card-box h3 {
-    margin-top: 10px;
-    font-weight: bold;
+.admin-booking-table thead th {
+    background-color: transparent !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 14px;
+    border: none !important;
+    padding: 14px 16px;
+    text-align: center !important;
+    white-space: nowrap;
 }
 
-.total {
-    border-left: 5px solid #ffc107;
+.admin-booking-table tbody td {
+    padding: 16px;
+    color: #111827;
+    font-size: 14px;
+    border: none !important;
+    text-align: center !important;
+    white-space: nowrap;
 }
 
-.success {
-    border-left: 5px solid #28a745;
+.admin-booking-table tbody tr:nth-child(even) td {
+    background-color: #f9fafb !important;
 }
 
-.warning {
-    border-left: 5px solid #007bff;
+.admin-booking-table tbody tr:nth-child(odd) td {
+    background-color: #ffffff !important;
 }
 
-.danger {
-    border-left: 5px solid #dc3545;
+.admin-booking-table tbody tr:hover td {
+    background-color: #f3f4f6 !important;
+    transition: background-color 0.2s ease;
 }
 
-.table {
-    background: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
+.admin-booking-table tbody tr td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
 }
 
-.table th {
-    background: #f8f9fa;
+.admin-booking-table tbody tr td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
-.badge {
-    padding: 6px 10px;
+.badge-status-modern {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.status-bg-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.status-bg-primary {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
+.status-bg-success {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.status-bg-secondary {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.status-bg-dark {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.btn-sm-action {
     border-radius: 8px;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 14px;
 }
 
-/* Force SweetAlert2 button visibility */
-body div.swal2-container div.swal2-actions button.swal2-styled.swal2-confirm,
-body div.swal2-container div.swal2-actions button.swal2-styled.swal2-confirm * {
-    background-color: #dc3545 !important;
+body div.swal2-container div.swal2-actions button.swal2-styled.swal2-confirm {
+    background-color: #198754 !important;
     color: #ffffff !important;
     border: none !important;
-    padding: 10px 24px !important;
-    border-radius: 6px !important;
+    padding: 8px 20px !important;
+    border-radius: 8px !important;
     font-weight: 600 !important;
-    font-size: 15px !important;
-    opacity: 1 !important;
-    display: inline-block !important;
-    visibility: visible !important;
-    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.4) !important;
+    font-size: 14px !important;
 }
 
-body div.swal2-container div.swal2-actions button.swal2-styled.swal2-cancel,
-body div.swal2-container div.swal2-actions button.swal2-styled.swal2-cancel * {
+body div.swal2-container div.swal2-actions button.swal2-styled.swal2-cancel {
     background-color: #6c757d !important;
     color: #ffffff !important;
     border: none !important;
-    padding: 10px 24px !important;
-    border-radius: 6px !important;
+    padding: 8px 20px !important;
+    border-radius: 8px !important;
     font-weight: 600 !important;
-    font-size: 15px !important;
-    opacity: 1 !important;
-    display: inline-block !important;
-    visibility: visible !important;
-}
-
-body div.swal2-container div.swal2-actions button.swal2-styled.swal2-confirm:hover {
-    background-color: #bb2d3b !important;
-    color: #ffffff !important;
-}
-
-body div.swal2-container div.swal2-actions button.swal2-styled.swal2-cancel:hover {
-    background-color: #5c636a !important;
-    color: #ffffff !important;
+    font-size: 14px !important;
 }
