@@ -47,7 +47,6 @@
                     @forelse ($bookings as $item)
 
                         @php
-                            // Prioritaskan $item['tanggal'] (tanggal main)
                             $dateString = $item['tanggal'] ?? $item['created_at'] ?? now();
                             $tglBooking = \Carbon\Carbon::parse($dateString)->timezone('Asia/Jakarta');
 
@@ -74,29 +73,25 @@
                             $statusText = $statusMap[$paymentStatus][0] ?? ucfirst(str_replace('_', ' ', $paymentStatus));
                             $badgeClass = $statusMap[$paymentStatus][1] ?? 'status-bg-dark';
 
-                            // --- PERBAIKAN BUKTI PEMBAYARAN (FIX LOCALHOST & BROKEN PATH) ---
+                            // Format proof image path to public/uploads/
                             $rawProof = $item['bukti_pembayaran'] ?? '';
                             $proofUrl = null;
 
                             if (trim((string) $rawProof) !== '') {
-                                // 1. Jika URL eksternal penuh (misal http://... atau https://...)
+                                $cleanPath = ltrim((string)$rawProof, '/');
+
                                 if (filter_var($rawProof, FILTER_VALIDATE_URL)) {
-                                    // Hilangkan domain/host-nya jika mengarah ke localhost agar dynamic
-                                    $parsedPath = parse_url($rawProof, PHP_URL_PATH);
-                                    $cleanPath = ltrim((string)$parsedPath, '/');
-                                    
-                                    if (str_starts_with($cleanPath, 'storage/')) {
-                                        $cleanPath = substr($cleanPath, 8);
-                                    }
-                                    $proofUrl = asset('storage/' . $cleanPath);
-                                } else {
-                                    // 2. Jika berupa path relatif (misal "proofs/xxx.jpg" atau "storage/proofs/xxx.jpg")
-                                    $cleanPath = ltrim((string)$rawProof, '/');
-                                    if (str_starts_with($cleanPath, 'storage/')) {
-                                        $cleanPath = substr($cleanPath, 8);
-                                    }
-                                    $proofUrl = asset('storage/' . $cleanPath);
+                                    $cleanPath = ltrim((string) parse_url($rawProof, PHP_URL_PATH), '/');
                                 }
+
+                                if (str_starts_with($cleanPath, 'storage/')) {
+                                    $cleanPath = substr($cleanPath, 8);
+                                }
+                                if (str_starts_with($cleanPath, 'uploads/')) {
+                                    $cleanPath = substr($cleanPath, 8);
+                                }
+
+                                $proofUrl = asset('uploads/' . $cleanPath);
                             }
                         @endphp
 
