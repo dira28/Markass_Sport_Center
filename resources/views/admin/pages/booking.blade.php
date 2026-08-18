@@ -47,7 +47,7 @@
                     @forelse ($bookings as $item)
 
                         @php
-                            // PERBAIKAN DI SINI: Prioritaskan $item['tanggal'] (tanggal main yang dipilih user)
+                            // Prioritaskan $item['tanggal'] (tanggal main)
                             $dateString = $item['tanggal'] ?? $item['created_at'] ?? now();
                             $tglBooking = \Carbon\Carbon::parse($dateString)->timezone('Asia/Jakarta');
 
@@ -73,6 +73,31 @@
 
                             $statusText = $statusMap[$paymentStatus][0] ?? ucfirst(str_replace('_', ' ', $paymentStatus));
                             $badgeClass = $statusMap[$paymentStatus][1] ?? 'status-bg-dark';
+
+                            // --- PERBAIKAN BUKTI PEMBAYARAN (FIX LOCALHOST & BROKEN PATH) ---
+                            $rawProof = $item['bukti_pembayaran'] ?? '';
+                            $proofUrl = null;
+
+                            if (trim((string) $rawProof) !== '') {
+                                // 1. Jika URL eksternal penuh (misal http://... atau https://...)
+                                if (filter_var($rawProof, FILTER_VALIDATE_URL)) {
+                                    // Hilangkan domain/host-nya jika mengarah ke localhost agar dynamic
+                                    $parsedPath = parse_url($rawProof, PHP_URL_PATH);
+                                    $cleanPath = ltrim((string)$parsedPath, '/');
+                                    
+                                    if (str_starts_with($cleanPath, 'storage/')) {
+                                        $cleanPath = substr($cleanPath, 8);
+                                    }
+                                    $proofUrl = asset('storage/' . $cleanPath);
+                                } else {
+                                    // 2. Jika berupa path relatif (misal "proofs/xxx.jpg" atau "storage/proofs/xxx.jpg")
+                                    $cleanPath = ltrim((string)$rawProof, '/');
+                                    if (str_starts_with($cleanPath, 'storage/')) {
+                                        $cleanPath = substr($cleanPath, 8);
+                                    }
+                                    $proofUrl = asset('storage/' . $cleanPath);
+                                }
+                            }
                         @endphp
 
                         <tr>
@@ -103,9 +128,9 @@
                             </td>
 
                             <td>
-                                @if(isset($item['bukti_pembayaran']) && trim((string) ($item['bukti_pembayaran'] ?? '')) !== '')
+                                @if($proofUrl)
                                     <img id="bookingProofThumb-{{ $item['id_booking'] }}" class="d-none"
-                                        data-proof-url="{{ $item['bukti_pembayaran'] }}" alt="Proof" />
+                                        data-proof-url="{{ $proofUrl }}" alt="Proof" />
                                     <button type="button" class="btn btn-outline-primary btn-sm-action"
                                         onclick="openProofModal('{{ $item['id_booking'] }}')">
                                         <i class="fas fa-eye me-1"></i> View Proof

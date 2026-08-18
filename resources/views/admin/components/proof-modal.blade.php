@@ -11,17 +11,19 @@
             <div class="modal-body">
                 <div class="text-center">
                     <div id="proofModalLoading" class="text-muted" style="display:none;">Loading...</div>
-                    <img id="proofModalImg" alt="Bukti Pembayaran" class="img-fluid rounded" style="display:none; max-height: 70vh; object-fit: contain; background: rgba(255,255,255,0.7); padding: 12px; box-shadow: 0 10px 30px rgba(15,23,42,0.18);" />
-                    <div id="proofModalEmpty" class="text-muted" style="display:none;">Tidak ada bukti.</div>
+                    <img id="proofModalImg" alt="Bukti Pembayaran" class="img-fluid rounded"
+                        style="display:none; max-height: 70vh; object-fit: contain; background: rgba(255,255,255,0.7); padding: 12px; box-shadow: 0 10px 30px rgba(15,23,42,0.18);" />
+                    <div id="proofModalEmpty" class="text-muted" style="display:none;">Tidak ada bukti pembayaran.</div>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <a id="proofModalOpenLink" href="#" target="_blank" class="btn btn-outline-primary" style="display:none;">
-                    <i class="fas fa-up-right-from-square"></i> Open Image
+                <a id="proofModalOpenLink" href="#" target="_blank" class="btn btn-outline-primary"
+                    style="display:none;">
+                    <i class="fas fa-external-link-alt me-1"></i> Buka Gambar
                 </a>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    Close
+                    Tutup
                 </button>
             </div>
         </div>
@@ -29,7 +31,6 @@
 </div>
 
 <script>
-    // Expose function used by booking table
     window.openProofModal = function (bookingId) {
         const modalEl = document.getElementById('proofModal');
         if (!modalEl) return;
@@ -39,46 +40,56 @@
         const emptyEl = document.getElementById('proofModalEmpty');
         const linkEl = document.getElementById('proofModalOpenLink');
 
+        // Reset state modal
         if (loadingEl) loadingEl.style.display = 'block';
-        if (imgEl) imgEl.style.display = 'none';
+        if (imgEl) {
+            imgEl.style.display = 'none';
+            imgEl.src = '';
+        }
         if (emptyEl) emptyEl.style.display = 'none';
         if (linkEl) linkEl.style.display = 'none';
 
-        // Open Bootstrap modal immediately
-        const modal = new bootstrap.Modal(modalEl);
+        // Buka Bootstrap Modal
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
 
-        // If you already embed the full proof URL in data attributes later, you can set it directly.
-        // Currently we try to discover the image url from the row thumbnail.
+        // Cari elemen gambar thumbnail berdasarkan bookingId
         const rowImg = document.querySelector(`#bookingProofThumb-${bookingId}`);
+
         if (rowImg && rowImg.dataset && rowImg.dataset.proofUrl) {
-            const raw = rowImg.dataset.proofUrl;
-            if (typeof raw !== 'string' || !raw.trim()) {
+            const url = rowImg.dataset.proofUrl.trim();
+
+            if (!url) {
                 if (loadingEl) loadingEl.style.display = 'none';
                 if (emptyEl) emptyEl.style.display = 'block';
                 return;
             }
-            const rawTrim = raw.trim();
-            const url = /^(https?:\/\/|\/)/i.test(rawTrim)
-                ? rawTrim
-                : `http://localhost:5000/uploads/${rawTrim}`;
 
+            // Set sumber gambar dan link tombol "Buka Gambar"
             if (imgEl) {
                 imgEl.src = url;
-                imgEl.style.display = 'block';
+                imgEl.onload = function () {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    imgEl.style.display = 'block';
+                };
+                imgEl.onerror = function () {
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (emptyEl) {
+                        emptyEl.innerText = 'Gambar tidak dapat dimuat (File hilang/broken).';
+                        emptyEl.style.display = 'block';
+                    }
+                };
             }
+
             if (linkEl) {
                 linkEl.href = url;
                 linkEl.style.display = 'inline-flex';
             }
-            if (loadingEl) loadingEl.style.display = 'none';
             return;
         }
 
-        // Fallback: try to find an image that contains bookingId in onclick (legacy)
-        // If not found, show empty state.
+        // Jika data-proof-url tidak ditemukan
         if (loadingEl) loadingEl.style.display = 'none';
         if (emptyEl) emptyEl.style.display = 'block';
     };
 </script>
-
