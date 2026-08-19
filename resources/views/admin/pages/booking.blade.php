@@ -50,7 +50,7 @@
                             $dateString = $item['tanggal'] ?? $item['created_at'] ?? now();
                             $tglBooking = \Carbon\Carbon::parse($dateString)->timezone('Asia/Jakarta');
 
-                            $paymentStatus = strtolower(trim((string)($item['status_pembayaran'] ?? 'pending')));
+                            $paymentStatus = strtolower(trim((string) ($item['status_pembayaran'] ?? 'pending')));
 
                             if ($paymentStatus === 'menunggu_verifikasi') {
                                 $paymentStatus = 'waiting_confirmation';
@@ -63,11 +63,11 @@
                             }
 
                             $statusMap = [
-                                'pending'              => ['Pending', 'status-bg-warning'],
+                                'pending' => ['Pending', 'status-bg-warning'],
                                 'waiting_confirmation' => ['Waiting confirmation', 'status-bg-primary'],
-                                'confirmed'            => ['Confirmed', 'status-bg-success'],
-                                'expired'              => ['Expired', 'status-bg-secondary'],
-                                'cancelled'            => ['Cancelled', 'status-bg-dark'],
+                                'confirmed' => ['Confirmed', 'status-bg-success'],
+                                'expired' => ['Expired', 'status-bg-secondary'],
+                                'cancelled' => ['Cancelled', 'status-bg-dark'],
                             ];
 
                             $statusText = $statusMap[$paymentStatus][0] ?? ucfirst(str_replace('_', ' ', $paymentStatus));
@@ -78,7 +78,7 @@
                             $proofUrl = null;
 
                             if (trim((string) $rawProof) !== '') {
-                                $cleanPath = ltrim((string)$rawProof, '/');
+                                $cleanPath = ltrim((string) $rawProof, '/');
 
                                 if (filter_var($rawProof, FILTER_VALIDATE_URL)) {
                                     $cleanPath = ltrim((string) parse_url($rawProof, PHP_URL_PATH), '/');
@@ -93,6 +93,10 @@
 
                                 $proofUrl = asset('uploads/' . $cleanPath);
                             }
+
+                            $isWaiting = $paymentStatus === 'waiting_confirmation';
+                            $isConfirmed = $paymentStatus === 'confirmed';
+                            $isCancelled = $paymentStatus === 'cancelled';
                         @endphp
 
                         <tr>
@@ -136,27 +140,38 @@
                             </td>
 
                             <td>
-                                <form id="approve-form-{{ $item['id_booking'] }}" method="POST" action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
-                                    @csrf
-                                    @method('PATCH')
+                                <div class="d-flex align-items-center gap-1">
+                                    @if($isCancelled)
+                                        <!-- TAMPILKAN STATUS REJECTED / CANCELLED SAJA -->
+                                        <button type="button" class="btn btn-secondary btn-sm-action disabled opacity-75" disabled>
+                                            <i class="fas fa-ban me-1"></i> Rejected
+                                        </button>
 
-                                    @php
-                                        $isWaiting   = $paymentStatus === 'waiting_confirmation';
-                                        $isConfirmed = $paymentStatus === 'confirmed';
-                                    @endphp
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-success btn-sm-action btn-approve shadow-sm"
-                                        data-id="{{ $item['id_booking'] }}"
-                                        {{ (!$isWaiting || $isConfirmed) ? 'disabled' : '' }}>
-                                        @if($isConfirmed)
+                                    @elseif($isConfirmed)
+                                        <!-- TAMPILKAN STATUS APPROVED -->
+                                        <button type="button" class="btn btn-success btn-sm-action disabled" disabled>
                                             <i class="fas fa-check-double me-1"></i> Approved
-                                        @else
-                                            <i class="fas fa-check me-1"></i> Approve
-                                        @endif
-                                    </button>
-                                </form>
+                                        </button>
+
+                                    @else
+                                        <!-- JIKA STATUS WAITING / PENDING: TAMPILKAN TOMBOL APPROVE & REJECT -->
+                                        <form id="approve-form-{{ $item['id_booking'] }}" method="POST"
+                                            action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
+                                            @csrf
+                                            @method('PATCH')
+
+                                            <button type="button" class="btn btn-success btn-sm-action btn-approve shadow-sm"
+                                                data-id="{{ $item['id_booking'] }}" {{ !$isWaiting ? 'disabled' : '' }}>
+                                                <i class="fas fa-check me-1"></i> Approve
+                                            </button>
+                                        </form>
+
+                                        <button type="button" class="btn btn-danger btn-sm-action btn-cancel-admin shadow-sm"
+                                            data-id="{{ $item['id_booking'] }}">
+                                            <i class="fas fa-times me-1"></i> Reject
+                                        </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -173,7 +188,8 @@
         @if(is_object($bookings) && method_exists($bookings, 'links') && $bookings->hasPages())
             <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                 <small class="text-muted">
-                    Menampilkan <b>{{ $bookings->firstItem() }}</b> - <b>{{ $bookings->lastItem() }}</b> dari <b>{{ $bookings->total() }}</b> data
+                    Menampilkan <b>{{ $bookings->firstItem() }}</b> - <b>{{ $bookings->lastItem() }}</b> dari
+                    <b>{{ $bookings->total() }}</b> data
                 </small>
                 <div>
                     {{ $bookings->links('pagination::bootstrap-5') }}
@@ -186,6 +202,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
+            // 1. CONFIRM APPROVE
             document.querySelectorAll('.btn-approve').forEach(button => {
                 button.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -208,6 +226,88 @@
                     });
                 });
             });
+
+            // 2. REJECT / CANCEL VIA FETCH API
+            document.querySelectorAll('.btn-cancel-admin').forEach(button => {
+                button.addEventListener('click', async function (e) {
+                    e.preventDefault();
+
+                    const btn = this;
+                    const bookingId = btn.getAttribute('data-id');
+
+                    const result = await Swal.fire({
+                        title: 'Tolak & Batalkan Booking?',
+                        text: "Apakah Anda yakin ingin membatalkan booking ini? Tindakan ini tidak dapat dibatalkan.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Batalkan!',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        reverseButtons: true
+                    });
+
+                    if (!result.isConfirmed) return;
+
+                    const token = window.authToken || localStorage.getItem('token');
+
+                    // Ambil CSRF token dari Meta Tag ATAU dari Form Token
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                        || document.querySelector('input[name="_token"]')?.value;
+
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Memproses...';
+
+                        const response = await fetch(`/api/booking/${bookingId}/cancel`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && (data.success || data.status === 'success')) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Dibatalkan!',
+                                text: 'Booking berhasil dibatalkan.',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                customClass: {
+                                    popup: 'rounded-4 shadow'
+                                }
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: data.message || 'Gagal membatalkan booking.',
+                                confirmButtonColor: '#0d6efd'
+                            });
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-times me-1"></i> Reject';
+                        }
+                    } catch (err) {
+                        console.error("Error cancelling booking:", err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Terjadi kesalahan sistem saat membatalkan booking.',
+                            confirmButtonColor: '#0d6efd'
+                        });
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-times me-1"></i> Reject';
+                    }
+                });
+            });
+
         });
     </script>
 
