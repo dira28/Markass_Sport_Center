@@ -5,13 +5,13 @@
     <div class="booking-header">
         <div>
             <h4>Manajemen Booking</h4>
-            <small class="text-muted">Admin / Booking</small>
+            <small class="text-muted">Admin / Booking Pending & Verifikasi</small>
         </div>
     </div>
 
     <div class="card-box">
 
-        <h5 class="fw-bold mb-4 text-dark">Data Booking</h5>
+        <h5 class="fw-bold mb-4 text-dark">Permintaan Booking (Menunggu Tindakan)</h5>
 
         @if(session('success'))
             <div class="alert alert-success border-0 rounded-3 fade show mb-4" role="alert">
@@ -31,12 +31,12 @@
             <table class="table align-middle admin-booking-table">
                 <thead>
                     <tr>
-                        <th>Tanggal Booking</th>
-                        <th>ID</th>
+                        <th>Waktu Transaksi</th>
+                        <th>ID Booking</th>
                         <th>Pengguna</th>
                         <th>Lapangan</th>
-                        <th>Jam</th>
-                        <th>Status Pembayaran</th>
+                        <th>Jadwal Main</th>
+                        <th>Status</th>
                         <th>Harga</th>
                         <th>Bukti Pembayaran</th>
                         <th>Aksi</th>
@@ -47,33 +47,24 @@
                     @forelse ($bookings as $item)
 
                         @php
-                            $dateString = $item['tanggal'] ?? $item['created_at'] ?? now();
-                            $tglBooking = \Carbon\Carbon::parse($dateString)->timezone('Asia/Jakarta');
+                            // Ambil tanggal transaksi pembuatan booking (created_at)
+                            $createdDate = $item['created_at'] ?? $item['tanggal'] ?? now();
+                            $tglTransaksi = \Carbon\Carbon::parse($createdDate)->timezone('Asia/Jakarta');
+
+                            // Tanggal Main
+                            $tglMain = \Carbon\Carbon::parse($item['tanggal'])->timezone('Asia/Jakarta');
 
                             $paymentStatus = strtolower(trim((string) ($item['status_pembayaran'] ?? 'pending')));
 
-                            if ($paymentStatus === 'menunggu_verifikasi') {
-                                $paymentStatus = 'waiting_confirmation';
-                            } elseif (in_array($paymentStatus, ['approve', 'paid'], true)) {
-                                $paymentStatus = 'confirmed';
+                            if (in_array($paymentStatus, ['waiting_confirmation', 'menunggu_verifikasi'], true)) {
+                                $statusText = 'Menunggu Verifikasi';
+                                $badgeClass = 'status-bg-primary';
+                            } else {
+                                $statusText = 'Pending (Belum Bayar)';
+                                $badgeClass = 'status-bg-warning';
                             }
 
-                            if (!in_array($paymentStatus, ['pending', 'waiting_confirmation', 'confirmed', 'expired', 'cancelled'], true)) {
-                                $paymentStatus = 'pending';
-                            }
-
-                            $statusMap = [
-                                'pending' => ['Pending', 'status-bg-warning'],
-                                'waiting_confirmation' => ['Waiting confirmation', 'status-bg-primary'],
-                                'confirmed' => ['Confirmed', 'status-bg-success'],
-                                'expired' => ['Expired', 'status-bg-secondary'],
-                                'cancelled' => ['Cancelled', 'status-bg-dark'],
-                            ];
-
-                            $statusText = $statusMap[$paymentStatus][0] ?? ucfirst(str_replace('_', ' ', $paymentStatus));
-                            $badgeClass = $statusMap[$paymentStatus][1] ?? 'status-bg-dark';
-
-                            // Format proof image path to public/uploads/
+                            // Format Gambar Bukti Pembayaran
                             $rawProof = $item['bukti_pembayaran'] ?? '';
                             $proofUrl = null;
 
@@ -93,15 +84,13 @@
 
                                 $proofUrl = asset('uploads/' . $cleanPath);
                             }
-
-                            $isWaiting = $paymentStatus === 'waiting_confirmation';
-                            $isConfirmed = $paymentStatus === 'confirmed';
-                            $isCancelled = $paymentStatus === 'cancelled';
                         @endphp
 
                         <tr>
+                            <!-- Waktu User Melakukan Booking -->
                             <td class="fw-semibold">
-                                {{ $tglBooking->translatedFormat('d M Y') }}
+                                <div>{{ $tglTransaksi->translatedFormat('d M Y') }}</div>
+                                <small class="text-muted">{{ $tglTransaksi->format('H:i') }} WIB</small>
                             </td>
 
                             <td class="fw-bold text-muted">
@@ -112,8 +101,10 @@
 
                             <td>{{ $item['lapangan']['nama_lapangan'] ?? '-' }}</td>
 
+                            <!-- Tanggal & Jam Main -->
                             <td>
-                                {{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}
+                                <div>{{ $tglMain->translatedFormat('d M Y') }}</div>
+                                <small class="text-muted">{{ $item['jam_mulai'] }} - {{ $item['jam_selesai'] }}</small>
                             </td>
 
                             <td>
@@ -141,43 +132,31 @@
 
                             <td>
                                 <div class="d-flex align-items-center gap-1">
-                                    @if($isCancelled)
-                                        <!-- TAMPILKAN STATUS REJECTED / CANCELLED SAJA -->
-                                        <button type="button" class="btn btn-secondary btn-sm-action disabled opacity-75" disabled>
-                                            <i class="fas fa-ban me-1"></i> Rejected
-                                        </button>
+                                    <!-- FORM APPROVE -->
+                                    <form id="approve-form-{{ $item['id_booking'] }}" method="POST"
+                                        action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
+                                        @csrf
+                                        @method('PATCH')
 
-                                    @elseif($isConfirmed)
-                                        <!-- TAMPILKAN STATUS APPROVED -->
-                                        <button type="button" class="btn btn-success btn-sm-action disabled" disabled>
-                                            <i class="fas fa-check-double me-1"></i> Approved
-                                        </button>
-
-                                    @else
-                                        <!-- JIKA STATUS WAITING / PENDING: TAMPILKAN TOMBOL APPROVE & REJECT -->
-                                        <form id="approve-form-{{ $item['id_booking'] }}" method="POST"
-                                            action="/booking/{{ $item['id_booking'] }}/confirm-payment" style="display:inline;">
-                                            @csrf
-                                            @method('PATCH')
-
-                                            <button type="button" class="btn btn-success btn-sm-action btn-approve shadow-sm"
-                                                data-id="{{ $item['id_booking'] }}" {{ !$isWaiting ? 'disabled' : '' }}>
-                                                <i class="fas fa-check me-1"></i> Approve
-                                            </button>
-                                        </form>
-
-                                        <button type="button" class="btn btn-danger btn-sm-action btn-cancel-admin shadow-sm"
+                                        <button type="button" class="btn btn-success btn-sm-action btn-approve shadow-sm"
                                             data-id="{{ $item['id_booking'] }}">
-                                            <i class="fas fa-times me-1"></i> Reject
+                                            <i class="fas fa-check me-1"></i> Approve
                                         </button>
-                                    @endif
+                                    </form>
+
+                                    <!-- TOMBOL REJECT -->
+                                    <button type="button" class="btn btn-danger btn-sm-action btn-cancel-admin shadow-sm"
+                                        data-id="{{ $item['id_booking'] }}">
+                                        <i class="fas fa-times me-1"></i> Reject
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="9" class="text-center py-5 text-muted">
-                                Tidak ada data booking
+                                <i class="fas fa-check-circle fa-2x mb-3 text-success d-block"></i>
+                                Tidak ada antrean booking baru. Semua transaksi sudah diproses!
                             </td>
                         </tr>
                     @endforelse
@@ -237,7 +216,7 @@
 
                     const result = await Swal.fire({
                         title: 'Tolak & Batalkan Booking?',
-                        text: "Apakah Anda yakin ingin membatalkan booking ini? Tindakan ini tidak dapat dibatalkan.",
+                        text: "Apakah Anda yakin ingin membatalkan booking ini?",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Ya, Batalkan!',
@@ -251,7 +230,6 @@
 
                     const token = window.authToken || localStorage.getItem('token');
 
-                    // Ambil CSRF token dari Meta Tag ATAU dari Form Token
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
                         || document.querySelector('input[name="_token"]')?.value;
 

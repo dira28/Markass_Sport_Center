@@ -87,12 +87,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
 
-    // FIX 1: Ubah controller ke BookingController dan panggil method bookingIndex
     Route::get('/booking', [BookingController::class, 'bookingIndex'])
         ->name('admin.booking');
 
-    // FIX 2: Route laporan diarahkan ke method laporanIndex di BookingController
-    Route::get('/laporan', [BookingController::class, 'laporanIndex'])
+    Route::get('/laporan', [LaporanController::class, 'index'])
         ->name('admin.laporan');
 
     Route::get('/laporan/export-pdf', [LaporanController::class, 'exportPdf'])

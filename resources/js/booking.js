@@ -33,6 +33,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (tanggalInput) {
             fpInstance = flatpickr("#tanggal", {
                 dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d-m-Y",
                 minDate: "today",
                 disable: disabledDates,
                 locale: { firstDayOfWeek: 1 },

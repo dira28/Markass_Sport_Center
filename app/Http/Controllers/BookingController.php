@@ -16,6 +16,7 @@ class BookingController extends Controller
     }
 
     // Admin booking list
+    // Admin booking list
     public function bookingIndex(Request $request)
     {
         $token = session('token');
@@ -34,10 +35,22 @@ class BookingController extends Controller
             $error = 'Server error: ' . $e->getMessage();
         }
 
-        // Pagination
+        // 1. FILTER & SORTING DATA
+        $collection = collect($allBookings)
+            // Filter: Hanya simpan booking yang butuh tindakan (pending / waiting_confirmation)
+            ->filter(function ($item) {
+                $status = strtolower(trim((string) ($item['status_pembayaran'] ?? 'pending')));
+                return !in_array($status, ['confirmed', 'approve', 'approved', 'paid', 'expired', 'cancelled', 'rejected']);
+            })
+            // Sorting: Urutkan berdasarkan created_at TERBARU di posisi atas
+            ->sortByDesc(function ($item) {
+                return $item['created_at'] ?? $item['created_date'] ?? $item['tanggal'] ?? '';
+            })
+            ->values();
+
+        // 2. PAGINATION
         $perPage = 10;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $collection = collect($allBookings);
         $currentPageItems = $collection->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
         $bookings = new LengthAwarePaginator(
@@ -53,7 +66,6 @@ class BookingController extends Controller
 
         return view('admin.pages.booking', compact('bookings', 'error'));
     }
-
     // Admin report
     public function laporanIndex(Request $request)
     {
@@ -264,7 +276,17 @@ class BookingController extends Controller
             $res = Http::withToken($token)
                 ->get(env('API_URL') . '/api/booking/user/my-bookings');
 
-            return response()->json($res->successful() ? ($res->json()['data'] ?? []) : []);
+            if ($res->successful()) {
+                $allBookings = $res->json()['data'] ?? [];
+
+                $sortedBookings = collect($allBookings)->sortByDesc(function ($item) {
+                    return $item['created_at'] ?? $item['created_date'] ?? $item['tanggal'] ?? '';
+                })->values()->all();
+
+                return response()->json($sortedBookings);
+            }
+
+            return response()->json([]);
         } catch (\Exception $e) {
             return response()->json([]);
         }

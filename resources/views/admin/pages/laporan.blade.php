@@ -10,12 +10,7 @@
 @section('content')
 
     @php
-        // Menggunakan variabel global hasil perhitungan Controller (BUKAN per-paginate)
-        $totalCount = $totalBooking ?? 0;
-        $revenueVal = $totalRevenue ?? 0;
-        $paidCount = $paidBooking ?? 0;
-        $pendingCount = $pendingBooking ?? 0;
-
+        // Menyiapkan variabel fallback agar tidak throw "Undefined Variable"
         $fromDateVal = $fromDate ?? request('from_date');
         $toDateVal = $toDate ?? request('to_date');
     @endphp
@@ -29,7 +24,7 @@
                 <small class="text-muted">Kelola dan tinjau seluruh riwayat transaksi booking fasilitas.</small>
             </div>
             <div>
-                {{-- Sertakan juga parameter status saat Export PDF --}}
+                {{-- Export PDF Button --}}
                 <a href="{{ route('admin.laporan.export', ['from_date' => $fromDateVal, 'to_date' => $toDateVal, 'status' => request('status', 'all')]) }}"
                     class="btn-export">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -80,23 +75,23 @@
             </form>
         </div>
 
-        {{-- Metrics Summary (Menampilkan Total Murni dari Controller) --}}
+        {{-- KPI Summary Cards --}}
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-label">Total Booking</div>
-                <div class="kpi-number kpi-total">{{ number_format($totalCount) }}</div>
+                <div class="kpi-number kpi-total">{{ number_format($totalBooking ?? 0) }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Total Revenue</div>
-                <div class="kpi-number kpi-revenue">Rp{{ number_format($revenueVal, 0, ',', '.') }}</div>
+                <div class="kpi-number kpi-revenue">Rp{{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Status Paid</div>
-                <div class="kpi-number kpi-paid">{{ number_format($paidCount) }}</div>
+                <div class="kpi-number kpi-paid">{{ number_format($paidBooking ?? 0) }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">Status Pending</div>
-                <div class="kpi-number kpi-pending">{{ number_format($pendingCount) }}</div>
+                <div class="kpi-number kpi-pending">{{ number_format($pendingBooking ?? 0) }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-label">EXPIRED / BATAL</div>
@@ -108,7 +103,7 @@
         <div class="table-card">
 
             <div class="table-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0 fw-bold">{{ number_format($totalCount) }} Data Bookings</h5>
+                <h5 class="m-0 fw-bold">{{ number_format($bookings->total()) }} Data Bookings</h5>
                 <small class="text-muted">
                     Periode:
                     {{ $fromDateVal ? \Carbon\Carbon::parse($fromDateVal)->format('d M Y') : '-' }} s/d
@@ -133,37 +128,72 @@
                     <tbody>
                         @forelse($bookings as $booking)
                             @php
-                                $rawStatus = data_get($booking, 'status_pembayaran', data_get($booking, 'status', data_get($booking, 'payment_status', 'pending')));
+                                $b = (array) $booking;
+
+                                $rawStatus = $b['status_pembayaran'] ?? $b['status'] ?? $b['payment_status'] ?? 'pending';
                                 $st = str_replace([' ', '-'], '_', strtolower(trim((string) $rawStatus)));
 
-                                $jamMulai = data_get($booking, 'jam_mulai');
-                                $jamSelesai = data_get($booking, 'jam_selesai');
+                                $jamMulai = $b['jam_mulai'] ?? null;
+                                $jamSelesai = $b['jam_selesai'] ?? null;
 
                                 $durasi = 0;
                                 if ($jamMulai && $jamSelesai) {
-                                    $start = \Carbon\Carbon::parse($jamMulai);
-                                    $end = \Carbon\Carbon::parse($jamSelesai);
-                                    $durasi = $start->diffInHours($end);
+                                    try {
+                                        $start = \Carbon\Carbon::parse($jamMulai);
+                                        $end = \Carbon\Carbon::parse($jamSelesai);
+                                        $durasi = $start->diffInHours($end);
+                                    } catch (\Exception $e) {
+                                        $durasi = 0;
+                                    }
                                 }
 
-                                $createdAt = data_get($booking, 'created_at');
-                                $tanggal = data_get($booking, 'tanggal');
+                                $createdAt = $b['created_at'] ?? $b['created_date'] ?? null;
+                                $tanggalMain = $b['tanggal'] ?? null;
 
-                                $rawId = data_get($booking, 'id_booking', data_get($booking, 'id', '-'));
-                                $idBooking = (str_starts_with($rawId, '#')) ? $rawId : '#' . $rawId;
+                                $rawId = $b['id_booking'] ?? $b['id'] ?? '-';
+                                $idBooking = (str_starts_with((string) $rawId, '#')) ? $rawId : '#' . $rawId;
 
-                                // Format label status
-                                $displayStatus = ucwords(str_replace('_', ' ', $st));
+                                // Nama Lapangan
+                                $namaLapangan = '-';
+                                if (isset($b['lapangan']['nama_lapangan'])) {
+                                    $namaLapangan = $b['lapangan']['nama_lapangan'];
+                                } elseif (isset($b['nama_lapangan'])) {
+                                    $namaLapangan = $b['nama_lapangan'];
+                                }
+
+                                // Nama User
+                                $namaUser = '-';
+                                if (isset($b['nama_user'])) {
+                                    $namaUser = $b['nama_user'];
+                                } elseif (isset($b['user']['nama'])) {
+                                    $namaUser = $b['user']['nama'];
+                                } elseif (isset($b['user']['name'])) {
+                                    $namaUser = $b['user']['name'];
+                                }
+
+                                // Status Display
+                                $paidStatuses = ['paid', 'confirmed', 'approve', 'approved', 'lunas', 'berhasil', 'success', 'settlement'];
+                                $pendingStatuses = ['pending', 'waiting_confirmation', 'waiting', 'menunggu_verifikasi', 'menunggu_konfirmasi', 'unpaid', 'menunggu'];
+
+                                if (in_array($st, $paidStatuses)) {
+                                    $displayStatus = 'Paid';
+                                    $badgeClass = 'status-paid';
+                                } elseif (in_array($st, $pendingStatuses)) {
+                                    $displayStatus = 'Pending';
+                                    $badgeClass = 'status-pending';
+                                } else {
+                                    $displayStatus = 'Cancelled / Expired';
+                                    $badgeClass = 'status-expired';
+                                }
                             @endphp
 
                             <tr>
                                 <td><strong>{{ strtoupper($idBooking) }}</strong></td>
-                                <td><strong>{{ data_get($booking, 'lapangan.nama_lapangan', data_get($booking, 'nama_lapangan', '-')) }}</strong>
-                                </td>
+                                <td><strong>{{ $namaLapangan }}</strong></td>
                                 <td>{{ $createdAt ? \Carbon\Carbon::parse($createdAt)->format('d M Y') : '-' }}</td>
                                 <td>
                                     <div>
-                                        <strong>{{ $tanggal ? \Carbon\Carbon::parse($tanggal)->format('d M Y') : '-' }}</strong>
+                                        <strong>{{ $tanggalMain ? \Carbon\Carbon::parse($tanggalMain)->format('d M Y') : '-' }}</strong>
                                     </div>
                                     <small class="text-muted">
                                         {{ $jamMulai ? substr($jamMulai, 0, 5) : '00:00' }} -
@@ -171,15 +201,14 @@
                                     </small>
                                 </td>
                                 <td><span class="badge-durasi">{{ $durasi }} Jam</span></td>
-                                <td>{{ data_get($booking, 'nama_user', data_get($booking, 'user.nama', data_get($booking, 'user.name', 'User'))) }}
-                                </td>
+                                <td>{{ $namaUser }}</td>
                                 <td>
-                                    <span class="status-badge status-{{ $st }}">
+                                    <span class="status-badge {{ $badgeClass }}">
                                         {{ $displayStatus }}
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <strong>Rp{{ number_format(data_get($booking, 'total_harga', 0), 0, ',', '.') }}</strong>
+                                    <strong>Rp{{ number_format((float) ($b['total_harga'] ?? $b['total'] ?? 0), 0, ',', '.') }}</strong>
                                 </td>
                             </tr>
                         @empty
@@ -194,7 +223,7 @@
             </div>
 
             {{-- Pagination Links --}}
-            @if(is_object($bookings) && method_exists($bookings, 'hasPages') && $bookings->hasPages())
+            @if($bookings->hasPages())
                 <div class="table-footer-pagination p-3 border-top d-flex justify-content-between align-items-center">
                     <div class="text-muted small">
                         Menampilkan {{ $bookings->firstItem() }} - {{ $bookings->lastItem() }} dari {{ $bookings->total() }}

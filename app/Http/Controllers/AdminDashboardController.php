@@ -17,7 +17,6 @@ class AdminDashboardController extends Controller
         }
 
         $token = session('token');
-        $includeAll = config('app.kpi_include_all', true);
         $apiUrl = config('services.api.url', env('API_URL'));
 
         // Initialize Default Values
@@ -41,67 +40,72 @@ class AdminDashboardController extends Controller
                 ->get($apiUrl . '/api/booking');
 
             if ($resBooking->successful()) {
-                $bookings = collect($resBooking->json()['data'] ?? []);
+                $rawBookings = collect($resBooking->json()['data'] ?? [])->map(fn($item) => (array) $item);
 
-                // Filter by payment status
-                $filteredBookings = $includeAll
-                    ? $bookings
-                    : $bookings->filter(fn($b) => ($b['status_pembayaran'] ?? '') === 'confirmed');
+                // Status sah dianggap lunas/bayar
+                $paidStatuses = ['paid', 'confirmed', 'approve', 'approved', 'lunas', 'berhasil', 'success', 'settlement'];
 
-                // Sort bookings chronologically
-                $sortedBookings = $filteredBookings->sortBy('tanggal');
+                // Helper Normalisasi Status
+                $getStatus = function ($item) {
+                    $raw = $item['status_pembayaran'] ?? $item['status'] ?? $item['payment_status'] ?? '';
+                    return str_replace([' ', '-'], '_', strtolower(trim((string) $raw)));
+                };
 
-                // Get 5 latest bookings
-                $latestBookings = $filteredBookings->sortByDesc('tanggal')->take(5)->values()->toArray();
+                // Filter Khusus Transaksi Lunas untuk Revenue
+                $paidBookings = $rawBookings->filter(function ($b) use ($getStatus, $paidStatuses) {
+                    return in_array($getStatus($b), $paidStatuses, true);
+                });
+
+                // Get 5 latest bookings (Menampilkan semua transaksi terbaru untuk list)
+                $latestBookings = $rawBookings->sortByDesc(function ($b) {
+                    return $b['tanggal'] ?? $b['created_at'] ?? '';
+                })->take(5)->values()->toArray();
 
                 // Calculate Total KPIs
-                $totalBooking = $filteredBookings->count();
-                $totalUser = $filteredBookings->unique('id_user')->count();
-                $totalRevenue = $filteredBookings->sum('total_harga');
+                $totalBooking = $rawBookings->count(); // Total seluruh order masuk
+                $totalUser = $rawBookings->unique('id_user')->count();
 
-                // Calculate daily average revenue
-                $daysCount = $filteredBookings->groupBy(fn($b) => Carbon::parse($b['tanggal'])->format('Y-m-d'))->count();
+                // HITUNG REVENUE HANYA DARI YANG PAID/LUNAS
+                $totalRevenue = $paidBookings->sum('total_harga');
+
+                // Calculate daily average revenue (Dari transaksi lunas)
+                $daysCount = $paidBookings->groupBy(function ($b) {
+                    $rawDate = $b['tanggal'] ?? $b['created_at'] ?? null;
+                    return $rawDate ? Carbon::parse($rawDate)->format('Y-m-d') : null;
+                })->filter()->count();
+
                 $averagePerDay = $daysCount > 0 ? $totalRevenue / $daysCount : 0;
 
                 // --- Calculate Real-time Data for Today ---
                 $todayDate = Carbon::now('Asia/Jakarta')->format('Y-m-d');
 
-                $todayBookings = $filteredBookings->filter(function ($b) use ($todayDate) {
-                    if (empty($b['tanggal']))
+                $todayBookings = $paidBookings->filter(function ($b) use ($todayDate) {
+                    $rawDate = $b['tanggal'] ?? $b['created_at'] ?? null;
+                    if (empty($rawDate))
                         return false;
-                    return Carbon::parse($b['tanggal'])->setTimezone('Asia/Jakarta')->format('Y-m-d') === $todayDate;
+                    return Carbon::parse($rawDate)->setTimezone('Asia/Jakarta')->format('Y-m-d') === $todayDate;
                 });
 
                 $revenueToday = $todayBookings->sum('total_harga');
                 $totalBookingToday = $todayBookings->count();
 
-                // --- Grouping Data Category (PERBAIKAN LOGIKA DI SINI) ---
-                $categoryGroup = $filteredBookings->groupBy(function ($b) {
-                    // 1. Pengecekan multi-key dari struktur API
+                // --- Grouping Data Category ---
+                $categoryGroup = $rawBookings->groupBy(function ($b) {
                     $cat = $b['kategori']
                         ?? $b['kategori_lapangan']
                         ?? $b['nama_kategori']
                         ?? $b['jenis_lapangan']
                         ?? $b['jenis']
-                        ?? $b['lapangan']['kategori']['nama']
-                        ?? $b['lapangan']['kategori']
-                        ?? $b['lapangan']['kategori_lapangan']
-                        ?? $b['lapangan']['nama_kategori']
-                        ?? $b['lapangan']['jenis_lapangan']
-                        ?? $b['lapangan']['jenis']
-                        ?? null;
+                        ?? $b['lapangan']['kategori']['nama'] ?? null;
 
-                    // 2. Jika field kategori berupa Array/Object dari API
                     if (is_array($cat)) {
                         $cat = $cat['nama'] ?? $cat['nama_kategori'] ?? null;
                     }
 
-                    // 3. FALLBACK: Tebak dari nama_lapangan jika key kategori masih null
                     if (empty($cat)) {
                         $namaLapangan = strtolower(
                             $b['lapangan']['nama_lapangan']
                             ?? $b['nama_lapangan']
-                            ?? $b['lapangan']['nama']
                             ?? ''
                         );
 
@@ -109,39 +113,32 @@ class AdminDashboardController extends Controller
                             $cat = 'Futsal';
                         } elseif (str_contains($namaLapangan, 'badminton') || str_contains($namaLapangan, 'bulutangkis')) {
                             $cat = 'Badminton';
-                        } elseif (str_contains($namaLapangan, 'basket') || str_contains($namaLapangan, 'basketball')) {
+                        } elseif (str_contains($namaLapangan, 'basket')) {
                             $cat = 'Basketball';
-                        } elseif (str_contains($namaLapangan, 'voli') || str_contains($namaLapangan, 'volleyball')) {
-                            $cat = 'Voli';
-                        } elseif (str_contains($namaLapangan, 'tenis') || str_contains($namaLapangan, 'tennis')) {
-                            $cat = 'Tenis';
                         }
                     }
 
                     return !empty($cat) ? ucfirst(strtolower(trim($cat))) : 'Lainnya';
                 });
 
-                $categoryData = [
-                    'labels' => [],
-                    'data' => []
-                ];
-
+                $categoryData = ['labels' => [], 'data' => []];
                 foreach ($categoryGroup as $catName => $items) {
                     $categoryData['labels'][] = $catName;
                     $categoryData['data'][] = $items->count();
                 }
 
-                // Process Chart Datasets (Line Chart)
-                $sortedBookings->each(function ($b) use (&$daily, &$monthly, &$yearly) {
-                    if (empty($b['tanggal']))
+                // Process Chart Datasets (Line Chart) HANYA DARI TRANSAKSI LUNAS
+                $paidBookings->sortBy('tanggal')->each(function ($b) use (&$daily, &$monthly, &$yearly) {
+                    $rawDate = $b['tanggal'] ?? $b['created_at'] ?? null;
+                    if (empty($rawDate))
                         return;
 
-                    $tanggal = Carbon::parse($b['tanggal']);
+                    $tanggal = Carbon::parse($rawDate);
                     $day = $tanggal->format('d M');
                     $month = $tanggal->format('M Y');
                     $year = $tanggal->format('Y');
 
-                    $price = $b['total_harga'] ?? 0;
+                    $price = (float) ($b['total_harga'] ?? 0);
 
                     $daily[$day] = ($daily[$day] ?? 0) + $price;
                     $monthly[$month] = ($monthly[$month] ?? 0) + $price;
@@ -149,23 +146,14 @@ class AdminDashboardController extends Controller
                 });
             }
         } catch (Exception $e) {
-            // Optional: \Log::error($e->getMessage());
+            // Log Error if needed
         }
 
         // 3. Prepare Chart Data Structure
         $chartData = [
-            'day' => [
-                'labels' => array_keys($daily),
-                'data' => array_values($daily)
-            ],
-            'month' => [
-                'labels' => array_keys($monthly),
-                'data' => array_values($monthly)
-            ],
-            'year' => [
-                'labels' => array_keys($yearly),
-                'data' => array_values($yearly)
-            ]
+            'day' => ['labels' => array_keys($daily), 'data' => array_values($daily)],
+            'month' => ['labels' => array_keys($monthly), 'data' => array_values($monthly)],
+            'year' => ['labels' => array_keys($yearly), 'data' => array_values($yearly)]
         ];
 
         // 4. Render Dashboard View

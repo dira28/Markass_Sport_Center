@@ -4,10 +4,10 @@
         <h6 class="fw-bold m-0">Atur Waktu Booking</h6>
     </div>
 
-    <!-- TANGGAL -->
+    <!-- TANGGAL (Ubah type jadi text & tambah placeholder) -->
     <div class="form-group mb-3">
         <label for="tanggal" class="form-label-custom">Pilih Tanggal</label>
-        <input type="date" class="form-control-custom" id="tanggal" min="{{ date('Y-m-d') }}">
+        <input type="text" class="form-control-custom" id="tanggal" placeholder="DD-MM-YYYY" readonly>
     </div>
 
     <!-- JAM -->
